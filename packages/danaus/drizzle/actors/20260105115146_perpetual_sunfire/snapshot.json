@@ -1,0 +1,446 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "7703cd64-47bf-40ef-86e7-bfc4757eed7e",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "blob",
+      "entityType": "tables"
+    },
+    {
+      "name": "legacy_pref",
+      "entityType": "tables"
+    },
+    {
+      "name": "record",
+      "entityType": "tables"
+    },
+    {
+      "name": "record_blob",
+      "entityType": "tables"
+    },
+    {
+      "name": "repo_block",
+      "entityType": "tables"
+    },
+    {
+      "name": "repo_root",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cid",
+      "entityType": "columns",
+      "table": "blob"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "mime_type",
+      "entityType": "columns",
+      "table": "blob"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "size",
+      "entityType": "columns",
+      "table": "blob"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "temp_key",
+      "entityType": "columns",
+      "table": "blob"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "takedown_ref",
+      "entityType": "columns",
+      "table": "blob"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "blob"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": "1",
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "legacy_pref"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "content",
+      "entityType": "columns",
+      "table": "legacy_pref"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "uri",
+      "entityType": "columns",
+      "table": "record"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cid",
+      "entityType": "columns",
+      "table": "record"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "collection",
+      "entityType": "columns",
+      "table": "record"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "rkey",
+      "entityType": "columns",
+      "table": "record"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "rev",
+      "entityType": "columns",
+      "table": "record"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "record"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "takedown_ref",
+      "entityType": "columns",
+      "table": "record"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "blob_cid",
+      "entityType": "columns",
+      "table": "record_blob"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "record_uri",
+      "entityType": "columns",
+      "table": "record_blob"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cid",
+      "entityType": "columns",
+      "table": "repo_block"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "rev",
+      "entityType": "columns",
+      "table": "repo_block"
+    },
+    {
+      "type": "blob",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "content",
+      "entityType": "columns",
+      "table": "repo_block"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": "1",
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "repo_root"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cid",
+      "entityType": "columns",
+      "table": "repo_root"
+    },
+    {
+      "type": "blob",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "content",
+      "entityType": "columns",
+      "table": "repo_root"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "rev",
+      "entityType": "columns",
+      "table": "repo_root"
+    },
+    {
+      "columns": [
+        "blob_cid"
+      ],
+      "tableTo": "blob",
+      "columnsTo": [
+        "cid"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_record_blob_blob_cid_blob_cid_fk",
+      "entityType": "fks",
+      "table": "record_blob"
+    },
+    {
+      "columns": [
+        "record_uri"
+      ],
+      "tableTo": "record",
+      "columnsTo": [
+        "uri"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_record_blob_record_uri_record_uri_fk",
+      "entityType": "fks",
+      "table": "record_blob"
+    },
+    {
+      "columns": [
+        "blob_cid",
+        "record_uri"
+      ],
+      "nameExplicit": false,
+      "name": "record_blob_pk",
+      "entityType": "pks",
+      "table": "record_blob"
+    },
+    {
+      "columns": [
+        "cid"
+      ],
+      "nameExplicit": false,
+      "name": "blob_pk",
+      "table": "blob",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "legacy_pref_pk",
+      "table": "legacy_pref",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "uri"
+      ],
+      "nameExplicit": false,
+      "name": "record_pk",
+      "table": "record",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "cid"
+      ],
+      "nameExplicit": false,
+      "name": "repo_block_pk",
+      "table": "repo_block",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "repo_root_pk",
+      "table": "repo_root",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "temp_key",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "blob_tempkey_idx",
+      "entityType": "indexes",
+      "table": "blob"
+    },
+    {
+      "columns": [
+        {
+          "value": "cid",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "record_cid_idx",
+      "entityType": "indexes",
+      "table": "record"
+    },
+    {
+      "columns": [
+        {
+          "value": "collection",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "record_collection_idx",
+      "entityType": "indexes",
+      "table": "record"
+    },
+    {
+      "columns": [
+        {
+          "value": "rev",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "record_rev_idx",
+      "entityType": "indexes",
+      "table": "record"
+    },
+    {
+      "columns": [
+        {
+          "value": "rev",
+          "isExpression": false
+        },
+        {
+          "value": "cid",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "repo_block_rev_cid_idx",
+      "entityType": "indexes",
+      "table": "repo_block"
+    },
+    {
+      "value": "\"id\" = 1",
+      "name": "single_row",
+      "entityType": "checks",
+      "table": "legacy_pref"
+    },
+    {
+      "value": "\"id\" = 1",
+      "name": "single_row",
+      "entityType": "checks",
+      "table": "repo_root"
+    }
+  ],
+  "renames": []
+}

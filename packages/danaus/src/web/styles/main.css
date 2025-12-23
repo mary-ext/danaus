@@ -1,0 +1,417 @@
+@import 'tailwindcss' source('../');
+@source not './main.out.css';
+
+@theme {
+	--text-*: initial;
+	--text-base-100: 10px;
+	--text-base-100--line-height: 14px;
+	--text-base-200: 12px;
+	--text-base-200--line-height: 16px;
+	--text-base-300: 14px;
+	--text-base-300--line-height: 20px;
+	--text-base-400: 16px;
+	--text-base-400--line-height: 22px;
+	--text-base-500: 20px;
+	--text-base-500--line-height: 28px;
+	--text-base-600: 24px;
+	--text-base-600--line-height: 32px;
+	--text-hero-700: 28px;
+	--text-hero-700--line-height: 36px;
+	--text-hero-800: 32px;
+	--text-hero-800--line-height: 40px;
+	--text-hero-900: 40px;
+	--text-hero-900--line-height: 52px;
+	--text-hero-1000: 68px;
+	--text-hero-1000--line-height: 92px;
+}
+
+@theme inline {
+	--color-*: initial;
+
+	--color-background-overlay: var(--color-background-overlay);
+	--color-brand-background-active: var(--color-brand-background-active);
+	--color-brand-background-hover: var(--color-brand-background-hover);
+	--color-brand-background: var(--color-brand-background);
+	--color-brand-stroke-1: var(--color-brand-stroke-1);
+	--color-brand-stroke-2: var(--color-brand-stroke-2);
+	--color-compound-brand-background-active: var(--color-compound-brand-background-active);
+	--color-compound-brand-background-hover: var(--color-compound-brand-background-hover);
+	--color-compound-brand-background: var(--color-compound-brand-background);
+	--color-compound-brand-foreground-1-active: var(--color-compound-brand-foreground-1-active);
+	--color-compound-brand-foreground-1-hover: var(--color-compound-brand-foreground-1-hover);
+	--color-compound-brand-foreground-1: var(--color-compound-brand-foreground-1);
+	--color-compound-brand-stroke-active: var(--color-compound-brand-stroke-active);
+	--color-compound-brand-stroke-hover: var(--color-compound-brand-stroke-hover);
+	--color-compound-brand-stroke: var(--color-compound-brand-stroke);
+	--color-neutral-background-1-active: var(--color-neutral-background-1-active);
+	--color-neutral-background-1-hover: var(--color-neutral-background-1-hover);
+	--color-neutral-background-1-selected: var(--color-neutral-background-1-selected);
+	--color-neutral-background-1: var(--color-neutral-background-1);
+	--color-neutral-background-2: var(--color-neutral-background-2);
+	--color-neutral-background-3: var(--color-neutral-background-3);
+	--color-neutral-background-disabled: var(--color-neutral-background-disabled);
+	--color-neutral-foreground-1-active: var(--color-neutral-foreground-1-active);
+	--color-neutral-foreground-1-hover: var(--color-neutral-foreground-1-hover);
+	--color-neutral-foreground-1: var(--color-neutral-foreground-1);
+	--color-neutral-foreground-2-active: var(--color-neutral-foreground-2-active);
+	--color-neutral-foreground-2-brand-hover: var(--color-neutral-foreground-2-brand-hover);
+	--color-neutral-foreground-2-brand-pressed: var(--color-neutral-foreground-2-brand-pressed);
+	--color-neutral-foreground-2-brand-selected: var(--color-neutral-foreground-2-brand-selected);
+	--color-neutral-foreground-2-hover: var(--color-neutral-foreground-2-hover);
+	--color-neutral-foreground-2: var(--color-neutral-foreground-2);
+	--color-neutral-foreground-3-active: var(--color-neutral-foreground-3-active);
+	--color-neutral-foreground-3-hover: var(--color-neutral-foreground-3-hover);
+	--color-neutral-foreground-3: var(--color-neutral-foreground-3);
+	--color-neutral-foreground-disabled: var(--color-neutral-foreground-disabled);
+	--color-neutral-foreground-inverted: var(--color-neutral-foreground-inverted);
+	--color-neutral-foreground-on-brand: var(--color-neutral-foreground-on-brand);
+	--color-neutral-stroke-1-active: var(--color-neutral-stroke-1-active);
+	--color-neutral-stroke-1-hover: var(--color-neutral-stroke-1-hover);
+	--color-neutral-stroke-1: var(--color-neutral-stroke-1);
+	--color-neutral-stroke-2: var(--color-neutral-stroke-2);
+	--color-neutral-stroke-accessible-active: var(--color-neutral-stroke-accessible-active);
+	--color-neutral-stroke-accessible-hover: var(--color-neutral-stroke-accessible-hover);
+	--color-neutral-stroke-accessible: var(--color-neutral-stroke-accessible);
+	--color-neutral-stroke-disabled: var(--color-neutral-stroke-disabled);
+	--color-status-danger-background-1: var(--color-status-danger-background-1);
+	--color-status-danger-border-1: var(--color-status-danger-border-1);
+	--color-status-danger-foreground-1: var(--color-status-danger-foreground-1);
+	--color-status-success-background-1: var(--color-status-success-background-1);
+	--color-status-success-border-1: var(--color-status-success-border-1);
+	--color-status-success-foreground-1: var(--color-status-success-foreground-1);
+	--color-status-warning-background-1: var(--color-status-warning-background-1);
+	--color-status-warning-border-1: var(--color-status-warning-border-1);
+	--color-status-warning-foreground-3: var(--color-status-warning-foreground-3);
+	--color-stroke-focus-2: var(--color-stroke-focus-2);
+	--color-subtle-background-active: var(--color-subtle-background-active);
+	--color-subtle-background-hover: var(--color-subtle-background-hover);
+	--color-subtle-background: var(--color-subtle-background);
+
+	--ease-*: initial;
+	--ease-fluent: cubic-bezier(0.33, 0, 0.67, 1);
+
+	--animate-*: initial;
+	--animate-spin-linear: spin-linear 1.5s linear infinite;
+	--animate-spin-swing: spin-swing 1.5s var(--ease-fluent) infinite;
+	--animate-spin-start: spin-start 1.5s var(--ease-fluent) infinite;
+	--animate-spin-end: spin-end 1.5s var(--ease-fluent) infinite;
+
+	--radius-*: initial;
+	--radius-none: 0;
+	--radius-sm: 2px;
+	--radius-md: 4px;
+	--radius-lg: 6px;
+	--radius-xl: 8px;
+	--radius-full: 10000px;
+
+	--shadow-*: initial;
+	--shadow-2: var(--shadow-2);
+	--shadow-4: var(--shadow-4);
+	--shadow-8: var(--shadow-8);
+	--shadow-16: var(--shadow-16);
+	--shadow-28: var(--shadow-28);
+	--shadow-64: var(--shadow-64);
+}
+
+@keyframes spin-linear {
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes spin-swing {
+	0% {
+		transform: rotate(-135deg);
+	}
+	50% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(225deg);
+	}
+}
+
+@keyframes spin-start {
+	0%,
+	100% {
+		transform: rotate(0deg);
+	}
+	50% {
+		transform: rotate(-80deg);
+	}
+}
+
+@keyframes spin-end {
+	0%,
+	100% {
+		transform: rotate(0deg);
+	}
+	50% {
+		transform: rotate(70deg);
+	}
+}
+
+:root {
+	& {
+		--color-background-overlay: rgba(0, 0, 0, 0.4);
+		--color-brand-background-active: #0c3b5e;
+		--color-brand-background-hover: #115ea3;
+		--color-brand-background: #0f6cbd;
+		--color-brand-stroke-1: #0f6cbd;
+		--color-brand-stroke-2: #b4d6fa;
+		--color-compound-brand-background-active: #0f548c;
+		--color-compound-brand-background-hover: #115ea3;
+		--color-compound-brand-background: #0f6cbd;
+		--color-compound-brand-foreground-1-active: #0f548c;
+		--color-compound-brand-foreground-1-hover: #115ea3;
+		--color-compound-brand-foreground-1: #0f6cbd;
+		--color-compound-brand-stroke-active: #0f548c;
+		--color-compound-brand-stroke-hover: #115ea3;
+		--color-compound-brand-stroke: #0f6cbd;
+		--color-neutral-background-1-active: #e0e0e0;
+		--color-neutral-background-1-hover: #f5f5f5;
+		--color-neutral-background-1-selected: #ebebeb;
+		--color-neutral-background-1: #ffffff;
+		--color-neutral-background-2: #fafafa;
+		--color-neutral-background-3: #f5f5f5;
+		--color-neutral-background-disabled: #f0f0f0;
+		--color-neutral-foreground-1-active: #242424;
+		--color-neutral-foreground-1-hover: #242424;
+		--color-neutral-foreground-1: #242424;
+		--color-neutral-foreground-2-active: #242424;
+		--color-neutral-foreground-2-brand-hover: #0f6cbd;
+		--color-neutral-foreground-2-brand-pressed: #115ea3;
+		--color-neutral-foreground-2-brand-selected: #0f6cbd;
+		--color-neutral-foreground-2-hover: #242424;
+		--color-neutral-foreground-2: #424242;
+		--color-neutral-foreground-3-active: #242424;
+		--color-neutral-foreground-3-hover: #424242;
+		--color-neutral-foreground-3: #616161;
+		--color-neutral-foreground-disabled: #bdbdbd;
+		--color-neutral-foreground-inverted: #ffffff;
+		--color-neutral-foreground-on-brand: #ffffff;
+		--color-neutral-stroke-1-active: #b3b3b3;
+		--color-neutral-stroke-1-hover: #c7c7c7;
+		--color-neutral-stroke-1: #d1d1d1;
+		--color-neutral-stroke-2: #e0e0e0;
+		--color-neutral-stroke-accessible-active: #4d4d4d;
+		--color-neutral-stroke-accessible-hover: #575757;
+		--color-neutral-stroke-accessible: #616161;
+		--color-neutral-stroke-disabled: #e0e0e0;
+		--color-status-danger-background-1: #fdf3f4;
+		--color-status-danger-border-1: #eeacb2;
+		--color-status-danger-foreground-1: #b10e1c;
+		--color-status-success-background-1: #f1faf1;
+		--color-status-success-border-1: #9fd89f;
+		--color-status-success-foreground-1: #0e700e;
+		--color-status-warning-background-1: #fff9f5;
+		--color-status-warning-border-1: #fdcfb4;
+		--color-status-warning-foreground-3: #bc4b09;
+		--color-stroke-focus-2: #000000;
+		--color-subtle-background-active: #e0e0e0;
+		--color-subtle-background-hover: #f5f5f5;
+		--color-subtle-background: transparent;
+
+		--shadow-2: 0 0 2px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.14);
+		--shadow-4: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
+		--shadow-8: 0 0 2px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.14);
+		--shadow-16: 0 0 2px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.14);
+		--shadow-28: 0 0 8px rgba(0, 0, 0, 0.12), 0 14px 28px rgba(0, 0, 0, 0.14);
+		--shadow-64: 0 0 8px rgba(0, 0, 0, 0.12), 0 32px 64px rgba(0, 0, 0, 0.14);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		--color-background-overlay: rgba(0, 0, 0, 0.5);
+		--color-brand-background-active: #0c3b5e;
+		--color-brand-background-hover: #0f6cbd;
+		--color-brand-background: #115ea3;
+		--color-brand-stroke-1: #479ef5;
+		--color-brand-stroke-2: #0e4775;
+		--color-compound-brand-background-active: #2886de;
+		--color-compound-brand-background-hover: #62abf5;
+		--color-compound-brand-background: #479ef5;
+		--color-compound-brand-foreground-1-active: #2886de;
+		--color-compound-brand-foreground-1-hover: #62abf5;
+		--color-compound-brand-foreground-1: #479ef5;
+		--color-compound-brand-stroke-active: #2886de;
+		--color-compound-brand-stroke-hover: #62abf5;
+		--color-compound-brand-stroke: #479ef5;
+		--color-neutral-background-1-active: #1f1f1f;
+		--color-neutral-background-1-hover: #3d3d3d;
+		--color-neutral-background-1-selected: #383838;
+		--color-neutral-background-1: #292929;
+		--color-neutral-background-2: #1f1f1f;
+		--color-neutral-background-3: #141414;
+		--color-neutral-background-disabled: #141414;
+		--color-neutral-foreground-1-active: #ffffff;
+		--color-neutral-foreground-1-hover: #ffffff;
+		--color-neutral-foreground-1: #ffffff;
+		--color-neutral-foreground-2-active: #ffffff;
+		--color-neutral-foreground-2-brand-hover: #479ef5;
+		--color-neutral-foreground-2-brand-pressed: #2886de;
+		--color-neutral-foreground-2-brand-selected: #479ef5;
+		--color-neutral-foreground-2-hover: #ffffff;
+		--color-neutral-foreground-2: #d6d6d6;
+		--color-neutral-foreground-3-active: #d6d6d6;
+		--color-neutral-foreground-3-hover: #d6d6d6;
+		--color-neutral-foreground-3: #adadad;
+		--color-neutral-foreground-disabled: #5c5c5c;
+		--color-neutral-foreground-inverted: #242424;
+		--color-neutral-foreground-on-brand: #ffffff;
+		--color-neutral-stroke-1-active: #6b6b6b;
+		--color-neutral-stroke-1-hover: #757575;
+		--color-neutral-stroke-1: #666666;
+		--color-neutral-stroke-2: #525252;
+		--color-neutral-stroke-accessible-active: #b3b3b3;
+		--color-neutral-stroke-accessible-hover: #bdbdbd;
+		--color-neutral-stroke-accessible: #adadad;
+		--color-neutral-stroke-disabled: #424242;
+		--color-status-danger-background-1: #3b0509;
+		--color-status-danger-border-1: #c50f1f;
+		--color-status-danger-foreground-1: #dc626d;
+		--color-status-success-background-1: #052505;
+		--color-status-success-border-1: #107c10;
+		--color-status-success-foreground-1: #54b054;
+		--color-status-warning-background-1: #4a1e04;
+		--color-status-warning-border-1: #f7630c;
+		--color-status-warning-foreground-3: #f98845;
+		--color-stroke-focus-2: #ffffff;
+		--color-subtle-background-active: #2e2e2e;
+		--color-subtle-background-hover: #383838;
+		--color-subtle-background: transparent;
+
+		--shadow-2: 0 0 2px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.28);
+		--shadow-4: 0 0 2px rgba(0, 0, 0, 0.24), 0 2px 4px rgba(0, 0, 0, 0.28);
+		--shadow-8: 0 0 2px rgba(0, 0, 0, 0.24), 0 4px 8px rgba(0, 0, 0, 0.28);
+		--shadow-16: 0 0 2px rgba(0, 0, 0, 0.24), 0 8px 16px rgba(0, 0, 0, 0.28);
+		--shadow-28: 0 0 8px rgba(0, 0, 0, 0.24), 0 14px 28px rgba(0, 0, 0, 0.28);
+		--shadow-64: 0 0 8px rgba(0, 0, 0, 0.24), 0 32px 64px rgba(0, 0, 0, 0.28);
+	}
+}
+
+:where(body) {
+	background: var(--color-neutral-background-2);
+	color: var(--color-neutral-foreground-1);
+	color-scheme: light dark;
+}
+
+/* #region anchor positioning */
+
+/* anchor-name: set via --anchor CSS variable */
+@utility anchor {
+	anchor-name: var(--anchor);
+}
+
+/* position-anchor: attach to anchor via --anchor CSS variable */
+@utility anchored {
+	position-anchor: var(--anchor);
+	&:where(&) {
+		position: absolute;
+	}
+}
+
+/* position-area: position relative to anchor */
+@utility anchored-top {
+	position-area: top;
+}
+@utility anchored-top-center {
+	position-area: top center;
+}
+@utility anchored-top-left {
+	position-area: top left;
+}
+@utility anchored-top-right {
+	position-area: top right;
+}
+@utility anchored-top-span-left {
+	position-area: top span-left;
+}
+@utility anchored-top-span-right {
+	position-area: top span-right;
+}
+@utility anchored-bottom {
+	position-area: bottom;
+}
+@utility anchored-bottom-center {
+	position-area: bottom center;
+}
+@utility anchored-bottom-left {
+	position-area: bottom left;
+}
+@utility anchored-bottom-right {
+	position-area: bottom right;
+}
+@utility anchored-bottom-span-left {
+	position-area: bottom span-left;
+}
+@utility anchored-bottom-span-right {
+	position-area: bottom span-right;
+}
+@utility anchored-left {
+	position-area: left;
+}
+@utility anchored-left-center {
+	position-area: left center;
+}
+@utility anchored-left-span-top {
+	position-area: left span-top;
+}
+@utility anchored-left-span-bottom {
+	position-area: left span-bottom;
+}
+@utility anchored-right {
+	position-area: right;
+}
+@utility anchored-right-center {
+	position-area: right center;
+}
+@utility anchored-right-span-top {
+	position-area: right span-top;
+}
+@utility anchored-right-span-bottom {
+	position-area: right span-bottom;
+}
+
+/* position-try-fallbacks: fallback positions */
+@utility try-none {
+	position-try-fallbacks: none;
+}
+@utility try-flip-x {
+	position-try-fallbacks: flip-inline;
+}
+@utility try-flip-y {
+	position-try-fallbacks: flip-block;
+}
+@utility try-flip-all {
+	position-try-fallbacks:
+		flip-block,
+		flip-inline,
+		flip-block flip-inline;
+}
+@utility try-flip-start {
+	position-try-fallbacks: flip-start;
+}
+
+/* position-try-order: fallback ordering */
+@utility try-order-normal {
+	position-try-order: normal;
+}
+@utility try-order-width {
+	position-try-order: most-width;
+}
+@utility try-order-height {
+	position-try-order: most-height;
+}
+
+/* position-visibility: conditional visibility */
+@utility anchored-visible-always {
+	position-visibility: always;
+}
+@utility anchored-visible-anchor {
+	position-visibility: anchors-visible;
+}
+@utility anchored-visible-no-overflow {
+	position-visibility: no-overflow;
+}
+
+/* #endregion */

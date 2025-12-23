@@ -1,0 +1,41 @@
+{
+	"type": "module",
+	"name": "@kelinci/danaus-lexicons",
+	"version": "0.0.0",
+	"description": "danaus schema definitions",
+	"license": "0BSD",
+	"private": true,
+	"files": [
+		"dist/",
+		"lib/",
+		"!lib/**/*.bench.ts",
+		"!lib/**/*.test.ts"
+	],
+	"exports": {
+		".": "./dist/index.js",
+		"./types/**/*": "./dist/lexicons/types/local/danaus/**/*"
+	},
+	"scripts": {
+		"build": "tsc -b",
+		"generate": "rm -r ./lib/lexicons/; lex-cli generate",
+		"export": "lex-cli export",
+		"prepublish": "rm -rf dist; pnpm run build"
+	},
+	"dependencies": {
+		"@atcute/atproto": "^3.1.10",
+		"@atcute/lexicons": "^1.2.6"
+	},
+	"devDependencies": {
+		"@atcute/lex-cli": "^2.5.2",
+		"@atcute/lexicon-doc": "^2.0.6",
+		"@kelinci/danaus-lexicons": "file:"
+	},
+	"atcute:lexicons": {
+		"mappings": {
+			"local.danaus.*": {
+				"type": "namespace",
+				"path": "./types/{{nsid_remainder}}"
+			}
+		}
+	}
+}

@@ -1,0 +1,58 @@
+import path from 'node:path';
+
+import type { AtprotoAudience } from '@atcute/lexicons/syntax';
+import { BSKY_PORT, PDS_PORT } from '@danaus/dev-env';
+
+import type { ProxyTargetConfig } from '#app/config.ts';
+import { TestPds } from '#app/test/test-pds.ts';
+
+const DATA_DIR = path.resolve('data/pds');
+const PLC_URL = process.env.PLC_URL ?? 'http://localhost:2582';
+
+const run = async () => {
+	console.log(`
+┌──────────────────────────────────┐
+│  danaus PDS                      │
+└──────────────────────────────────┘
+`);
+
+	const targets = new Map<AtprotoAudience, ProxyTargetConfig>();
+
+	targets.set('did:web:api.bsky.app#bsky_appview', {
+		to: `did:web:localhost%3A${BSKY_PORT}#bsky_appview`,
+		exclude: [
+			'app.bsky.actor.getPreferences',
+			'app.bsky.actor.putPreferences',
+			'com.atproto.repo.applyWrites',
+			'com.atproto.repo.createRecord',
+			'com.atproto.repo.putRecord',
+			'com.atproto.server.getSession',
+		],
+	});
+
+	const pds = await TestPds.create({
+		plcUrl: PLC_URL,
+		port: PDS_PORT,
+		dataDirectory: DATA_DIR,
+		proxy: {
+			targets: targets,
+		},
+	});
+
+	console.log(`📁 Data directory: ${DATA_DIR}`);
+	console.log(`🌞 PDS http://localhost:${pds.port}`);
+
+	const shutdown = async () => {
+		console.log('\nshutting down...');
+		await pds.close();
+		process.exit(0);
+	};
+
+	process.on('SIGINT', shutdown);
+	process.on('SIGTERM', shutdown);
+};
+
+run().catch((err) => {
+	console.error('fatal error:', err);
+	process.exit(1);
+});

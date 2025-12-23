@@ -1,0 +1,47 @@
+import type { IconProps } from './_types.ts';
+
+const TrashCanOutlined = (props: IconProps) => {
+	const { size = 24, class: className } = props;
+
+	return (
+		<svg viewBox="0 0 24 24" width={size} height={size} fill="none" class={className}>
+			<path
+				d="M5 6.5L5.87156 19.1376C5.94388 20.1863 6.81565 21 7.86682 21H16.1332C17.1843 21 18.0561 20.1863 18.1284 19.1376L19 6.5"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+			<path
+				d="M10 11V16"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+			<path
+				d="M14 11V16"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+			<path
+				d="M3.5 6H20.5"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+			<path
+				d="M8.07092 5.74621C8.42348 3.89745 10.0485 2.5 12 2.5C13.9515 2.5 15.5765 3.89745 15.9291 5.74621"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</svg>
+	);
+};
+
+export default TrashCanOutlined;

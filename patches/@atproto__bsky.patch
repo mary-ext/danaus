@@ -1,0 +1,21 @@
+diff --git a/dist/api/well-known.js b/dist/api/well-known.js
+index e03a123ad88c236d6b213eb0797c56371dae01b5..26043c819e2422352a71372af425896650c4e245 100644
+--- a/dist/api/well-known.js
++++ b/dist/api/well-known.js
+@@ -1,13 +1,13 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.createRouter = void 0;
++const did_1 = require("@atproto/did");
+ const express_1 = require("express");
+ const createRouter = (ctx) => {
+     const router = (0, express_1.Router)();
+     const did = ctx.cfg.serverDid;
+-    if (did.startsWith('did:web:')) {
+-        const hostname = did.slice('did:web:'.length);
+-        const serviceEndpoint = `https://${hostname}`;
++    if ((0, did_1.isDidWeb)(did)) {
++        const serviceEndpoint = (0, did_1.didWebToUrl)(did).origin;
+         router.get('/.well-known/did.json', (_req, res) => {
+             res.json({
+                 '@context': [

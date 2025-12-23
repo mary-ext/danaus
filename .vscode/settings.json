@@ -1,4 +1,5 @@
 {
 	"editor.defaultFormatter": "prettier.prettier-vscode",
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"tailwindCSS.classFunctions": ["cva", "cx"]
 }

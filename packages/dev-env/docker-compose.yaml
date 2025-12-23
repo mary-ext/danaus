@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: danaus
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 500ms
+      timeout: 10s
+      retries: 20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD-SHELL', '[ "$$(redis-cli ping)" = "PONG" ]']
+      interval: 500ms
+      timeout: 10s
+      retries: 20
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

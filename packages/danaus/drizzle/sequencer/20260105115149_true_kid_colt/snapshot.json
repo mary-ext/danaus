@@ -1,0 +1,136 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "b02785ea-d1b3-4b5a-8e8c-6e74dc906f5d",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "repo_seq",
+      "entityType": "tables"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "seq",
+      "entityType": "columns",
+      "table": "repo_seq"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "repo_seq"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "event_type",
+      "entityType": "columns",
+      "table": "repo_seq"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "event",
+      "entityType": "columns",
+      "table": "repo_seq"
+    },
+    {
+      "type": "blob",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "blocks",
+      "entityType": "columns",
+      "table": "repo_seq"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "invalidated",
+      "entityType": "columns",
+      "table": "repo_seq"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sequenced_at",
+      "entityType": "columns",
+      "table": "repo_seq"
+    },
+    {
+      "columns": [
+        "seq"
+      ],
+      "nameExplicit": false,
+      "name": "repo_seq_pk",
+      "table": "repo_seq",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "did",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "repo_seq_did_idx",
+      "entityType": "indexes",
+      "table": "repo_seq"
+    },
+    {
+      "columns": [
+        {
+          "value": "event_type",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "repo_seq_event_type_idx",
+      "entityType": "indexes",
+      "table": "repo_seq"
+    },
+    {
+      "columns": [
+        {
+          "value": "sequenced_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "repo_seq_sequenced_at_idx",
+      "entityType": "indexes",
+      "table": "repo_seq"
+    }
+  ],
+  "renames": []
+}

@@ -1,2 +1,4 @@
 .research/
 node_modules/
+dist/
+data/

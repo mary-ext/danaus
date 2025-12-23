@@ -1,0 +1,55 @@
+import type { XRPCRouter } from '@atcute/xrpc-server';
+
+import type { AppContext } from '#app/context.ts';
+
+import { resolveHandle } from './identity.resolveHandle';
+import { applyWrites } from './repo.applyWrites';
+import { createRecord } from './repo.createRecord';
+import { deleteRecord } from './repo.deleteRecord';
+import { describeRepo } from './repo.describeRepo';
+import { getRecord } from './repo.getRecord';
+import { listRecords } from './repo.listRecords';
+import { putRecord } from './repo.putRecord';
+import { uploadBlob } from './repo.uploadBlob';
+import { createSession } from './server.createSession';
+import { deleteSession } from './server.deleteSession';
+import { describeServer } from './server.describeServer';
+import { getServiceAuth } from './server.getServiceAuth';
+import { getSession } from './server.getSession';
+import { refreshSession } from './server.refreshSession';
+import { getBlob } from './sync.getBlob';
+import { getBlocks } from './sync.getBlocks';
+import { getLatestCommit } from './sync.getLatestCommit';
+import { getRecord as getSyncRecord } from './sync.getRecord';
+import { getRepo } from './sync.getRepo';
+import { getRepoStatus } from './sync.getRepoStatus';
+import { listBlobs } from './sync.listBlobs';
+import { listRepos } from './sync.listRepos';
+import { subscribeRepos } from './sync.subscribeRepos';
+
+export const comAtproto = (router: XRPCRouter, context: AppContext) => {
+	describeServer(router, context);
+	createSession(router, context);
+	deleteSession(router, context);
+	getServiceAuth(router, context);
+	getSession(router, context);
+	refreshSession(router, context);
+	resolveHandle(router, context);
+	createRecord(router, context);
+	putRecord(router, context);
+	deleteRecord(router, context);
+	applyWrites(router, context);
+	getRecord(router, context);
+	listRecords(router, context);
+	describeRepo(router, context);
+	uploadBlob(router, context);
+	getRepo(router, context);
+	getBlocks(router, context);
+	getLatestCommit(router, context);
+	getSyncRecord(router, context);
+	getRepoStatus(router, context);
+	listRepos(router, context);
+	listBlobs(router, context);
+	getBlob(router, context);
+	subscribeRepos(router, context);
+};

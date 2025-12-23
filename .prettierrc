@@ -1,5 +1,5 @@
 {
-	"plugins": ["@prettier/plugin-oxc"],
+	"plugins": ["@prettier/plugin-oxc", "@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
 	"trailingComma": "all",
 	"useTabs": true,
 	"tabWidth": 2,
@@ -7,6 +7,29 @@
 	"semi": true,
 	"singleQuote": true,
 	"bracketSpacing": true,
+
+	"importOrder": [
+		"<BUILTIN_MODULES>",
+		"^bun(?::(.*))?$",
+		"",
+		"^@atcute/(.*)$",
+		"^@danaus/(.*)$",
+		"^@kelinci/(.*)$",
+		"",
+		"<THIRD_PARTY_MODULES>",
+		"",
+		"^#app/(.*)$",
+		"^#frontend/(.*)$",
+		"",
+		"^\\.\\.",
+		"",
+		"^\\."
+	],
+	"importOrderTypeScriptVersion": "5.0.0",
+
+	"tailwindStylesheet": "./packages/danaus/src/web/styles/main.css",
+	"tailwindFunctions": ["cva", "cn"],
+
 	"overrides": [
 		{
 			"files": ["tsconfig.json", "jsconfig.json"],

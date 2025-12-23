@@ -1,0 +1,30 @@
+{
+	"name": "@danaus/dev-env",
+	"version": "0.0.0",
+	"type": "module",
+	"private": true,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"bin": "./src/bin.ts",
+	"scripts": {
+		"tsc": "tsc",
+		"infra:up": "docker compose up -d --wait",
+		"infra:down": "docker compose down"
+	},
+	"dependencies": {
+		"@atcute/client": "^4.2.0",
+		"@atcute/crypto": "^2.3.0",
+		"@atproto/bsky": "^0.0.203",
+		"@atproto/crypto": "^0.4.5",
+		"@atproto/identity": "^0.4.10",
+		"@did-plc/lib": "^0.0.4",
+		"@did-plc/server": "^0.0.1",
+		"@swc-node/register": "^1.11.1",
+		"get-port": "^7.1.0"
+	},
+	"devDependencies": {
+		"@poppinss/ts-exec": "^1.4.1",
+		"@types/node": "^22.19.3"
+	}
+}

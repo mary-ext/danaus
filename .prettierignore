@@ -1,1 +1,4 @@
 pnpm-lock.yaml
+**/drizzle/
+
+*.out.css
