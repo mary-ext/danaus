@@ -33,7 +33,6 @@ const select = cva({
 		'bg-neutral-background-1',
 		'pr-8 pl-2.5',
 		'min-w-0',
-		'cursor-pointer',
 		'text-neutral-foreground-1',
 		'group-disabled/select:cursor-not-allowed group-disabled/select:bg-transparent',
 	],
