@@ -1,4 +1,4 @@
-import { cva } from 'cva';
+import { cva, type VariantProps } from 'cva';
 import type { Child } from 'hono/jsx';
 
 import { useDialogContext } from './utils/dialog-context';
@@ -9,8 +9,10 @@ const root = cva({
 		'border-none p-0',
 		'bg-transparent',
 		'overflow-visible',
-		// reset dialog defaults
-		'open:flex open:items-center open:justify-center',
+		'open:flex',
+		// bottom-aligned on mobile, centered on larger screens
+		'items-end justify-center',
+		'sm:items-center',
 		// backdrop
 		'backdrop:bg-background-overlay',
 	],
@@ -24,32 +26,38 @@ const surface = cva({
 	base: [
 		'relative z-10',
 		'box-border',
+		'w-full',
 		'max-h-[calc(100dvh-48px)]',
 		'p-6',
-		'rounded-xl',
+		// rounded top on mobile, all corners on larger screens
+		'rounded-t-xl sm:rounded-xl',
 		'bg-neutral-background-1 text-neutral-foreground-1',
 		'shadow-64',
-		// mobile-first: full width on mobile, constrained on larger
-		'max-w-full sm:max-w-150',
 	],
+	variants: {
+		size: {
+			small: 'max-w-120',
+			medium: 'max-w-150',
+		},
+	},
 });
 
-export interface DialogSurfaceProps {
+export interface DialogSurfaceProps extends VariantProps<typeof surface> {
 	children?: Child;
 }
 
 /**
  * visual container for dialog content
- * @param props.class additional CSS classes
+ * @param props.size dialog width ('small' or 'medium')
  */
 const DialogSurface = (props: DialogSurfaceProps) => {
-	const { children } = props;
+	const { size = 'small', children } = props;
 
 	const { dialogId, titleId } = useDialogContext();
 
 	return (
 		<dialog id={dialogId} aria-labelledby={titleId} class={root()}>
-			<div class={surface()}>{children}</div>
+			<div class={surface({ size })}>{children}</div>
 
 			<button
 				type="button"

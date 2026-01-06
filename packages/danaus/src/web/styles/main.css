@@ -289,10 +289,17 @@
 	}
 }
 
-:where(body) {
-	background: var(--color-neutral-background-2);
-	color: var(--color-neutral-foreground-1);
-	color-scheme: light dark;
+@layer base {
+	:where(body) {
+		background: var(--color-neutral-background-2);
+		color: var(--color-neutral-foreground-1);
+		color-scheme: light dark;
+	}
+
+	/* prevent body scroll when modal dialog is open */
+	:where(body:has(dialog:modal)) {
+		overflow: hidden;
+	}
 }
 
 /* #region anchor positioning */

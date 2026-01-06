@@ -2,13 +2,7 @@ import { cva } from 'cva';
 import type { Child } from 'hono/jsx';
 
 const root = cva({
-	base: [
-		'box-border',
-		'grid gap-2',
-		'grid-cols-[1fr_1fr_auto]',
-		// mobile-first: extra row for stacked actions
-		'grid-rows-[auto_1fr_auto_auto] sm:grid-rows-[auto_1fr_auto]',
-	],
+	base: ['grid gap-2', '@container/dialog-body'],
 });
 
 export interface DialogBodyProps {
