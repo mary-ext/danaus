@@ -12,8 +12,15 @@
 		"!lib/**/*.test.ts"
 	],
 	"exports": {
-		".": "./dist/index.js",
-		"./types/**/*": "./dist/lexicons/types/local/danaus/**/*"
+		".": "./lib/index.ts",
+		"./types/*": "./lib/lexicons/types/local/danaus/*.ts"
+	},
+	"publishConfig": {
+		"access": "public",
+		"exports": {
+			".": "./dist/index.js",
+			"./types/*": "./dist/lexicons/types/local/danaus/*.js"
+		}
 	},
 	"scripts": {
 		"build": "tsc -b",
