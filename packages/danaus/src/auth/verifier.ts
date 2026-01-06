@@ -13,8 +13,6 @@ import { AuthScope, isAuthScope } from '#app/auth/scopes.ts';
 
 import type { AccountManager } from '../accounts/manager';
 
-import { readWebSessionToken, verifyWebSessionToken } from './web';
-
 /**
  * options for account checks.
  */
@@ -52,7 +50,6 @@ export const enum AuthCredentialsType {
 	OAuth,
 	Access,
 	Refresh,
-	WebSession,
 	UserServiceAuth,
 	AdminToken,
 }
@@ -104,15 +101,6 @@ export interface OAuthOutput {
 export interface UserServiceAuthOutput {
 	type: AuthCredentialsType.UserServiceAuth;
 	did: Did;
-}
-
-/**
- * web session credentials.
- */
-export interface WebSessionOutput {
-	type: AuthCredentialsType.WebSession;
-	did: Did;
-	sessionId: string;
 }
 
 type AuthType = 'unknown' | 'basic' | 'bearer' | 'dpop';
@@ -268,37 +256,6 @@ export class AuthVerifier {
 		}
 
 		return this.unauthenticated(request);
-	}
-
-	/**
-	 * web session verifier.
-	 * @param request http request
-	 * @param options verification options
-	 * @returns web session output
-	 */
-	async web(request: Request, options: VerifiedOptions = {}): Promise<WebSessionOutput> {
-		const token = readWebSessionToken(request);
-		if (!token) {
-			throw new AuthRequiredError({ description: `missing web session cookie` });
-		}
-
-		const sessionId = verifyWebSessionToken(this.jwtKey, token);
-		if (!sessionId) {
-			throw new AuthRequiredError({ description: `invalid web session cookie` });
-		}
-
-		const session = this.accountManager.getWebSession(sessionId);
-		if (!session) {
-			throw new AuthRequiredError({ description: `invalid web session` });
-		}
-
-		this.assertAccountStatus(session.did, options);
-
-		return {
-			type: AuthCredentialsType.WebSession,
-			did: session.did,
-			sessionId: session.id,
-		};
 	}
 
 	/**

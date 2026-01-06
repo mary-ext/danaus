@@ -18,7 +18,7 @@ import type {
 	AppBskyGraphList,
 	AppBskyGraphVerification,
 } from '@atcute/bluesky';
-import { Client, ClientResponseError, ok, simpleFetchHandler } from '@atcute/client';
+import { Client, ok, simpleFetchHandler } from '@atcute/client';
 import type {
 	$type,
 	CanonicalResourceUri,
@@ -30,14 +30,11 @@ import type {
 	ResourceUri,
 } from '@atcute/lexicons';
 import type { Records } from '@atcute/lexicons/ambient';
-import {
-	LocalDanausAccountCreateAccount,
-	LocalDanausAccountSignIn,
-	LocalDanausLegacyAuthCreateAppPassword,
-} from '@kelinci/danaus-lexicons';
+import { LocalDanausAccountCreateAccount } from '@kelinci/danaus-lexicons';
 
-const WEB_SESSION_COOKIE = 'danaus_session';
-const DEFAULT_APP_PASSWORD_PRIVILEGE = 'full';
+import { AppPasswordPrivilege } from '#app/accounts/db/schema.ts';
+
+import type { TestNetworkNoAppView } from './test-network.ts';
 
 export type BlobRef = ComAtprotoRepoUploadBlob.$output['blob'];
 
@@ -64,17 +61,10 @@ export interface RecordRef {
 	cid: Cid;
 }
 
-/** minimal interface for test network */
-export interface TestNetworkLike {
-	pds: {
-		url: string;
-	};
-}
-
 /**
  * seed client for creating test data.
  */
-export class SeedClient<Network extends TestNetworkLike = TestNetworkLike> {
+export class SeedClient {
 	accounts: Record<string, SeedAccount> = {};
 	dids: Record<string, Did> = {};
 
@@ -104,7 +94,7 @@ export class SeedClient<Network extends TestNetworkLike = TestNetworkLike> {
 	private client: Client;
 
 	constructor(
-		public network: Network,
+		public network: TestNetworkNoAppView,
 		private adminAuth: string,
 	) {
 		this.client = new Client({ handler: simpleFetchHandler({ service: network.pds.url }) });
@@ -124,28 +114,25 @@ export class SeedClient<Network extends TestNetworkLike = TestNetworkLike> {
 			password: string;
 			recoveryKey?: Did;
 			appPasswordName?: string;
-			appPasswordPrivilege?: 'limited' | 'privileged' | 'full';
+			appPasswordPrivilege?: AppPasswordPrivilege;
 		},
 	): Promise<SeedAccount> {
-		const recoveryKey = params.recoveryKey;
-
-		await ok(
+		const { did } = await ok(
 			this.client.call(LocalDanausAccountCreateAccount, {
 				input: {
 					handle: params.handle,
 					email: params.email,
 					password: params.password,
-					recoveryKey: recoveryKey,
+					recoveryKey: params.recoveryKey,
 				},
 				headers: { authorization: this.adminAuth },
 			}),
 		);
 
-		const cookie = await this.webSignIn(params.handle, params.password);
-
-		const appPassword = await this.createAppPassword(cookie, {
+		const { secret: appPassword } = await this.network.pds.ctx.accountManager.createAppPassword({
+			did: did,
 			name: params.appPasswordName ?? 'seed password',
-			privilege: params.appPasswordPrivilege ?? DEFAULT_APP_PASSWORD_PRIVILEGE,
+			privilege: params.appPasswordPrivilege ?? AppPasswordPrivilege.Full,
 		});
 
 		const session = await ok(
@@ -608,45 +595,6 @@ export class SeedClient<Network extends TestNetworkLike = TestNetworkLike> {
 	static getHeaders(jwt: string): { authorization: string } {
 		return { authorization: `Bearer ${jwt}` };
 	}
-
-	private async webSignIn(identifier: string, password: string): Promise<string> {
-		const response = await this.client.call(LocalDanausAccountSignIn, {
-			input: {
-				identifier,
-				password,
-			},
-		});
-
-		if (!response.ok) {
-			throw new ClientResponseError(response);
-		}
-
-		const cookie = extractCookie(response.headers, WEB_SESSION_COOKIE);
-		if (!cookie) {
-			throw new Error(`failed to read web session cookie`);
-		}
-
-		return cookie;
-	}
-
-	private async createAppPassword(
-		cookie: string,
-		input: {
-			name: string;
-			privilege: 'limited' | 'privileged' | 'full';
-		},
-	): Promise<string> {
-		const data = await ok(
-			this.client.call(LocalDanausLegacyAuthCreateAppPassword, {
-				input: input,
-				headers: {
-					cookie: cookie,
-				},
-			}),
-		);
-
-		return data.secret;
-	}
 }
 
 /**
@@ -713,17 +661,3 @@ const users = {
 		selfLabels: undefined,
 	},
 } satisfies Record<string, UserDecl>;
-
-const extractCookie = (headers: Headers, name: string): string | null => {
-	const header = headers.get('set-cookie');
-	if (!header) {
-		return null;
-	}
-
-	const match = header.match(new RegExp(`${name}=([^;]+)`));
-	if (!match) {
-		return null;
-	}
-
-	return `${name}=${match[1]}`;
-};
