@@ -1,6 +1,8 @@
 import { cva } from 'cva';
 import type { Child } from 'hono/jsx';
 
+import type { InvokerCommand } from './utils/types.ts';
+
 const root = cva({
 	base: [
 		'flex items-center gap-1 rounded-md px-2 py-1.5 text-left select-none',
@@ -20,7 +22,7 @@ export interface MenuItemProps {
 	/** invoker command target element id */
 	commandfor?: string;
 	/** invoker command action */
-	command?: string;
+	command?: InvokerCommand;
 	class?: string;
 	children?: Child;
 }

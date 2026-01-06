@@ -1,6 +1,8 @@
 import { cva, type VariantProps } from 'cva';
 import type { Child } from 'hono/jsx';
 
+import type { InvokerCommand } from './utils/types.ts';
+
 const root = cva({
 	base: [
 		'inline-flex appearance-none items-center justify-center gap-2 overflow-hidden align-middle select-none',
@@ -53,7 +55,7 @@ export interface ButtonProps extends VariantProps<typeof root> {
 	/** invoker command target element id */
 	commandfor?: string;
 	/** invoker command action */
-	command?: string;
+	command?: InvokerCommand;
 	class?: string;
 	children?: Child;
 }
