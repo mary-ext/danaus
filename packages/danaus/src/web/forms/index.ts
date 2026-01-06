@@ -241,7 +241,7 @@ export const registerForms = (forms: Record<string, FormDefinition<any, any>>): 
 					return await form.__.handler(validated.value, issueBuilder);
 				});
 
-				state.set(actionId, { input, issues: {}, result });
+				state.set(actionId, { input: {}, issues: {}, result });
 			} catch (err) {
 				if (err instanceof ValidationError) {
 					state.set(actionId, { input, issues: flattenIssues(err.issues) });
