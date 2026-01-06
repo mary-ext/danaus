@@ -305,7 +305,7 @@
 /* position-anchor: attach to anchor via --anchor CSS variable */
 @utility anchored {
 	position-anchor: var(--anchor);
-	&:where(&) {
+	:where(&) {
 		position: absolute;
 	}
 }
