@@ -4,7 +4,7 @@ import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { jsxRenderer } from 'hono/jsx-renderer';
 
-import { formatAppPasswordPrivilege } from '#app/accounts/app-passwords.ts';
+import { AppPasswordPrivilege } from '#app/accounts/db/schema.ts';
 import type { WebSession } from '#app/accounts/manager.ts';
 import { readWebSessionToken, verifyWebSessionToken } from '#app/auth/web.ts';
 import type { AppContext } from '#app/context.ts';
@@ -20,14 +20,15 @@ import PersonOutlined from '../icons/central/person-outlined.tsx';
 import PhoneOutlined from '../icons/central/phone-outlined.tsx';
 import PlusLargeOutlined from '../icons/central/plus-large-outlined.tsx';
 import ShieldOutlined from '../icons/central/shield-outlined.tsx';
-import TrashCanOutlined from '../icons/central/trash-can-outlined.tsx';
 import UsbOutlined from '../icons/central/usb-outlined.tsx';
 import Button from '../primitives/button.tsx';
 import DialogActions from '../primitives/dialog-actions.tsx';
 import DialogBody from '../primitives/dialog-body.tsx';
+import DialogClose from '../primitives/dialog-close.tsx';
 import DialogContent from '../primitives/dialog-content.tsx';
 import DialogSurface from '../primitives/dialog-surface.tsx';
 import DialogTitle from '../primitives/dialog-title.tsx';
+import DialogTrigger from '../primitives/dialog-trigger.tsx';
 import Dialog from '../primitives/dialog.tsx';
 import Field from '../primitives/field.tsx';
 import Input from '../primitives/input.tsx';
@@ -266,7 +267,7 @@ export const createAccountApp = (ctx: AppContext) => {
 						</MessageBar>
 					)}
 
-					{passwords.length === 0 ? (
+					{/* {passwords.length === 0 ? (
 						<p class="py-8 text-center text-base-300 text-neutral-foreground-3">no app passwords yet.</p>
 					) : (
 						<ul class="divide-y divide-neutral-stroke-2">
@@ -289,7 +290,92 @@ export const createAccountApp = (ctx: AppContext) => {
 								</li>
 							))}
 						</ul>
-					)}
+					)} */}
+
+					<div class="flex flex-col divide-y divide-neutral-stroke-2 rounded-md bg-neutral-background-1 shadow-4">
+						{passwords.length === 0 && (
+							<div class="flex flex-col gap-1 p-8 text-center">
+								<p class="text-base-300 font-medium">No app passwords created</p>
+								<p class="text-base-300 text-neutral-foreground-3">
+									App passwords lets you sign into legacy AT Protocol apps.
+								</p>
+							</div>
+						)}
+
+						{passwords.map((password) => {
+							let privilege = `Unknown`;
+							switch (password.privilege) {
+								case AppPasswordPrivilege.Full: {
+									privilege = `Full access`;
+									break;
+								}
+								case AppPasswordPrivilege.Privileged: {
+									privilege = `Privileged access`;
+									break;
+								}
+								case AppPasswordPrivilege.Limited: {
+									privilege = `Limited access`;
+									break;
+								}
+							}
+
+							return (
+								<div class="flex items-center gap-4 px-4 py-3">
+									<Key2Outlined size={24} class="shrink-0" />
+
+									<div class="min-w-0 grow">
+										<p class="text-base-300">{password.name}</p>
+										<p class="text-base-300 text-neutral-foreground-3">{privilege}</p>
+									</div>
+
+									<Menu>
+										<MenuTrigger>
+											<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
+												<DotGrid1x3HorizontalOutlined size={16} />
+											</button>
+										</MenuTrigger>
+
+										<MenuPopover>
+											<MenuList>
+												<Dialog>
+													<DialogTrigger>
+														<MenuItem>Delete</MenuItem>
+													</DialogTrigger>
+
+													<DialogSurface>
+														<DialogBody>
+															<DialogTitle>Delete this app password?</DialogTitle>
+
+															<form {...deleteAppPasswordForm} class="contents">
+																<DialogContent>
+																	<p class="text-base-300">
+																		You'll no longer be able to sign in to legacy apps using the{' '}
+																		<strong>{password.name}</strong> app password.
+																	</p>
+
+																	<input {...deleteAppPasswordForm.fields.name.as('hidden', password.name)} />
+																</DialogContent>
+
+																<DialogActions>
+																	<DialogClose>
+																		<Button>Cancel</Button>
+																	</DialogClose>
+
+																	<Button type="submit" variant="primary">
+																		Delete
+																	</Button>
+																</DialogActions>
+															</form>
+														</DialogBody>
+													</DialogSurface>
+												</Dialog>
+											</MenuList>
+										</MenuPopover>
+									</Menu>
+								</div>
+							);
+						})}
+					</div>
 				</div>
 
 				<Dialog id="create-app-password-dialog">
@@ -316,11 +402,11 @@ export const createAccountApp = (ctx: AppContext) => {
 								</DialogContent>
 
 								<DialogActions>
-									<Button type="submit" variant="primary">
-										Create
-									</Button>
 									<Button commandfor="create-app-password-dialog" command="close" variant="outlined">
 										Cancel
+									</Button>
+									<Button type="submit" variant="primary">
+										Create
 									</Button>
 								</DialogActions>
 							</form>

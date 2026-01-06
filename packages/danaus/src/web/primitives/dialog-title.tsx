@@ -5,7 +5,7 @@ import { useDialogContext } from './utils/dialog-context.tsx';
 
 const root = cva({
 	base: [
-		'm-0',
+		'm-0 pb-2',
 		'text-base-500 font-semibold',
 		// grid position: row 1, col 1-2 (leaves col 3 for action)
 		'col-start-1 col-end-3 row-start-1 row-end-1',

@@ -3,7 +3,7 @@ import type { Child } from 'hono/jsx';
 
 const root = cva({
 	base: [
-		'box-border',
+		'box-border pt-2',
 		'h-fit',
 		// grid position: row 3
 		'row-start-3 row-end-3',
