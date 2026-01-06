@@ -58,6 +58,9 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
   be sure
 - Task tool (subagents for exploration, planning, etc.) may not always be accurate; verify subagent
   findings when needed
+- pnpm doesn't hoist packages by default; check the package's own `node_modules/` directory when
+  inspecting dependencies (e.g., `packages/danaus/node_modules/@atcute/crypto` not root
+  `node_modules`)
 
 ## Decision Graph Workflow
 
