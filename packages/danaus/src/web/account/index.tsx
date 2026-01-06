@@ -138,9 +138,18 @@ export const createAccountApp = (ctx: AppContext) => {
 	// #endregion
 
 	// #region overview route
-	app.get('/', (c) => {
+	app.on(['GET', 'POST'], '/', (c) => {
 		const session = verifyCredentials(c);
 		const account = ctx.accountManager.getAccount(session.did);
+		const { updateHandleForm, refreshHandleForm } = forms;
+
+		// determine current handle parts for form prefill
+		const currentHandle = account?.handle ?? '';
+		const isServiceHandle = ctx.config.identity.serviceHandleDomains.some((d) => currentHandle.endsWith(d));
+		const currentDomain = isServiceHandle
+			? (ctx.config.identity.serviceHandleDomains.find((d) => currentHandle.endsWith(d)) ?? 'custom')
+			: 'custom';
+		const currentLocalPart = isServiceHandle ? currentHandle.slice(0, -currentDomain.length) : currentHandle;
 
 		return c.render(
 			<AccountLayout>
@@ -171,8 +180,105 @@ export const createAccountApp = (ctx: AppContext) => {
 
 										<MenuPopover>
 											<MenuList>
-												<MenuItem>Change handle</MenuItem>
-												<MenuItem>Request refresh</MenuItem>
+												<Dialog>
+													<DialogTrigger>
+														<MenuItem>Change handle</MenuItem>
+													</DialogTrigger>
+
+													<DialogSurface>
+														<DialogBody>
+															<DialogTitle>Change handle</DialogTitle>
+
+															<form {...updateHandleForm} class="contents">
+																<DialogContent class="flex flex-col gap-4">
+																	<p class="text-base-300 text-neutral-foreground-3">
+																		Your handle is your unique identity on the AT Protocol network.
+																	</p>
+
+																	<Field
+																		label="Domain"
+																		validationMessageText={
+																			updateHandleForm.fields.domain.issues()[0]?.message
+																		}
+																	>
+																		<Select
+																			{...updateHandleForm.fields.domain.as('select')}
+																			value={updateHandleForm.fields.domain.value() || currentDomain}
+																			options={[
+																				...ctx.config.identity.serviceHandleDomains.map((d) => ({
+																					value: d,
+																					label: d,
+																				})),
+																				{ value: 'custom', label: 'I have my own domain' },
+																			]}
+																		/>
+																	</Field>
+
+																	<Field
+																		label="Handle"
+																		required
+																		validationMessageText={
+																			updateHandleForm.fields.handle.issues()[0]?.message
+																		}
+																	>
+																		<Input
+																			{...updateHandleForm.fields.handle.as('text')}
+																			value={updateHandleForm.fields.handle.value() || currentLocalPart}
+																			placeholder="alice"
+																			required
+																		/>
+																	</Field>
+
+																	<p class="text-base-200 text-neutral-foreground-3">
+																		Custom domains must have a DNS TXT record or .well-known file pointing to
+																		your DID.
+																	</p>
+																</DialogContent>
+
+																<DialogActions>
+																	<DialogClose>
+																		<Button>Cancel</Button>
+																	</DialogClose>
+
+																	<Button type="submit" variant="primary">
+																		Save
+																	</Button>
+																</DialogActions>
+															</form>
+														</DialogBody>
+													</DialogSurface>
+												</Dialog>
+
+												<Dialog>
+													<DialogTrigger>
+														<MenuItem>Request refresh</MenuItem>
+													</DialogTrigger>
+
+													<DialogSurface>
+														<DialogBody>
+															<DialogTitle>Request handle refresh</DialogTitle>
+
+															<form {...refreshHandleForm} class="contents">
+																<DialogContent>
+																	<p class="text-base-300">
+																		This will notify the network to re-verify your handle. Use this if apps
+																		are marking your handle as invalid despite being set up correctly.
+																	</p>
+																</DialogContent>
+
+																<DialogActions>
+																	<DialogClose>
+																		<Button>Cancel</Button>
+																	</DialogClose>
+
+																	<Button type="submit" variant="primary">
+																		Refresh
+																	</Button>
+																</DialogActions>
+															</form>
+														</DialogBody>
+													</DialogSurface>
+												</Dialog>
 											</MenuList>
 										</MenuPopover>
 									</Menu>
