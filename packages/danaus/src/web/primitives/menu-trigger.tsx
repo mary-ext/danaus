@@ -1,3 +1,4 @@
+import { cx } from 'cva';
 import { cloneElement } from 'hono/jsx';
 import type { JSX } from 'hono/jsx/jsx-runtime';
 
@@ -20,8 +21,7 @@ const MenuTrigger = (props: MenuTriggerProps) => {
 	return cloneElement(children, {
 		commandfor: menuId,
 		command: 'toggle-popover',
-		class: `anchor ${childProps?.class ?? ''}`.trim(),
-		style: childProps?.style,
+		class: cx('anchor', childProps?.class as string | undefined),
 	});
 };
 
