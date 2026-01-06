@@ -46,6 +46,8 @@ const Dialog = (props: DialogProps) => {
 	return (
 		<DialogContext.Provider value={contextValue}>
 			<dialog id={id} aria-labelledby={titleId} class={root({ className })}>
+				{children}
+
 				<button
 					type="button"
 					tabindex={-1}
@@ -54,7 +56,6 @@ const Dialog = (props: DialogProps) => {
 					command="close"
 					class={backdrop()}
 				/>
-				{children}
 			</dialog>
 		</DialogContext.Provider>
 	);

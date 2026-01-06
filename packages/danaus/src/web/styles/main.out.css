@@ -254,7 +254,7 @@
   }
   .anchored {
     position-anchor: var(--anchor);
-    &:where(&) {
+    :where(&) {
       position: absolute;
     }
   }
@@ -507,9 +507,6 @@
   }
   .grow {
     flex-grow: 1;
-  }
-  .cursor-default {
-    cursor: default;
   }
   .cursor-pointer {
     cursor: pointer;
