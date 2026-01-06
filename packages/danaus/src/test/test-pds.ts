@@ -24,6 +24,8 @@ export interface TestPdsConfig extends Partial<AppConfig> {
 	port?: number;
 	/** persistent data directory; uses temp directory if not provided */
 	dataDirectory?: string;
+	/** hex-encoded secp256k1 private key for PLC rotation */
+	plcRotationKey?: string;
 }
 
 /**
@@ -59,7 +61,9 @@ export class TestPds implements AsyncDisposable {
 		await fs.mkdir(blobDir, { recursive: true });
 		await fs.mkdir(blobTempDir, { recursive: true });
 
-		const plcRotationKey = await Secp256k1PrivateKeyExportable.createKeypair();
+		const plcRotationKey = cfg.plcRotationKey
+			? await Secp256k1PrivateKeyExportable.importRaw(Buffer.from(cfg.plcRotationKey, 'hex'))
+			: await Secp256k1PrivateKeyExportable.createKeypair();
 
 		const service: ServiceConfig = {
 			version: 'test',

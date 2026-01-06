@@ -6,6 +6,9 @@ import { BSKY_PORT, PDS_PORT } from '@danaus/dev-env';
 import type { ProxyTargetConfig } from '#app/config.ts';
 import { TestPds } from '#app/test/test-pds.ts';
 
+// stable rotation key for dev environment (persisted DIDs expect this key)
+const DEV_PLC_ROTATION_KEY = '3f916c70dc69e4c5e83877f013325b11ecac31742e6a42f5c4fb240d0703d9d5';
+
 const DATA_DIR = path.resolve('data/pds');
 const PLC_URL = process.env.PLC_URL ?? 'http://localhost:2582';
 
@@ -34,6 +37,7 @@ const run = async () => {
 		plcUrl: PLC_URL,
 		port: PDS_PORT,
 		dataDirectory: DATA_DIR,
+		plcRotationKey: DEV_PLC_ROTATION_KEY,
 		proxy: {
 			targets: targets,
 		},
