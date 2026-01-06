@@ -12,6 +12,7 @@ import type { AppContext } from '#app/context.ts';
 import AsideItem from '../admin/components/aside-item.tsx';
 import { IdProvider } from '../components/id.tsx';
 import { registerForms } from '../forms/index.ts';
+import AtOutlined from '../icons/central/at-outlined.tsx';
 import DotGrid1x3HorizontalOutlined from '../icons/central/dot-grid-1x3-horizontal-outlined.tsx';
 import Key2Outlined from '../icons/central/key-2-outlined.tsx';
 import PasskeysOutlined from '../icons/central/passkeys-outlined.tsx';
@@ -21,6 +22,10 @@ import PhoneOutlined from '../icons/central/phone-outlined.tsx';
 import PlusLargeOutlined from '../icons/central/plus-large-outlined.tsx';
 import ShieldOutlined from '../icons/central/shield-outlined.tsx';
 import UsbOutlined from '../icons/central/usb-outlined.tsx';
+import AccordionHeader from '../primitives/accordion-header.tsx';
+import AccordionItem from '../primitives/accordion-item.tsx';
+import AccordionPanel from '../primitives/accordion-panel.tsx';
+import Accordion from '../primitives/accordion.tsx';
 import Button from '../primitives/button.tsx';
 import DialogActions from '../primitives/dialog-actions.tsx';
 import DialogBody from '../primitives/dialog-body.tsx';
@@ -151,6 +156,9 @@ export const createAccountApp = (ctx: AppContext) => {
 			: 'custom';
 		const currentLocalPart = isServiceHandle ? currentHandle.slice(0, -currentDomain.length) : currentHandle;
 
+		const updateHandleError = updateHandleForm.fields.allIssues().at(0);
+		const refreshHandleError = refreshHandleForm.fields.allIssues().at(0);
+
 		return c.render(
 			<AccountLayout>
 				<title>My account - Danaus</title>
@@ -159,6 +167,18 @@ export const createAccountApp = (ctx: AppContext) => {
 					<div class="flex h-8 items-center">
 						<h3 class="text-base-400 font-medium">Account overview</h3>
 					</div>
+
+					{updateHandleError && (
+						<MessageBar intent="error" layout="singleline">
+							<MessageBarBody>{updateHandleError.message}</MessageBarBody>
+						</MessageBar>
+					)}
+
+					{refreshHandleError && (
+						<MessageBar intent="error" layout="singleline">
+							<MessageBarBody>{refreshHandleError.message}</MessageBarBody>
+						</MessageBar>
+					)}
 
 					<div class="flex flex-col gap-8">
 						<div class="flex flex-col gap-2">
@@ -180,105 +200,13 @@ export const createAccountApp = (ctx: AppContext) => {
 
 										<MenuPopover>
 											<MenuList>
-												<Dialog>
-													<DialogTrigger>
-														<MenuItem>Change handle</MenuItem>
-													</DialogTrigger>
+												<MenuItem command="show-modal" commandfor="change-service-handle-dialog">
+													Change handle
+												</MenuItem>
 
-													<DialogSurface>
-														<DialogBody>
-															<DialogTitle>Change handle</DialogTitle>
-
-															<form {...updateHandleForm} class="contents">
-																<DialogContent class="flex flex-col gap-4">
-																	<p class="text-base-300 text-neutral-foreground-3">
-																		Your handle is your unique identity on the AT Protocol network.
-																	</p>
-
-																	<Field
-																		label="Domain"
-																		validationMessageText={
-																			updateHandleForm.fields.domain.issues()[0]?.message
-																		}
-																	>
-																		<Select
-																			{...updateHandleForm.fields.domain.as('select')}
-																			value={updateHandleForm.fields.domain.value() || currentDomain}
-																			options={[
-																				...ctx.config.identity.serviceHandleDomains.map((d) => ({
-																					value: d,
-																					label: d,
-																				})),
-																				{ value: 'custom', label: 'I have my own domain' },
-																			]}
-																		/>
-																	</Field>
-
-																	<Field
-																		label="Handle"
-																		required
-																		validationMessageText={
-																			updateHandleForm.fields.handle.issues()[0]?.message
-																		}
-																	>
-																		<Input
-																			{...updateHandleForm.fields.handle.as('text')}
-																			value={updateHandleForm.fields.handle.value() || currentLocalPart}
-																			placeholder="alice"
-																			required
-																		/>
-																	</Field>
-
-																	<p class="text-base-200 text-neutral-foreground-3">
-																		Custom domains must have a DNS TXT record or .well-known file pointing to
-																		your DID.
-																	</p>
-																</DialogContent>
-
-																<DialogActions>
-																	<DialogClose>
-																		<Button>Cancel</Button>
-																	</DialogClose>
-
-																	<Button type="submit" variant="primary">
-																		Save
-																	</Button>
-																</DialogActions>
-															</form>
-														</DialogBody>
-													</DialogSurface>
-												</Dialog>
-
-												<Dialog>
-													<DialogTrigger>
-														<MenuItem>Request refresh</MenuItem>
-													</DialogTrigger>
-
-													<DialogSurface>
-														<DialogBody>
-															<DialogTitle>Request handle refresh</DialogTitle>
-
-															<form {...refreshHandleForm} class="contents">
-																<DialogContent>
-																	<p class="text-base-300">
-																		This will notify the network to re-verify your handle. Use this if apps
-																		are marking your handle as invalid despite being set up correctly.
-																	</p>
-																</DialogContent>
-
-																<DialogActions>
-																	<DialogClose>
-																		<Button>Cancel</Button>
-																	</DialogClose>
-
-																	<Button type="submit" variant="primary">
-																		Refresh
-																	</Button>
-																</DialogActions>
-															</form>
-														</DialogBody>
-													</DialogSurface>
-												</Dialog>
+												<MenuItem command="show-modal" commandfor="refresh-handle-dialog">
+													Request refresh
+												</MenuItem>
 											</MenuList>
 										</MenuPopover>
 									</Menu>
@@ -320,6 +248,199 @@ export const createAccountApp = (ctx: AppContext) => {
 						</div>
 					</div>
 				</div>
+
+				<Dialog id="change-service-handle-dialog">
+					<DialogSurface>
+						<DialogBody>
+							<DialogTitle>Change handle</DialogTitle>
+
+							<form {...updateHandleForm} class="contents">
+								<DialogContent class="flex flex-col gap-4">
+									<p class="text-base-300 text-neutral-foreground-3">
+										Your handle is your unique identity on the AT Protocol network.
+									</p>
+
+									<Field label="Handle" required>
+										<div class="flex gap-2">
+											<Input
+												{...updateHandleForm.fields.handle.as('text')}
+												value={updateHandleForm.fields.handle.value() || currentLocalPart}
+												placeholder="alice"
+												contentBefore={<AtOutlined size={16} />}
+												class="grow"
+											/>
+
+											<Select
+												{...updateHandleForm.fields.domain.as('select')}
+												value={updateHandleForm.fields.domain.value() || currentDomain}
+												options={ctx.config.identity.serviceHandleDomains.map((d) => ({
+													value: d,
+													label: d,
+												}))}
+											/>
+										</div>
+									</Field>
+
+									<div></div>
+								</DialogContent>
+
+								<DialogActions>
+									<Button command="show-modal" commandfor="change-custom-handle-dialog">
+										Use my own domain
+									</Button>
+
+									<div class="grow"></div>
+
+									<DialogClose>
+										<Button>Cancel</Button>
+									</DialogClose>
+
+									<Button type="submit" variant="primary">
+										Change
+									</Button>
+								</DialogActions>
+							</form>
+						</DialogBody>
+					</DialogSurface>
+				</Dialog>
+
+				<Dialog id="refresh-handle-dialog">
+					<DialogSurface>
+						<DialogBody>
+							<DialogTitle>Request handle refresh</DialogTitle>
+
+							<form {...refreshHandleForm} class="contents">
+								<DialogContent>
+									<p class="text-base-300">
+										This will notify the network to re-verify your handle. Use this if apps are marking your
+										handle as invalid despite being set up correctly.
+									</p>
+								</DialogContent>
+
+								<DialogActions>
+									<DialogClose>
+										<Button>Cancel</Button>
+									</DialogClose>
+
+									<Button type="submit" variant="primary">
+										Refresh
+									</Button>
+								</DialogActions>
+							</form>
+						</DialogBody>
+					</DialogSurface>
+				</Dialog>
+
+				<Dialog id="change-custom-handle-dialog">
+					<DialogSurface>
+						<DialogBody>
+							<DialogTitle>Change handle</DialogTitle>
+
+							<form {...updateHandleForm} class="contents">
+								<DialogContent class="flex flex-col gap-4">
+									<p class="text-base-300 text-neutral-foreground-3">
+										Your handle is your unique identity on the AT Protocol network.
+									</p>
+
+									<Field label="Handle" required>
+										<Input
+											{...updateHandleForm.fields.handle.as('text')}
+											placeholder="alice.com"
+											contentBefore={<AtOutlined size={16} />}
+										/>
+									</Field>
+
+									<input {...updateHandleForm.fields.domain.as('hidden', 'custom')} />
+
+									<Accordion class="flex flex-col gap-2">
+										<AccordionItem name="handle-method" open>
+											<AccordionHeader>DNS record</AccordionHeader>
+											<AccordionPanel>
+												<div class="flex flex-col gap-3">
+													<p class="text-base-300 text-neutral-foreground-3">
+														Add the following DNS record to your domain:
+													</p>
+
+													<div class="flex flex-col gap-2 rounded-md bg-neutral-background-3 p-3">
+														<div class="flex flex-col gap-0.5">
+															<span class="text-base-200 text-neutral-foreground-3">Host</span>
+															<input
+																type="text"
+																readonly
+																value="_atproto.<your-domain>"
+																class="font-mono text-base-300 outline-none"
+															/>
+														</div>
+														<div class="flex flex-col gap-0.5">
+															<span class="text-base-200 text-neutral-foreground-3">Type</span>
+															<input
+																type="text"
+																readonly
+																value="TXT"
+																class="font-mono text-base-300 outline-none"
+															/>
+														</div>
+														<div class="flex flex-col gap-0.5">
+															<span class="text-base-200 text-neutral-foreground-3">Value</span>
+															<input
+																type="text"
+																readonly
+																value={`did=${session.did}`}
+																class="font-mono text-base-300 outline-none"
+															/>
+														</div>
+													</div>
+												</div>
+											</AccordionPanel>
+										</AccordionItem>
+
+										<AccordionItem name="handle-method">
+											<AccordionHeader>HTTP well-known entry</AccordionHeader>
+											<AccordionPanel>
+												<div class="flex flex-col gap-3">
+													<p class="text-base-300 text-neutral-foreground-3">
+														Upload a text file to the following URL:
+													</p>
+
+													<div class="flex flex-col gap-2 rounded-md bg-neutral-background-3 p-3">
+														<div class="flex flex-col gap-0.5">
+															<span class="text-base-200 text-neutral-foreground-3">URL</span>
+															<input
+																type="text"
+																readonly
+																value="https://<your-domain>/.well-known/atproto-did"
+																class="font-mono text-base-300 outline-none"
+															/>
+														</div>
+														<div class="flex flex-col gap-0.5">
+															<span class="text-base-200 text-neutral-foreground-3">Contents</span>
+															<input
+																type="text"
+																readonly
+																value={session.did}
+																class="font-mono text-base-300 outline-none"
+															/>
+														</div>
+													</div>
+												</div>
+											</AccordionPanel>
+										</AccordionItem>
+									</Accordion>
+								</DialogContent>
+
+								<DialogActions>
+									<DialogClose>
+										<Button>Cancel</Button>
+									</DialogClose>
+
+									<Button type="submit" variant="primary">
+										Change
+									</Button>
+								</DialogActions>
+							</form>
+						</DialogBody>
+					</DialogSurface>
+				</Dialog>
 			</AccountLayout>,
 		);
 	});

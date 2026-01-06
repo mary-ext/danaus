@@ -1,4 +1,4 @@
-import { signOperation, type UnsignedOperation } from '@atcute/did-plc';
+import { PlcClientError, signOperation, type UnsignedOperation } from '@atcute/did-plc';
 import type { Did, Handle } from '@atcute/lexicons';
 import { isHandle } from '@atcute/lexicons/syntax';
 import { XRPCError } from '@atcute/xrpc-server';
@@ -193,7 +193,15 @@ export const createAccountForms = (ctx: AppContext) => {
 
 			// update PLC document for did:plc accounts
 			if (did.startsWith('did:plc:')) {
-				await updatePlcHandle(ctx, did as Did<'plc'>, handle);
+				try {
+					await updatePlcHandle(ctx, did as Did<'plc'>, handle);
+				} catch (err) {
+					if (err instanceof PlcClientError) {
+						invalid(`Unable to update DID document, please try again later`);
+					}
+
+					throw err;
+				}
 			}
 
 			// update local database and emit identity event
@@ -271,9 +279,7 @@ async function updatePlcHandle(ctx: AppContext, did: Did<'plc'>, handle: Handle)
 		services: state.services,
 	};
 
-	// sign with PDS rotation key
+	// sign with PDS rotation key and submit to PLC directory
 	const signedOp = await signOperation(unsignedOp, config.secrets.plcRotationKey);
-
-	// submit to PLC directory
 	await plcClient.submitOperation(did, signedOp);
 }
