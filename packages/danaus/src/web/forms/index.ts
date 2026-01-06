@@ -55,37 +55,65 @@ export type IssueBuilder<T> = {
 } & ((message: string) => FormIssue);
 
 export type FieldsProxy<T> = {
-	[K in keyof T]: T[K] extends Record<string, unknown> ? FieldsProxy<T[K]> & FieldAccessor : FieldAccessor;
-} & FieldAccessor;
+	[K in keyof T]: T[K] extends Record<string, unknown>
+		? FieldsProxy<T[K]> & FieldAccessor<T[K]>
+		: FieldAccessor<T[K]>;
+} & FieldAccessor<T>;
 
-export interface FieldAccessor {
+export type FormFieldValue = string | string[] | number | boolean | File | File[];
+
+export type FormFieldType<T> = {
+	[K in keyof InputTypeMap]: T extends InputTypeMap[K] ? K : never;
+}[keyof InputTypeMap];
+
+export interface FieldAccessor<Value> {
 	/** returns the current input value for this field */
-	value(): unknown;
+	value(): Value;
 	/** returns validation issues for this exact field path */
 	issues(): { path: (string | number)[]; message: string }[];
 	/** returns validation issues for this field and all nested fields */
 	allIssues(): { path: (string | number)[]; message: string }[];
 	/** returns props for an input element */
-	as(type: InputType, inputValue?: string): Record<string, unknown>;
+	as<T extends FormFieldType<Value>>(...args: AsArgs<T, Value>): Record<string, unknown>;
 }
 
-type InputType =
-	| 'text'
-	| 'email'
-	| 'password'
-	| 'number'
-	| 'range'
-	| 'search'
-	| 'tel'
-	| 'url'
-	| 'hidden'
-	| 'submit'
-	| 'checkbox'
-	| 'radio'
-	| 'select'
-	| 'select multiple'
-	| 'file'
-	| 'file multiple';
+type InputTypeMap = {
+	text: string;
+	email: string;
+	password: string;
+	url: string;
+	tel: string;
+	search: string;
+	number: number;
+	range: number;
+	date: string;
+	'datetime-local': string;
+	time: string;
+	month: string;
+	week: string;
+	color: string;
+	checkbox: boolean | string[];
+	radio: string;
+	file: File;
+	hidden: string;
+	submit: string;
+	button: string;
+	reset: string;
+	image: string;
+	select: string;
+	'select multiple': string[];
+	'file multiple': File[];
+};
+
+type InputType = keyof InputTypeMap;
+
+type AsArgs<Type extends InputType, Value> = Type extends 'checkbox'
+	? Value extends string[]
+		? [type: Type, value: Value[number] | (string & {})]
+		: [type: Type]
+	: Type extends 'radio' | 'submit' | 'hidden'
+		? [type: Type, value: Value | (string & {})]
+		: [type: Type];
 // #endregion
 
 // #region async local storage
@@ -352,7 +380,7 @@ const createFieldsProxy = <T>(
 
 	const pathKey = buildName() || '$';
 
-	const accessor: FieldAccessor = {
+	const accessor = {
 		value: getValue,
 		issues: () => {
 			const issues = getIssues()[pathKey] ?? [];
@@ -365,7 +393,7 @@ const createFieldsProxy = <T>(
 			const issues = getIssues()[pathKey] ?? [];
 			return issues.map((issue) => ({ path: issue.path, message: issue.message }));
 		},
-		as: (type, inputValue) => {
+		as: (type: InputType, inputValue?: string) => {
 			const baseName = buildName();
 			const issues = getIssues()[pathKey] ?? [];
 			const pathStr = path.join('.');
