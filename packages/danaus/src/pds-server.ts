@@ -1,5 +1,5 @@
 import { isHandle } from '@atcute/lexicons/syntax';
-import { defaultExceptionHandler, XRPCError, XRPCRouter } from '@atcute/xrpc-server';
+import { defaultExceptionHandler, XRPCRouter } from '@atcute/xrpc-server';
 import { createBunWebSocket } from '@atcute/xrpc-server-bun';
 import { cors } from '@atcute/xrpc-server/middlewares/cors';
 
