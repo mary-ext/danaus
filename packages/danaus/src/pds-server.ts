@@ -44,6 +44,12 @@ export class PdsServer implements AsyncDisposable {
 		await using disposables = new AsyncDisposableStack();
 
 		const context = createAppContext(this.config);
+
+		// register cleanup in reverse dependency order
+		// NOTE: Bun/JSCore quirk - AsyncDisposableStack.use() requires AsyncDisposable,
+		// doesn't accept Disposable like the spec allows, so we use defer() instead
+		disposables.defer(() => context.backgroundQueue.dispose());
+		disposables.defer(() => context.identityCache.dispose());
 		disposables.defer(() => context.accountManager.dispose());
 
 		const { wrap, adapter } = createBunWebSocket();

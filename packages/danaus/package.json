@@ -17,6 +17,7 @@
 		"css:watch": "tailwindcss -i src/web/styles/main.css -o src/web/styles/main.out.css -w",
 		"db:generate:account": "drizzle-kit generate --dialect=sqlite --schema=src/accounts/db/schema.ts --out=drizzle/accounts",
 		"db:generate:actor": "drizzle-kit generate --dialect=sqlite --schema=src/actors/db/schema.ts --out=drizzle/actors",
+		"db:generate:identity": "drizzle-kit generate --dialect=sqlite --schema=src/identity/db/schema.ts --out=drizzle/identity",
 		"db:generate:sequencer": "drizzle-kit generate --dialect=sqlite --schema=src/sequencer/db/schema.ts --out=drizzle/sequencer"
 	},
 	"dependencies": {
@@ -47,6 +48,7 @@
 		"hono": "^4.11.3",
 		"jose": "^6.1.3",
 		"nanoid": "^5.1.6",
+		"p-queue": "^9.1.0",
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {

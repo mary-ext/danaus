@@ -1,0 +1,125 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "05a4b23c-3072-4afe-bb1d-7495fb7fcdad",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "did_doc",
+      "entityType": "tables"
+    },
+    {
+      "name": "handle",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "did_doc"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "doc",
+      "entityType": "columns",
+      "table": "did_doc"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "did_doc"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "handle",
+      "entityType": "columns",
+      "table": "handle"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "handle"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "handle"
+    },
+    {
+      "columns": [
+        "did"
+      ],
+      "nameExplicit": false,
+      "name": "did_doc_pk",
+      "table": "did_doc",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "handle"
+      ],
+      "nameExplicit": false,
+      "name": "handle_pk",
+      "table": "handle",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "did_doc_updated_at_idx",
+      "entityType": "indexes",
+      "table": "did_doc"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "handle_updated_at_idx",
+      "entityType": "indexes",
+      "table": "handle"
+    }
+  ],
+  "renames": []
+}

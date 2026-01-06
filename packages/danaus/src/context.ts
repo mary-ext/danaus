@@ -15,12 +15,19 @@ import { DiskBlobStore } from './actors/blob-store/disk';
 import { S3BlobStore } from './actors/blob-store/s3';
 import { ActorManager } from './actors/manager';
 import { AuthVerifier } from './auth/verifier';
+import { BackgroundQueue } from './background';
 import type { AppConfig } from './config';
 import { Crawlers } from './crawlers';
+import { CachedDidDocumentResolver } from './identity/cached-did-document-resolver';
+import { CachedHandleResolver } from './identity/cached-handle-resolver';
+import { IdentityCache } from './identity/manager';
 import { Sequencer } from './sequencer/sequencer';
 
 export interface AppContext {
 	config: AppConfig;
+
+	backgroundQueue: BackgroundQueue;
+	identityCache: IdentityCache;
 
 	handleResolver: HandleResolver;
 	didDocumentResolver: DidDocumentResolver<'plc' | 'web'>;
@@ -34,7 +41,15 @@ export interface AppContext {
 }
 
 export const createAppContext = (config: AppConfig): AppContext => {
-	const handleResolver = new CompositeHandleResolver({
+	const backgroundQueue = new BackgroundQueue();
+
+	const identityCache = new IdentityCache({
+		location: config.database.identityCacheDbLocation,
+		walAutoCheckpointDisabled: config.database.walAutoCheckpointDisabled,
+		backgroundQueue: backgroundQueue,
+	});
+
+	const baseHandleResolver = new CompositeHandleResolver({
 		strategy: 'race',
 		methods: {
 			http: new WellKnownHandleResolver(),
@@ -42,11 +57,21 @@ export const createAppContext = (config: AppConfig): AppContext => {
 		},
 	});
 
-	const didDocumentResolver = new CompositeDidDocumentResolver({
+	const handleResolver = new CachedHandleResolver({
+		cache: identityCache,
+		resolver: baseHandleResolver,
+	});
+
+	const baseDidDocumentResolver = new CompositeDidDocumentResolver({
 		methods: {
 			plc: new PlcDidDocumentResolver({ apiUrl: config.identity.plcDirectoryUrl }),
 			web: new WebDidDocumentResolver(),
 		},
+	});
+
+	const didDocumentResolver = new CachedDidDocumentResolver({
+		cache: identityCache,
+		resolver: baseDidDocumentResolver,
 	});
 
 	const plcClient = new PlcClient({
@@ -93,6 +118,9 @@ export const createAppContext = (config: AppConfig): AppContext => {
 
 	return {
 		config: config,
+
+		backgroundQueue: backgroundQueue,
+		identityCache: identityCache,
 
 		handleResolver: handleResolver,
 		didDocumentResolver: didDocumentResolver,
