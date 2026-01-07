@@ -27,9 +27,11 @@ export class BackgroundQueue implements Disposable {
 			return;
 		}
 
-		this.#queue.add(() => task()).catch((err) => {
-			console.error('background queue task failed:', err);
-		});
+		this.#queue
+			.add(() => task())
+			.catch((err) => {
+				console.error('background queue task failed:', err);
+			});
 	}
 
 	/**

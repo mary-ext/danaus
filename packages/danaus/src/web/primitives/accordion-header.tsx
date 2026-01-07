@@ -34,17 +34,17 @@ const root = cva({
 });
 
 const expandIconStyle = cva({
-	base: ['flex shrink-0 items-center', 'text-base-500 leading-base-500'],
+	base: ['flex shrink-0 items-center', 'leading-base-500 text-base-500'],
 	variants: {
 		position: {
 			start: 'pr-2',
-			end: 'grow shrink basis-0 justify-end pl-2',
+			end: 'shrink grow basis-0 justify-end pl-2',
 		},
 	},
 });
 
 const iconStyle = cva({
-	base: 'flex shrink-0 items-center pr-2 text-base-500 leading-base-500',
+	base: 'leading-base-500 flex shrink-0 items-center pr-2 text-base-500',
 });
 
 export interface AccordionHeaderProps {
