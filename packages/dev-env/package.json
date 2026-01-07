@@ -13,7 +13,7 @@
 		"infra:down": "docker compose down"
 	},
 	"dependencies": {
-		"@atcute/client": "^4.2.0",
+		"@atcute/client": "^4.2.1",
 		"@atcute/crypto": "^2.3.0",
 		"@atproto/bsky": "^0.0.203",
 		"@atproto/crypto": "^0.4.5",
