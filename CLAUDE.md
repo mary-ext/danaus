@@ -11,6 +11,9 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
 - run tests via `bun test` (bun, in package)
 - typecheck via `bun run tsc` (tsc, in package)
 - check `pnpm view <package>` before adding a new dependency
+- pnpm doesn't hoist packages by default; check the package's own `node_modules/` directory when
+  inspecting dependencies (e.g., `packages/danaus/node_modules/@atcute/crypto` not root
+  `node_modules`)
 
 ### code writing
 
@@ -40,7 +43,7 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
   - use `@throws` for exceptions when applicable
   - keep descriptions concise but informative
 
-### working style
+### agentic coding
 
 - `.research/` directory in the project root serves as a workspace for temporary experiments,
   analysis, and planning materials. create if not present (it's gitignored). this directory may
@@ -58,9 +61,6 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
   be sure
 - Task tool (subagents for exploration, planning, etc.) may not always be accurate; verify subagent
   findings when needed
-- pnpm doesn't hoist packages by default; check the package's own `node_modules/` directory when
-  inspecting dependencies (e.g., `packages/danaus/node_modules/@atcute/crypto` not root
-  `node_modules`)
 
 ## Decision Graph Workflow
 
