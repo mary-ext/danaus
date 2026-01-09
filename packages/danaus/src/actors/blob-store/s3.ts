@@ -39,11 +39,17 @@ export class S3BlobStore implements BlobStore {
 		return `blocks/${this.did}/${cid}`;
 	}
 
-	async putTemp(data: Request): Promise<string> {
+	async putTemp(stream: ReadableStream<Uint8Array>): Promise<string> {
 		const tempKey = nanoid();
 
 		const temp = this.client.file(this.getTempPath(tempKey));
-		await temp.write(data);
+		const writer = temp.writer();
+
+		for await (const chunk of stream) {
+			writer.write(chunk);
+		}
+
+		await writer.end();
 
 		return tempKey;
 	}

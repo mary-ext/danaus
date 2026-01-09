@@ -1,5 +1,5 @@
 export interface BlobStore {
-	putTemp(data: Request): Promise<string>;
+	putTemp(stream: ReadableStream<Uint8Array>): Promise<string>;
 	putPermanent(cid: string, data: Request): Promise<void>;
 
 	makePermanent(tempKey: string, cid: string): Promise<void>;

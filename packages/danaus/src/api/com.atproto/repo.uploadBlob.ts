@@ -28,10 +28,11 @@ export const uploadBlob = (router: XRPCRouter, context: AppContext) => {
 
 			const blobStore = actorManager.resources.createBlobStore(auth.did);
 
-			const [{ digest, size }, tempKey] = await Promise.all([
-				hashBlob(request.clone() as Request, config.service.blobs.maxUploadSize),
-				blobStore.putTemp(request),
-			]);
+			const { stream, result } = hashingStream(request.body!, config.service.blobs.maxUploadSize);
+
+			const tempKey = await blobStore.putTemp(stream);
+
+			const { digest, size: hashSize } = await result;
 
 			const cid = CID.toString(CID.fromDigest(CID.CODEC_RAW, digest));
 
@@ -51,7 +52,7 @@ export const uploadBlob = (router: XRPCRouter, context: AppContext) => {
 						cid: cid,
 						created_at: new Date(),
 						mime_type: mimeType,
-						size: size,
+						size: hashSize,
 						temp_key: tempKey,
 					})
 					.onConflictDoUpdate({
@@ -66,7 +67,7 @@ export const uploadBlob = (router: XRPCRouter, context: AppContext) => {
 				return {
 					cid: cid,
 					mimeType: mimeType,
-					size: size,
+					size: hashSize,
 				};
 			});
 
@@ -82,22 +83,64 @@ export const uploadBlob = (router: XRPCRouter, context: AppContext) => {
 	});
 };
 
-const hashBlob = async (request: Request, maxSize: number): Promise<{ digest: Uint8Array; size: number }> => {
+interface HashingStreamResult {
+	stream: ReadableStream<Uint8Array>;
+	result: Promise<{ digest: Uint8Array; size: number }>;
+}
+
+/**
+ * create a passthrough stream that hashes data as it flows through.
+ * uses pull-based reading to work with bun's stream implementation.
+ * @param input input stream
+ * @param maxSize maximum allowed size
+ * @returns passthrough stream and promise for digest and size
+ */
+const hashingStream = (input: ReadableStream<Uint8Array>, maxSize: number): HashingStreamResult => {
 	const hasher = createHash('sha256');
 	let size = 0;
 
-	for await (const chunk of request.body!) {
-		size += chunk.length;
+	const { promise: result, resolve, reject } = Promise.withResolvers<{ digest: Uint8Array; size: number }>();
 
-		if (size > maxSize) {
-			throw new InvalidRequestError({
-				error: 'BlobTooLarge',
-				description: `blob exceeds upload size limit`,
-			});
-		}
+	let reader: ReadableStreamDefaultReader<Uint8Array>;
 
-		hasher.update(chunk);
-	}
+	const stream = new ReadableStream<Uint8Array>({
+		start() {
+			reader = input.getReader() as any;
+		},
+		async pull(controller) {
+			try {
+				const { done, value } = await reader.read();
 
-	return { digest: new Uint8Array(hasher.digest()), size };
+				if (done) {
+					resolve({ digest: new Uint8Array(hasher.digest()), size });
+					controller.close();
+					return;
+				}
+
+				size += value.length;
+
+				if (size > maxSize) {
+					const err = new InvalidRequestError({
+						error: 'BlobTooLarge',
+						description: `blob exceeds upload size limit`,
+					});
+					reject(err);
+					controller.error(new Error('blob too large'));
+					reader.cancel();
+					return;
+				}
+
+				hasher.update(value);
+				controller.enqueue(value);
+			} catch (err) {
+				reject(err);
+				controller.error(err);
+			}
+		},
+		cancel() {
+			reader.cancel();
+		},
+	});
+
+	return { stream, result };
 };

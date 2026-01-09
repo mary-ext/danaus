@@ -31,7 +31,7 @@ export const getBlob = (router: XRPCRouter, context: AppContext) => {
 
 			const blob = result.blob;
 
-			return new Response(blob.size > 0 ? blob : null, {
+			return new Response(blob.size > 0 ? blob.stream() : null, {
 				status: 200,
 				headers: {
 					'content-type': result.metadata.mimeType,

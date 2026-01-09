@@ -37,11 +37,20 @@ export class DiskBlobStore implements BlobStore {
 		return path.join(this.directory, cid);
 	}
 
-	async putTemp(data: Request): Promise<string> {
+	async putTemp(stream: ReadableStream<Uint8Array>): Promise<string> {
 		const tempKey = nanoid();
+		const tempPath = this.getTempPath(tempKey);
 
-		const temp = Bun.file(this.getTempPath(tempKey));
-		await temp.write(data);
+		await mkdir(this.tempDirectory, { recursive: true });
+
+		const file = Bun.file(tempPath);
+		const writer = file.writer();
+
+		for await (const chunk of stream) {
+			writer.write(chunk);
+		}
+
+		await writer.end();
 
 		return tempKey;
 	}
