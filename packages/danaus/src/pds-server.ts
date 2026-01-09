@@ -8,7 +8,6 @@ import { comAtproto } from './api/com.atproto/index.ts';
 import { localDanaus } from './api/local.danaus/index.ts';
 import type { AppConfig } from './config.ts';
 import { createAppContext, type AppContext } from './context.ts';
-import { createProxyMiddleware } from './proxy/index.ts';
 import { createWebRouter } from './web/router.ts';
 import styles from './web/styles/main.out.css' with { type: 'file' };
 
@@ -61,8 +60,8 @@ export class PdsServer implements AsyncDisposable {
 					allowedHeaders: ['x-bsky-topics'],
 					allowPrivateNetwork: true,
 				}),
-				createProxyMiddleware(context),
 			],
+			handleNotFound: context.proxy.handleNotFound,
 			handleException(err, request) {
 				return defaultExceptionHandler(err, request);
 			},

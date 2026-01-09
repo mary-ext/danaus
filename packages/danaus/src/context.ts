@@ -21,6 +21,7 @@ import { Crawlers } from './crawlers';
 import { CachedDidDocumentResolver } from './identity/cached-did-document-resolver';
 import { CachedHandleResolver } from './identity/cached-handle-resolver';
 import { IdentityCache } from './identity/manager';
+import { createServiceProxy, type ServiceProxy } from './proxy/index';
 import { Sequencer } from './sequencer/sequencer';
 
 export interface AppContext {
@@ -38,6 +39,9 @@ export interface AppContext {
 	authVerifier: AuthVerifier;
 
 	sequencer: Sequencer;
+
+	/** service proxy for forwarding requests to atproto-proxy targets */
+	proxy: ServiceProxy;
 }
 
 export const createAppContext = (config: AppConfig): AppContext => {
@@ -116,6 +120,13 @@ export const createAppContext = (config: AppConfig): AppContext => {
 		didDocumentResolver: didDocumentResolver,
 	});
 
+	const proxy = createServiceProxy({
+		targets: config.proxy.targets,
+		authVerifier: authVerifier,
+		actorManager: actorManager,
+		didDocumentResolver: didDocumentResolver,
+	});
+
 	return {
 		config: config,
 
@@ -131,5 +142,7 @@ export const createAppContext = (config: AppConfig): AppContext => {
 		authVerifier: authVerifier,
 
 		sequencer: sequencer,
+
+		proxy: proxy,
 	};
 };

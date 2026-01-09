@@ -9,10 +9,12 @@ import type { AppContext } from '#app/context.ts';
  * @param context app context
  */
 export const getRecord = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, actorManager } = context;
+	const { accountManager, actorManager, proxy } = context;
 
 	router.addQuery(ComAtprotoRepoGetRecord, {
-		async handler({ params }) {
+		async handler({ params, request }) {
+			await proxy.passthrough(request);
+
 			const { repo, collection, rkey, cid } = params;
 
 			const did = accountManager.getAccountDid(repo);

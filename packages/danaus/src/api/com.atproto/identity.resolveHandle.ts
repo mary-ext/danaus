@@ -10,10 +10,12 @@ import type { AppContext } from '#app/context.ts';
  * @param context app context
  */
 export const resolveHandle = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, config, handleResolver } = context;
+	const { accountManager, config, handleResolver, proxy } = context;
 
 	router.addQuery(ComAtprotoIdentityResolveHandle, {
-		async handler({ params }) {
+		async handler({ params, request }) {
+			await proxy.passthrough(request);
+
 			const handle = params.handle.toLowerCase();
 
 			if (!isHandle(handle)) {

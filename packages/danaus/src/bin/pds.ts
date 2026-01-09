@@ -23,14 +23,7 @@ const run = async () => {
 
 	targets.set('did:web:api.bsky.app#bsky_appview', {
 		to: `did:web:localhost%3A${BSKY_PORT}#bsky_appview`,
-		exclude: [
-			'app.bsky.actor.getPreferences',
-			'app.bsky.actor.putPreferences',
-			'com.atproto.repo.applyWrites',
-			'com.atproto.repo.createRecord',
-			'com.atproto.repo.putRecord',
-			'com.atproto.server.getSession',
-		],
+		exclude: ['app.bsky.actor.getPreferences', 'app.bsky.actor.putPreferences'],
 	});
 
 	const pds = await TestPds.create({

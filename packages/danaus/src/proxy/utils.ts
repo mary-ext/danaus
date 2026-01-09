@@ -1,9 +1,10 @@
 import { getAtprotoServiceEndpoint, isAtprotoAudience } from '@atcute/identity';
+import type { DidDocumentResolver } from '@atcute/identity-resolver';
 import type { Did, Nsid } from '@atcute/lexicons';
 import { isNsid, type AtprotoDid } from '@atcute/lexicons/syntax';
 import { InvalidRequestError } from '@atcute/xrpc-server';
 
-import type { AppContext } from '#app/context.ts';
+import type { ProxyTargetConfig } from '#app/config.ts';
 
 export interface ProxyTarget {
 	did: Did;
@@ -12,13 +13,15 @@ export interface ProxyTarget {
 
 /**
  * parse atproto-proxy header and resolve service endpoint.
- * @param ctx app context
+ * @param targets proxy target configurations
+ * @param didDocumentResolver DID document resolver
  * @param header proxy header value (format: `did#serviceId`)
  * @param nsid request NSID to check exclusions
  * @returns resolved proxy target with DID and URL, or null if NSID is excluded
  */
 export const parseProxyHeader = async (
-	ctx: AppContext,
+	targets: Map<string, ProxyTargetConfig>,
+	didDocumentResolver: DidDocumentResolver<string>,
 	header: string,
 	nsid: Nsid,
 ): Promise<ProxyTarget | null> => {
@@ -26,7 +29,7 @@ export const parseProxyHeader = async (
 		throw new InvalidRequestError({ description: `invalid atproto-proxy header` });
 	}
 
-	const targetConfig = ctx.config.proxy.targets.get(header);
+	const targetConfig = targets.get(header);
 
 	// check if NSID is excluded for this target
 	if (targetConfig?.exclude?.includes(nsid)) {
@@ -40,7 +43,7 @@ export const parseProxyHeader = async (
 	const did = audience.slice(0, hashIndex) as AtprotoDid;
 	const serviceId = audience.slice(hashIndex) as `#${string}`;
 
-	const didDoc = await ctx.didDocumentResolver.resolve(did);
+	const didDoc = await didDocumentResolver.resolve(did);
 	if (!didDoc) {
 		throw new InvalidRequestError({ description: `could not resolve proxy did` });
 	}
@@ -97,6 +100,45 @@ export const buildProxyRequestHeaders = (req: Request, serviceJwt: string): Head
 			}
 		}
 	}
+
+	// set service auth
+	headers.set('authorization', `Bearer ${serviceJwt}`);
+
+	return headers;
+};
+
+/**
+ * build headers for upstream proxy request when input body was already consumed.
+ * sets content-type to application/json since the body will be reserialized.
+ * @param req original request
+ * @param serviceJwt service auth JWT
+ * @returns headers for upstream request
+ */
+export const buildProxyRequestHeadersWithInput = (req: Request, serviceJwt: string): Headers => {
+	const headers = new Headers();
+
+	// forward standard headers
+	for (const name of REQUEST_HEADERS_TO_FORWARD) {
+		const value = req.headers.get(name);
+		if (value) {
+			headers.set(name, value);
+		}
+	}
+
+	// ensure accept-encoding has a value
+	if (!headers.has('accept-encoding')) {
+		headers.set('accept-encoding', 'identity');
+	}
+
+	// forward all x-* headers
+	for (const [name, value] of req.headers) {
+		if (name.startsWith('x-')) {
+			headers.set(name, value);
+		}
+	}
+
+	// set content-type for reserialized JSON body
+	headers.set('content-type', 'application/json');
 
 	// set service auth
 	headers.set('authorization', `Bearer ${serviceJwt}`);
