@@ -18,7 +18,6 @@ import PasskeysOutlined from '../icons/central/passkeys-outlined.tsx';
 import PasswordOutlined from '../icons/central/password-outlined.tsx';
 import PhoneOutlined from '../icons/central/phone-outlined.tsx';
 import PlusLargeOutlined from '../icons/central/plus-large-outlined.tsx';
-import TrashCanOutlined from '../icons/central/trash-can-outlined.tsx';
 import UsbOutlined from '../icons/central/usb-outlined.tsx';
 import { AccountLayout } from '../layouts/account.tsx';
 import { getAppContext } from '../middlewares/app-context.ts';
@@ -34,6 +33,7 @@ import DialogClose from '../primitives/dialog-close.tsx';
 import DialogContent from '../primitives/dialog-content.tsx';
 import DialogSurface from '../primitives/dialog-surface.tsx';
 import DialogTitle from '../primitives/dialog-title.tsx';
+import DialogTrigger from '../primitives/dialog-trigger.tsx';
 import Dialog from '../primitives/dialog.tsx';
 import Field from '../primitives/field.tsx';
 import Input from '../primitives/input.tsx';
@@ -445,16 +445,53 @@ export default {
 										<div class="min-w-0 grow">
 											<p class="text-base-300 font-medium">{password.name}</p>
 											<p class="text-base-300 text-neutral-foreground-3">
-												{privilege} · created {password.created_at.toLocaleDateString()}
+												{privilege} · Created {password.created_at.toLocaleDateString()}
 											</p>
 										</div>
 
-										<form {...deleteAppPasswordForm} class="contents">
-											<input type="hidden" name="name" value={password.name} />
-											<Button type="submit" variant="subtle">
-												<TrashCanOutlined size={16} />
-											</Button>
-										</form>
+										<Menu>
+											<MenuTrigger>
+												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
+													<DotGrid1x3HorizontalOutlined size={16} />
+												</button>
+											</MenuTrigger>
+
+											<MenuPopover>
+												<MenuList>
+													<Dialog>
+														<DialogTrigger>
+															<MenuItem>Remove</MenuItem>
+														</DialogTrigger>
+
+														<DialogSurface>
+															<DialogBody>
+																<DialogTitle>Remove app password?</DialogTitle>
+
+																<form {...deleteAppPasswordForm} class="contents">
+																	<input type="hidden" name="name" value={password.name} />
+
+																	<DialogContent>
+																		<p class="text-base-300">
+																			Any app signed in with "{password.name}" will be signed out immediately.
+																		</p>
+																	</DialogContent>
+
+																	<DialogActions>
+																		<DialogClose>
+																			<Button>Cancel</Button>
+																		</DialogClose>
+
+																		<Button type="submit" variant="primary">
+																			Remove
+																		</Button>
+																	</DialogActions>
+																</form>
+															</DialogBody>
+														</DialogSurface>
+													</Dialog>
+												</MenuList>
+											</MenuPopover>
+										</Menu>
 									</div>
 								);
 							})}
