@@ -1,10 +1,9 @@
-import { cloneElement } from 'hono/jsx';
-import type { JSX } from 'hono/jsx/jsx-runtime';
+import { cloneElement, type JSXElement } from '@oomfware/jsx';
 
 import { useDialogContext } from './utils/dialog-context.tsx';
 
 export interface DialogTriggerProps {
-	children: JSX.Element;
+	children: JSXElement;
 }
 
 const DialogTrigger = (props: DialogTriggerProps) => {

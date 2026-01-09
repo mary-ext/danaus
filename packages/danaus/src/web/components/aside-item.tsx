@@ -1,6 +1,7 @@
+import { getContext } from '@oomfware/fetch-router/middlewares/async-context';
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
-import { useRequestContext } from 'hono/jsx-renderer';
 
 const root = cva({
 	base: [
@@ -22,8 +23,8 @@ export interface AsideItemProps {
 	href: string;
 	/** whether to match the path exactly (default: false) */
 	exact?: boolean;
-	icon?: Child;
-	children?: Child;
+	icon?: JSXNode;
+	children?: JSXNode;
 }
 
 /**
@@ -35,8 +36,8 @@ export interface AsideItemProps {
 const AsideItem = (props: AsideItemProps) => {
 	const { href, exact = false, icon, children } = props;
 
-	const c = useRequestContext();
-	const currentPath = c.req.path;
+	const { url } = getContext();
+	const currentPath = url.pathname;
 	const isActive = exact ? currentPath === href : currentPath.startsWith(href);
 
 	return (

@@ -15,6 +15,7 @@
 		"^@atcute/(.*)$",
 		"^@danaus/(.*)$",
 		"^@kelinci/(.*)$",
+		"^@oomfware/(.*)$",
 		"",
 		"<THIRD_PARTY_MODULES>",
 		"",

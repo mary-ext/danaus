@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useId } from '../components/id.tsx';
 import CheckCircle2Solid from '../icons/central/check-circle-2-solid.tsx';
@@ -61,13 +62,13 @@ const validationMessageText = cva({
 export interface FieldProps {
 	required?: boolean;
 	validationStatus?: ValidationStatus;
-	label?: Child;
-	description?: Child;
-	hint?: Child;
-	validationMessageText?: Child;
-	validationMessageIcon?: Child;
+	label?: JSXNode;
+	description?: JSXNode;
+	hint?: JSXNode;
+	validationMessageText?: JSXNode;
+	validationMessageIcon?: JSXNode;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 const Field = (props: FieldProps) => {

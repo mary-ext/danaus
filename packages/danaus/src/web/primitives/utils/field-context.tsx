@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'hono/jsx';
+import { createContext, use } from '@oomfware/jsx';
 
 export type ValidationStatus = 'error' | 'warning' | 'success' | 'none';
 
@@ -17,7 +17,7 @@ export const useFieldContext: {
 	(fallback: null): FieldContextValue | null;
 	(fallback?: FieldContextValue): FieldContextValue;
 } = (fallback?: FieldContextValue | null): any => {
-	const context = useContext(FieldContext);
+	const context = use(FieldContext);
 	if (context === null) {
 		if (fallback !== undefined) {
 			return fallback;

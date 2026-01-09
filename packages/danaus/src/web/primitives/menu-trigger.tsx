@@ -1,11 +1,11 @@
+import { cloneElement, type JSXElement } from '@oomfware/jsx';
+
 import { cx } from 'cva';
-import { cloneElement } from 'hono/jsx';
-import type { JSX } from 'hono/jsx/jsx-runtime';
 
 import { useMenuContext } from './utils/menu-context.tsx';
 
 export interface MenuTriggerProps {
-	children: JSX.Element;
+	children: JSXElement;
 }
 
 /**
@@ -16,7 +16,7 @@ const MenuTrigger = (props: MenuTriggerProps) => {
 	const { children } = props;
 	const { menuId } = useMenuContext();
 
-	const childProps = (children as any).props as Record<string, unknown> | undefined;
+	const childProps = children.props as Record<string, unknown>;
 
 	return cloneElement(children, {
 		commandfor: menuId,

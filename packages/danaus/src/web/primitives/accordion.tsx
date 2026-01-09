@@ -1,8 +1,8 @@
-import type { Child } from 'hono/jsx';
+import type { JSXNode } from '@oomfware/jsx';
 
 export interface AccordionProps {
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 const root = cva({
 	base: ['pr-3', 'text-base-300'],
@@ -7,7 +8,7 @@ const root = cva({
 
 export interface MessageBarBodyProps {
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

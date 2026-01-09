@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'hono/jsx';
+import { createContext, use } from '@oomfware/jsx';
 
 export type MessageBarIntent = 'info' | 'success' | 'warning' | 'error';
 export type MessageBarLayout = 'singleline' | 'multiline';
@@ -18,7 +18,7 @@ export const useMessageBarContext: {
 	(fallback: null): MessageBarContextValue | null;
 	(fallback?: MessageBarContextValue): MessageBarContextValue;
 } = (fallback?: MessageBarContextValue | null): any => {
-	const context = useContext(MessageBarContext);
+	const context = use(MessageBarContext);
 	if (context === null) {
 		if (fallback !== undefined) {
 			return fallback;

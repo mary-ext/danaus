@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useFieldContext } from './utils/field-context.tsx';
 
@@ -15,7 +16,7 @@ export interface LabelProps {
 	for?: string;
 	required?: boolean;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 const Label = (props: LabelProps) => {

@@ -1,4 +1,4 @@
-import type { Child } from 'hono/jsx';
+import type { JSXNode } from '@oomfware/jsx';
 
 export interface AccordionItemProps {
 	/** whether the accordion item is open by default */
@@ -6,7 +6,7 @@ export interface AccordionItemProps {
 	/** group name for exclusive accordion behavior (only one open at a time) */
 	name?: string;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

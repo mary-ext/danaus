@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useId } from '../components/id.tsx';
 import CheckmarkIcon from '../icons/central/checkmark-1-solid.tsx';
@@ -75,7 +76,7 @@ export interface CheckboxProps {
 	disabled?: boolean;
 	labelPosition?: 'before' | 'after';
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 const Checkbox = (props: CheckboxProps) => {

@@ -97,6 +97,15 @@ importers:
       '@kelinci/danaus-lexicons':
         specifier: workspace:*
         version: link:../lexicons
+      '@oomfware/fetch-router':
+        specifier: ^0.2.1
+        version: 0.2.1
+      '@oomfware/forms':
+        specifier: ^0.2.0
+        version: 0.2.0(@oomfware/fetch-router@0.2.1)
+      '@oomfware/jsx':
+        specifier: ^0.1.4
+        version: 0.1.4
       cva:
         specifier: 1.0.0-beta.4
         version: 1.0.0-beta.4(typescript@5.9.3)
@@ -106,9 +115,6 @@ importers:
       get-port:
         specifier: ^7.1.0
         version: 7.1.0
-      hono:
-        specifier: ^4.11.3
-        version: 4.11.3
       jose:
         specifier: ^6.1.3
         version: 6.1.3
@@ -878,6 +884,17 @@ packages:
   '@noble/secp256k1@3.0.0':
     resolution: {integrity: sha512-NJBaR352KyIvj3t6sgT/+7xrNyF9Xk9QlLSIqUGVUYlsnDTAUqY8LOmwpcgEx4AMJXRITQ5XEVHD+mMaPfr3mg==}
 
+  '@oomfware/fetch-router@0.2.1':
+    resolution: {integrity: sha512-WV0cSeKjyTmM2pXYlRzv1md3Dym1vMR8PnJ/GfZUg8i1GS7RIDezmMkqVaWI/9IpeOHhs+QeDO41q1u+z1EzSg==}
+
+  '@oomfware/forms@0.2.0':
+    resolution: {integrity: sha512-XNvTZzAAur4ahitZ5R5VSZSzJem9Myn1T5Vhv6RLhVALn8qTsOKD8ju+hYed9P/cdMGog4DhKpiyaXbS5Elicw==}
+    peerDependencies:
+      '@oomfware/fetch-router': ^0.2.1
+
+  '@oomfware/jsx@0.1.4':
+    resolution: {integrity: sha512-3mY2Iqdjl+mE1ni3i6x9TdmgYTndfgiK4hpqBpHfvZHLtUddLBPWT8+AEidC5EZRXS1E2B1AZvtHFPESdkscfQ==}
+
   '@optique/core@0.6.11':
     resolution: {integrity: sha512-GVLFihzBA1j78NFlkU5N1Lu0jRqET0k6Z66WK8VQKG/a3cxmCInVGSKMIdQG8i6pgC8wD5OizF6Y3QMztmhAxg==}
     engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
@@ -1237,6 +1254,9 @@ packages:
 
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
+
+  '@remix-run/route-pattern@0.16.0':
+    resolution: {integrity: sha512-Co6bPtODF7cLYVBweayRXfEb31ybz45WqwT/u72eDQJZgRSVKFf0Ps9fqinSaiX0Xp7jvkRCBAbSUgLuLLjzuw==}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -2073,10 +2093,6 @@ packages:
   hmac-drbg@1.0.1:
     resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
 
-  hono@4.11.3:
-    resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
-    engines: {node: '>=16.9.0'}
-
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
@@ -2101,8 +2117,8 @@ packages:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
 
-  iconv-lite@0.7.1:
-    resolution: {integrity: sha512-2Tth85cXwGFHfvRgZWszZSvdo+0Xsqmw8k8ZwxScfcBneNUraK+dxRxRm24nszx80Y0TVio8kKLt5sLE7ZCLlw==}
+  iconv-lite@0.7.2:
+    resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
     engines: {node: '>=0.10.0'}
 
   ieee754@1.2.1:
@@ -3886,6 +3902,17 @@ snapshots:
 
   '@noble/secp256k1@3.0.0': {}
 
+  '@oomfware/fetch-router@0.2.1':
+    dependencies:
+      '@remix-run/route-pattern': 0.16.0
+
+  '@oomfware/forms@0.2.0(@oomfware/fetch-router@0.2.1)':
+    dependencies:
+      '@oomfware/fetch-router': 0.2.1
+      '@standard-schema/spec': 1.1.0
+
+  '@oomfware/jsx@0.1.4': {}
+
   '@optique/core@0.6.11': {}
 
   '@optique/run@0.6.11':
@@ -4120,6 +4147,8 @@ snapshots:
   '@protobufjs/pool@1.1.0': {}
 
   '@protobufjs/utf8@1.1.0': {}
+
+  '@remix-run/route-pattern@0.16.0': {}
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -4888,8 +4917,6 @@ snapshots:
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
 
-  hono@4.11.3: {}
-
   http-errors@2.0.1:
     dependencies:
       depd: 2.0.0
@@ -4927,7 +4954,7 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  iconv-lite@0.7.1:
+  iconv-lite@0.7.2:
     dependencies:
       safer-buffer: 2.1.2
 
@@ -5633,7 +5660,7 @@ snapshots:
       '@js-joda/core': 5.6.5
       '@types/node': 22.19.3
       bl: 6.1.6
-      iconv-lite: 0.7.1
+      iconv-lite: 0.7.2
       js-md4: 0.3.2
       native-duplexpair: 1.0.0
       sprintf-js: 1.1.3

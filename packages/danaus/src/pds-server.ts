@@ -9,7 +9,7 @@ import { localDanaus } from './api/local.danaus/index.ts';
 import type { AppConfig } from './config.ts';
 import { createAppContext, type AppContext } from './context.ts';
 import { createProxyMiddleware } from './proxy/index.ts';
-import { createWebApp } from './web/app.ts';
+import { createWebRouter } from './web/router.ts';
 import styles from './web/styles/main.out.css' with { type: 'file' };
 
 export interface PdsServerOptions {
@@ -74,7 +74,7 @@ export class PdsServer implements AsyncDisposable {
 		comAtproto(router, context);
 		localDanaus(router, context);
 
-		const web = createWebApp(context);
+		const web = createWebRouter(context);
 
 		const corsHeaders = { 'access-control-allow-origin': '*' };
 
@@ -119,7 +119,7 @@ export class PdsServer implements AsyncDisposable {
 				'/xrpc/*': wrapped.fetch,
 
 				'/assets/style.css': new Response(Bun.file(styles), { headers: { 'cache-control': 'no-cache' } }),
-				'/*': web.fetch,
+				'/*': (request) => web.fetch(request),
 			},
 		});
 		disposables.defer(() => server.stop());

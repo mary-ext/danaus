@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import CheckCircle2Solid from '../icons/central/check-circle-2-solid.tsx';
 import CircleInfoSolid from '../icons/central/circle-info-solid.tsx';
@@ -13,7 +14,7 @@ import {
 	type MessageBarLayout,
 } from './utils/message-bar-context.tsx';
 
-const getIntentIcon = (intent: MessageBarIntent): Child => {
+const getIntentIcon = (intent: MessageBarIntent): JSXNode => {
 	switch (intent) {
 		case 'info':
 			return <CircleInfoSolid size={20} />;
@@ -71,9 +72,9 @@ export interface MessageBarProps {
 	/** layout of the message bar */
 	layout: MessageBarLayout;
 	/** optional icon to display */
-	icon?: Child;
+	icon?: JSXNode;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

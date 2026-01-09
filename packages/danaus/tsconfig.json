@@ -16,7 +16,7 @@
 
 		/* JSX */
 		"jsx": "react-jsx",
-		"jsxImportSource": "hono/jsx",
+		"jsxImportSource": "@oomfware/jsx",
 
 		/* Linting */
 		"strict": true,

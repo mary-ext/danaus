@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import ChevronDownSmallOutlined from '../icons/central/chevron-down-small-outlined.tsx';
 
@@ -51,9 +52,9 @@ export interface AccordionHeaderProps {
 	size?: 'small' | 'medium' | 'large' | 'extra-large';
 	expandIconPosition?: 'start' | 'end';
 	/** slot for custom icon before the text */
-	icon?: Child;
+	icon?: JSXNode;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

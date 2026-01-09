@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 const root = cva({
 	base: ['grid gap-2', '@container/dialog-body'],
@@ -7,7 +8,7 @@ const root = cva({
 
 export interface DialogBodyProps {
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

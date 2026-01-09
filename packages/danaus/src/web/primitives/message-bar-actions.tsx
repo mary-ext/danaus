@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useMessageBarContext } from './utils/message-bar-context.tsx';
 
@@ -15,7 +16,7 @@ const root = cva({
 
 export interface MessageBarActionsProps {
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

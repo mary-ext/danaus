@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva, type VariantProps } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useDialogContext } from './utils/dialog-context';
 
@@ -43,7 +44,7 @@ const surface = cva({
 });
 
 export interface DialogSurfaceProps extends VariantProps<typeof surface> {
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

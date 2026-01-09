@@ -1,4 +1,4 @@
-import { createContext, useContext, type Child } from 'hono/jsx';
+import { createContext, use, type JSXNode } from '@oomfware/jsx';
 
 export interface IdContextValue {
 	count: number;
@@ -7,7 +7,7 @@ export interface IdContextValue {
 export const IdContext = createContext<IdContextValue | null>(null);
 
 export const useId = (): string => {
-	const context = useContext(IdContext);
+	const context = use(IdContext);
 	if (context === null) {
 		throw new Error(`expected useId() to be used under <IdProvider>`);
 	}
@@ -16,7 +16,7 @@ export const useId = (): string => {
 };
 
 export interface IdProviderProps {
-	children?: Child;
+	children?: JSXNode;
 }
 
 export const IdProvider = (props: IdProviderProps) => {

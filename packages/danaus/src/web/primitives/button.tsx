@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva, type VariantProps } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import type { InvokerCommand } from './utils/types.ts';
 
@@ -57,7 +58,7 @@ export interface ButtonProps extends VariantProps<typeof root> {
 	/** invoker command action */
 	command?: InvokerCommand;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 const Button = (props: ButtonProps) => {

@@ -1,10 +1,12 @@
-import { useId, type Child } from 'hono/jsx';
+import type { JSXNode } from '@oomfware/jsx';
+
+import { useId } from '../components/id.tsx';
 
 import { MenuContext, type MenuContextValue } from './utils/menu-context.tsx';
 
 export interface MenuProps {
 	id?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { Child } from 'hono/jsx';
+import type { JSXNode } from '@oomfware/jsx';
 
 import { useId } from '../components/id.tsx';
 
@@ -6,7 +6,7 @@ import { DialogContext, type DialogContextValue } from './utils/dialog-context.t
 
 export interface DialogProps {
 	id?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

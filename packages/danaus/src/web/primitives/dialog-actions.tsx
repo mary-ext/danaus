@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva, type VariantProps } from 'cva';
-import type { Child } from 'hono/jsx';
 
 const root = cva({
 	base: [
@@ -18,7 +19,7 @@ const root = cva({
 
 export interface DialogActionsProps extends VariantProps<typeof root> {
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

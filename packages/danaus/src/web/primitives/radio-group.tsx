@@ -1,4 +1,4 @@
-import { createContext, useContext, type Child } from 'hono/jsx';
+import { createContext, use, type JSXNode } from '@oomfware/jsx';
 
 import { useId } from '../components/id.tsx';
 
@@ -13,7 +13,7 @@ export interface RadioGroupContextValue {
 export const RadioGroupContext = createContext<RadioGroupContextValue | null>(null);
 
 export const useRadioGroupContext = () => {
-	const context = useContext(RadioGroupContext);
+	const context = use(RadioGroupContext);
 	if (context === null) {
 		throw new Error('<Radio> must be used under <RadioGroup>');
 	}
@@ -27,7 +27,7 @@ export interface RadioGroupProps {
 	disabled?: boolean;
 	autofocus?: boolean;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 const RadioGroup = (props: RadioGroupProps) => {

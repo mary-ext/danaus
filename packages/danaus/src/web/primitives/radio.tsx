@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useId } from '../components/id.tsx';
 
@@ -65,7 +66,7 @@ export interface RadioProps {
 	value: string;
 	disabled?: boolean;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 const Radio = (props: RadioProps) => {

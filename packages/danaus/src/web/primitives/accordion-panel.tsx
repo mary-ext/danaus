@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 const root = cva({
 	base: 'px-3 pb-3',
@@ -7,7 +8,7 @@ const root = cva({
 
 export interface AccordionPanelProps {
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

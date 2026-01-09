@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'hono/jsx';
+import { createContext, use } from '@oomfware/jsx';
 
 export interface DialogContextValue {
 	dialogId: string;
@@ -15,7 +15,7 @@ export const useDialogContext: {
 	(fallback: null): DialogContextValue | null;
 	(fallback?: DialogContextValue): DialogContextValue;
 } = (fallback?: DialogContextValue | null): any => {
-	const context = useContext(DialogContext);
+	const context = use(DialogContext);
 	if (context === null) {
 		if (fallback !== undefined) {
 			return fallback;

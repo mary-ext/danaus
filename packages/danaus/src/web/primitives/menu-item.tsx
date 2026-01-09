@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import type { InvokerCommand } from './utils/types.ts';
 
@@ -24,7 +25,7 @@ export interface MenuItemProps {
 	/** invoker command action */
 	command?: InvokerCommand;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'hono/jsx';
+import { createContext, use } from '@oomfware/jsx';
 
 export interface MenuContextValue {
 	menuId: string;
@@ -14,7 +14,7 @@ export const useMenuContext: {
 	(fallback: null): MenuContextValue | null;
 	(fallback?: MenuContextValue): MenuContextValue;
 } = (fallback?: MenuContextValue | null): any => {
-	const context = useContext(MenuContext);
+	const context = use(MenuContext);
 	if (context === null) {
 		if (fallback !== undefined) {
 			return fallback;

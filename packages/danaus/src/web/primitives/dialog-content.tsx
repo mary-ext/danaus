@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 const root = cva({
 	base: ['min-h-8 overflow-y-auto', 'text-base-300'],
@@ -7,7 +8,7 @@ const root = cva({
 
 export interface DialogContentProps {
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**

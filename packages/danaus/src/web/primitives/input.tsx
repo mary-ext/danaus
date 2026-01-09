@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useFieldContext } from './utils/field-context.tsx';
 
@@ -67,8 +68,8 @@ export interface InputProps {
 	autofocus?: boolean;
 	autocomplete?: string;
 	required?: boolean;
-	contentBefore?: Child;
-	contentAfter?: Child;
+	contentBefore?: JSXNode;
+	contentAfter?: JSXNode;
 	class?: string;
 }
 

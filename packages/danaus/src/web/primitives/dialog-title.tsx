@@ -1,5 +1,6 @@
+import type { JSXNode } from '@oomfware/jsx';
+
 import { cva } from 'cva';
-import type { Child } from 'hono/jsx';
 
 import { useDialogContext } from './utils/dialog-context.tsx';
 
@@ -13,9 +14,9 @@ const action = cva({
 
 export interface DialogTitleProps {
 	/** optional action element (e.g., close button) */
-	action?: Child;
+	action?: JSXNode;
 	class?: string;
-	children?: Child;
+	children?: JSXNode;
 }
 
 /**
