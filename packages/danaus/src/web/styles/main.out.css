@@ -81,6 +81,9 @@
     --color-subtle-background-hover: var(--color-subtle-background-hover);
     --color-subtle-background: var(--color-subtle-background);
     --ease-fluent: cubic-bezier(0.33, 0, 0.67, 1);
+    --ease-accelerate-min: cubic-bezier(0.8, 0, 0.78, 1);
+    --ease-decelerate-mid: cubic-bezier(0, 0, 0, 1);
+    --duration-faster: 100ms;
     --shadow-2: var(--shadow-2);
     --shadow-4: var(--shadow-4);
     --shadow-8: var(--shadow-8);
@@ -494,6 +497,50 @@
   .basis-0 {
     flex-basis: calc(var(--spacing) * 0);
   }
+  .popover-animate {
+    --_slide-x: 0;
+    --_slide-y: 8px;
+    transition-property: opacity, translate, overlay, display;
+    transition-duration: var(--duration-faster);
+    transition-timing-function: var(--ease-decelerate-mid);
+    transition-behavior: allow-discrete;
+    &:popover-open {
+      opacity: 1;
+      translate: 0 0;
+    }
+    &:not(:popover-open) {
+      opacity: 0;
+      translate: var(--_slide-x) var(--_slide-y);
+      transition-timing-function: var(--ease-accelerate-min);
+    }
+    @starting-style {
+      &:popover-open {
+        opacity: 0;
+        translate: var(--_slide-x) var(--_slide-y);
+      }
+    }
+  }
+  .dialog-animate {
+    transition-property: opacity, scale, overlay, display;
+    transition-duration: var(--duration-faster);
+    transition-timing-function: var(--ease-decelerate-mid);
+    transition-behavior: allow-discrete;
+    &[open] {
+      opacity: 1;
+      scale: 1;
+    }
+    &:not([open]) {
+      opacity: 0;
+      scale: 0.95;
+      transition-timing-function: var(--ease-accelerate-min);
+    }
+    @starting-style {
+      &[open] {
+        opacity: 0;
+        scale: 0.95;
+      }
+    }
+  }
   .cursor-pointer {
     cursor: pointer;
   }
@@ -866,6 +913,24 @@
   .no-underline {
     text-decoration-line: none;
   }
+  .dialog-backdrop-animate {
+    &::backdrop {
+      transition-property: opacity, overlay, display;
+      transition-duration: var(--duration-faster);
+      transition-timing-function: var(--ease-decelerate-mid);
+      transition-behavior: allow-discrete;
+      opacity: 1;
+    }
+    &:not([open])::backdrop {
+      opacity: 0;
+      transition-timing-function: var(--ease-accelerate-min);
+    }
+    @starting-style {
+      &[open]::backdrop {
+        opacity: 0;
+      }
+    }
+  }
   .opacity-0 {
     opacity: 0%;
   }
@@ -907,6 +972,10 @@
   .outline-none {
     --tw-outline-style: none;
     outline-style: none;
+  }
+  .popover-slide-down {
+    --_slide-x: 0;
+    --_slide-y: -8px;
   }
   .select-none {
     -webkit-user-select: none;

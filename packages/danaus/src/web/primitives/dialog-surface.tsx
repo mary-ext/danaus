@@ -16,6 +16,8 @@ const root = cva({
 		'sm:items-center',
 		// backdrop
 		'backdrop:bg-background-overlay',
+		// entry/exit animations
+		'dialog-animate dialog-backdrop-animate',
 	],
 });
 

@@ -89,6 +89,16 @@
 
 	--ease-*: initial;
 	--ease-fluent: cubic-bezier(0.33, 0, 0.67, 1);
+	--ease-accelerate-min: cubic-bezier(0.8, 0, 0.78, 1);
+	--ease-decelerate-mid: cubic-bezier(0, 0, 0, 1);
+
+	--duration-*: initial;
+	--duration-faster: 100ms;
+	--duration-fast: 150ms;
+	--duration-normal: 200ms;
+	--duration-gentle: 250ms;
+	--duration-slow: 300ms;
+	--duration-slower: 400ms;
 
 	--animate-*: initial;
 	--animate-spin-linear: spin-linear 1.5s linear infinite;
@@ -419,6 +429,124 @@
 }
 @utility anchored-visible-no-overflow {
 	position-visibility: no-overflow;
+}
+
+/* #endregion */
+
+/* #region dialog animations */
+
+/*
+ * dialog entry/exit animations using @starting-style
+ * inspired by FluentUI's Dialog motion: scale + fade with decelerate/accelerate easing
+ */
+
+@utility dialog-animate {
+	/* transition properties for both dialog surface and backdrop */
+	transition-property: opacity, scale, overlay, display;
+	transition-duration: var(--duration-faster);
+	transition-timing-function: var(--ease-decelerate-mid);
+	transition-behavior: allow-discrete;
+
+	/* final open state */
+	&[open] {
+		opacity: 1;
+		scale: 1;
+	}
+
+	/* exit state (dialog closing) */
+	&:not([open]) {
+		opacity: 0;
+		scale: 0.95;
+		transition-timing-function: var(--ease-accelerate-min);
+	}
+
+	/* entry starting state */
+	@starting-style {
+		&[open] {
+			opacity: 0;
+			scale: 0.95;
+		}
+	}
+}
+
+/* backdrop animation (fade only, no scale) */
+@utility dialog-backdrop-animate {
+	&::backdrop {
+		transition-property: opacity, overlay, display;
+		transition-duration: var(--duration-faster);
+		transition-timing-function: var(--ease-decelerate-mid);
+		transition-behavior: allow-discrete;
+		opacity: 1;
+	}
+
+	&:not([open])::backdrop {
+		opacity: 0;
+		transition-timing-function: var(--ease-accelerate-min);
+	}
+
+	@starting-style {
+		&[open]::backdrop {
+			opacity: 0;
+		}
+	}
+}
+
+/* #endregion */
+
+/* #region popover animations */
+
+/*
+ * popover entry/exit animations using @starting-style
+ * inspired by FluentUI's Menu motion: slide + fade based on placement
+ */
+
+@utility popover-animate {
+	--_slide-x: 0;
+	--_slide-y: 8px;
+
+	transition-property: opacity, translate, overlay, display;
+	transition-duration: var(--duration-faster);
+	transition-timing-function: var(--ease-decelerate-mid);
+	transition-behavior: allow-discrete;
+
+	/* final open state */
+	&:popover-open {
+		opacity: 1;
+		translate: 0 0;
+	}
+
+	/* exit state */
+	&:not(:popover-open) {
+		opacity: 0;
+		translate: var(--_slide-x) var(--_slide-y);
+		transition-timing-function: var(--ease-accelerate-min);
+	}
+
+	/* entry starting state */
+	@starting-style {
+		&:popover-open {
+			opacity: 0;
+			translate: var(--_slide-x) var(--_slide-y);
+		}
+	}
+}
+
+/* slide direction variants based on anchor position */
+@utility popover-slide-down {
+	--_slide-x: 0;
+	--_slide-y: -8px;
+}
+@utility popover-slide-up {
+	--_slide-x: 0;
+	--_slide-y: 8px;
+}
+@utility popover-slide-left {
+	--_slide-x: 8px;
+	--_slide-y: 0;
+}
+@utility popover-slide-right {
+	--_slide-x: -8px;
+	--_slide-y: 0;
 }
 
 /* #endregion */
