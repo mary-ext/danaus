@@ -31,7 +31,6 @@ const surface = cva({
 		'box-border',
 		'w-full',
 		'max-h-[calc(100dvh-48px)]',
-		'p-6',
 		// rounded top on mobile, all corners on larger screens
 		'rounded-t-xl sm:rounded-xl',
 		'bg-neutral-background-1 text-neutral-foreground-1',

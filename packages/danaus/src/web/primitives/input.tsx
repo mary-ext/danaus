@@ -67,6 +67,10 @@ export interface InputProps {
 	disabled?: boolean;
 	autofocus?: boolean;
 	autocomplete?: string;
+	inputmode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+	pattern?: string;
+	minlength?: number;
+	maxlength?: number;
 	required?: boolean;
 	contentBefore?: JSXNode;
 	contentAfter?: JSXNode;
@@ -82,6 +86,10 @@ const Input = (props: InputProps) => {
 		disabled = false,
 		autofocus = false,
 		autocomplete,
+		inputmode,
+		pattern,
+		minlength,
+		maxlength,
 		required,
 		contentBefore,
 		contentAfter,
@@ -111,6 +119,10 @@ const Input = (props: InputProps) => {
 					placeholder={placeholder}
 					autofocus={autofocus}
 					autocomplete={autocomplete}
+					inputmode={inputmode}
+					pattern={pattern}
+					minlength={minlength}
+					maxlength={maxlength}
 					required={required ?? fieldContext?.required}
 					aria-describedby={ariaDescribedBy}
 					aria-invalid={fieldContext?.validationStatus === 'error' ? true : undefined}

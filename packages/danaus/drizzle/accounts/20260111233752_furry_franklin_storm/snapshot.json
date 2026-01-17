@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "cfbe3ca9-50aa-4487-9cd4-b30d846fc0cd",
+  "id": "5f7c0714-f369-47f1-88ab-4294528beada",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -28,6 +28,18 @@
     },
     {
       "name": "legacy_session",
+      "entityType": "tables"
+    },
+    {
+      "name": "mfa_challenge",
+      "entityType": "tables"
+    },
+    {
+      "name": "recovery_code",
+      "entityType": "tables"
+    },
+    {
+      "name": "totp_credential",
       "entityType": "tables"
     },
     {
@@ -380,6 +392,156 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "token",
+      "entityType": "columns",
+      "table": "mfa_challenge"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "mfa_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "mfa_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "table": "mfa_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "recovery_code"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "recovery_code"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "code",
+      "entityType": "columns",
+      "table": "recovery_code"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "used_at",
+      "entityType": "columns",
+      "table": "recovery_code"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "recovery_code"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "totp_credential"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "totp_credential"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "totp_credential"
+    },
+    {
+      "type": "blob",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "secret",
+      "entityType": "columns",
+      "table": "totp_credential"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "totp_credential"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "last_used_counter",
+      "entityType": "columns",
+      "table": "totp_credential"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "web_session"
@@ -421,6 +583,16 @@
       "default": null,
       "generated": null,
       "name": "expires_at",
+      "entityType": "columns",
+      "table": "web_session"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sudo_at",
       "entityType": "columns",
       "table": "web_session"
     },
@@ -540,6 +712,51 @@
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
+      "name": "fk_mfa_challenge_did_account_did_fk",
+      "entityType": "fks",
+      "table": "mfa_challenge"
+    },
+    {
+      "columns": [
+        "did"
+      ],
+      "tableTo": "account",
+      "columnsTo": [
+        "did"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_recovery_code_did_account_did_fk",
+      "entityType": "fks",
+      "table": "recovery_code"
+    },
+    {
+      "columns": [
+        "did"
+      ],
+      "tableTo": "account",
+      "columnsTo": [
+        "did"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_totp_credential_did_account_did_fk",
+      "entityType": "fks",
+      "table": "totp_credential"
+    },
+    {
+      "columns": [
+        "did"
+      ],
+      "tableTo": "account",
+      "columnsTo": [
+        "did"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
       "name": "fk_web_session_did_account_did_fk",
       "entityType": "fks",
       "table": "web_session"
@@ -598,6 +815,33 @@
       "nameExplicit": false,
       "name": "legacy_session_pk",
       "table": "legacy_session",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "token"
+      ],
+      "nameExplicit": false,
+      "name": "mfa_challenge_pk",
+      "table": "mfa_challenge",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "recovery_code_pk",
+      "table": "recovery_code",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "totp_credential_pk",
+      "table": "totp_credential",
       "entityType": "pks"
     },
     {
@@ -672,6 +916,48 @@
     {
       "columns": [
         {
+          "value": "expires_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "mfa_challenge_expires_idx",
+      "entityType": "indexes",
+      "table": "mfa_challenge"
+    },
+    {
+      "columns": [
+        {
+          "value": "did",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "recovery_code_did_idx",
+      "entityType": "indexes",
+      "table": "recovery_code"
+    },
+    {
+      "columns": [
+        {
+          "value": "did",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "totp_credential_did_idx",
+      "entityType": "indexes",
+      "table": "totp_credential"
+    },
+    {
+      "columns": [
+        {
           "value": "did",
           "isExpression": false
         }
@@ -692,6 +978,16 @@
       "name": "app_password_did_name_unique",
       "entityType": "uniques",
       "table": "app_password"
+    },
+    {
+      "columns": [
+        "did",
+        "name"
+      ],
+      "nameExplicit": false,
+      "name": "totp_credential_did_name_unique",
+      "entityType": "uniques",
+      "table": "totp_credential"
     }
   ],
   "renames": []

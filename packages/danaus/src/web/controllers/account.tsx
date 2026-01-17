@@ -14,11 +14,7 @@ import {
 import AtOutlined from '../icons/central/at-outlined.tsx';
 import DotGrid1x3HorizontalOutlined from '../icons/central/dot-grid-1x3-horizontal-outlined.tsx';
 import Key2Outlined from '../icons/central/key-2-outlined.tsx';
-import PasskeysOutlined from '../icons/central/passkeys-outlined.tsx';
-import PasswordOutlined from '../icons/central/password-outlined.tsx';
-import PhoneOutlined from '../icons/central/phone-outlined.tsx';
 import PlusLargeOutlined from '../icons/central/plus-large-outlined.tsx';
-import UsbOutlined from '../icons/central/usb-outlined.tsx';
 import { AccountLayout } from '../layouts/account.tsx';
 import { getAppContext } from '../middlewares/app-context.ts';
 import { getSession, requireSession } from '../middlewares/session.ts';
@@ -37,7 +33,6 @@ import DialogTrigger from '../primitives/dialog-trigger.tsx';
 import Dialog from '../primitives/dialog.tsx';
 import Field from '../primitives/field.tsx';
 import Input from '../primitives/input.tsx';
-import MenuDivider from '../primitives/menu-divider.tsx';
 import MenuItem from '../primitives/menu-item.tsx';
 import MenuList from '../primitives/menu-list.tsx';
 import MenuPopover from '../primitives/menu-popover.tsx';
@@ -48,6 +43,8 @@ import MessageBarTitle from '../primitives/message-bar-title.tsx';
 import MessageBar from '../primitives/message-bar.tsx';
 import Select from '../primitives/select.tsx';
 import type { routes } from '../routes.ts';
+
+import security from './account/security.tsx';
 
 export default {
 	middleware: [
@@ -543,169 +540,6 @@ export default {
 			);
 		},
 
-		security() {
-			const ctx = getAppContext();
-			const session = getSession();
-			const account = ctx.accountManager.getAccount(session.did);
-
-			return render(
-				<AccountLayout>
-					<title>Security - Danaus</title>
-
-					<div class="flex flex-col gap-4">
-						<div class="flex h-8 shrink-0 items-center">
-							<h3 class="text-base-400 font-medium">Security</h3>
-						</div>
-
-						<div class="flex flex-col gap-8">
-							<div class="flex flex-col gap-2">
-								<h4 class="text-base-300 font-medium text-neutral-foreground-2">Account information</h4>
-
-								<div class="flex flex-col divide-y divide-neutral-stroke-2 rounded-md bg-neutral-background-1 shadow-4">
-									<div class="flex items-center gap-4 px-4 py-3">
-										<div class="min-w-0 grow">
-											<p class="text-base-300 font-medium wrap-break-word">{account?.email}</p>
-											<p class="text-base-300 text-neutral-foreground-3">
-												{account?.email_confirmed_at ? 'Verified' : 'Not verified'}
-											</p>
-										</div>
-
-										{!account?.email_confirmed_at && <Button>Verify</Button>}
-
-										<Menu>
-											<MenuTrigger>
-												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
-													<DotGrid1x3HorizontalOutlined size={16} />
-												</button>
-											</MenuTrigger>
-
-											<MenuPopover>
-												<MenuList>
-													<MenuItem>Change email</MenuItem>
-												</MenuList>
-											</MenuPopover>
-										</Menu>
-									</div>
-								</div>
-							</div>
-
-							<div class="flex flex-col gap-2">
-								<h4 class="text-base-300 font-medium text-neutral-foreground-2">Ways to prove who you are</h4>
-
-								<div class="flex flex-col divide-y divide-neutral-stroke-2 rounded-md bg-neutral-background-1 shadow-4">
-									<div class="flex items-center gap-4 px-4 py-3">
-										<PasswordOutlined size={24} class="shrink-0" />
-
-										<div class="min-w-0 grow">
-											<p class="text-base-300 font-medium wrap-break-word">Password</p>
-											<p class="text-base-300 text-neutral-foreground-3">Last changed yesterday</p>
-										</div>
-
-										<Menu>
-											<MenuTrigger>
-												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
-													<DotGrid1x3HorizontalOutlined size={16} />
-												</button>
-											</MenuTrigger>
-
-											<MenuPopover>
-												<MenuList>
-													<MenuItem>Change password</MenuItem>
-												</MenuList>
-											</MenuPopover>
-										</Menu>
-									</div>
-
-									<div class="flex items-center gap-4 px-4 py-3">
-										<PhoneOutlined size={24} class="shrink-0" />
-
-										<div class="min-w-0 grow">
-											<p class="text-base-300 font-medium wrap-break-word">Bitwarden</p>
-											<p class="text-base-300 text-neutral-foreground-3">Authenticator · Added yesterday</p>
-										</div>
-
-										<Menu>
-											<MenuTrigger>
-												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
-													<DotGrid1x3HorizontalOutlined size={16} />
-												</button>
-											</MenuTrigger>
-
-											<MenuPopover>
-												<MenuList>
-													<MenuItem>Rename</MenuItem>
-													<MenuDivider />
-													<MenuItem>Remove</MenuItem>
-												</MenuList>
-											</MenuPopover>
-										</Menu>
-									</div>
-
-									<div class="flex items-center gap-4 px-4 py-3">
-										<UsbOutlined size={24} class="shrink-0" />
-
-										<div class="min-w-0 grow">
-											<p class="text-base-300 font-medium wrap-break-word">YubiKey 5</p>
-											<p class="text-base-300 text-neutral-foreground-3">Security key · Added 2 weeks ago</p>
-										</div>
-
-										<Menu>
-											<MenuTrigger>
-												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
-													<DotGrid1x3HorizontalOutlined size={16} />
-												</button>
-											</MenuTrigger>
-
-											<MenuPopover>
-												<MenuList>
-													<MenuItem>Rename</MenuItem>
-													<MenuDivider />
-													<MenuItem>Remove</MenuItem>
-												</MenuList>
-											</MenuPopover>
-										</Menu>
-									</div>
-
-									<div class="flex items-center gap-4 px-4 py-3">
-										<PasskeysOutlined size={24} class="shrink-0" />
-
-										<div class="min-w-0 grow">
-											<p class="text-base-300 font-medium wrap-break-word">iCloud Keychain</p>
-											<p class="text-base-300 text-neutral-foreground-3">Passkey · Added last month</p>
-										</div>
-
-										<Menu>
-											<MenuTrigger>
-												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
-													<DotGrid1x3HorizontalOutlined size={16} />
-												</button>
-											</MenuTrigger>
-
-											<MenuPopover>
-												<MenuList>
-													<MenuItem>Rename</MenuItem>
-													<MenuDivider />
-													<MenuItem>Remove</MenuItem>
-												</MenuList>
-											</MenuPopover>
-										</Menu>
-									</div>
-
-									<button class="flex items-center gap-4 bg-subtle-background px-4 py-3 text-left outline-2 -outline-offset-2 outline-transparent transition select-none first:rounded-t-md last:rounded-b-md hover:bg-subtle-background-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active">
-										<div class="grid h-6 w-6 shrink-0 place-items-center">
-											<PlusLargeOutlined size={16} />
-										</div>
-
-										<div class="min-w-0 grow">
-											<p class="text-base-300">Add another way to sign in</p>
-										</div>
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</AccountLayout>,
-			);
-		},
+		security,
 	},
 } satisfies Controller<typeof routes.account>;

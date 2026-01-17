@@ -42,6 +42,9 @@ const run = async () => {
 	const shutdown = async () => {
 		console.log('\nshutting down...');
 		await pds.close();
+
+		process.off('SIGINT', shutdown);
+		process.off('SIGTERM', shutdown);
 		process.exit(0);
 	};
 

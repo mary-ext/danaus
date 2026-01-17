@@ -19,6 +19,7 @@ import { getAccountDb, t, type AccountDb } from './db';
 import { AppPasswordPrivilege, EmailTokenPurpose } from './db/schema';
 import { isServiceDomain, isValidTld } from './handle';
 import { hashPassword, verifyPassword } from './passwords';
+import { generateBackupCodes, MAX_TOTP_CREDENTIALS, verifyTotpCode } from './totp';
 import { AccountStatus, formatAccountStatus } from './types';
 
 const WEB_SESSION_TTL_MS = 7 * DAY;
@@ -26,6 +27,8 @@ const WEB_SESSION_LONG_TTL_MS = 365 * DAY;
 const LEGACY_ACCESS_TTL_MS = 2 * HOUR;
 const LEGACY_REFRESH_TTL_MS = 90 * DAY;
 const LEGACY_REFRESH_GRACE_TTL_MS = 2 * HOUR;
+const MFA_CHALLENGE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const SUDO_MODE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 export const MAX_APP_PASSWORDS = 25;
 
 export type Account = typeof t.account.$inferSelect;
@@ -34,6 +37,9 @@ export type LegacySession = typeof t.legacySession.$inferSelect;
 export type WebSession = typeof t.webSession.$inferSelect;
 export type InviteCode = typeof t.inviteCode.$inferSelect;
 export type InviteCodeUse = typeof t.inviteCodeUse.$inferSelect;
+export type TotpCredential = typeof t.totpCredential.$inferSelect;
+export type BackupCode = typeof t.recoveryCode.$inferSelect;
+export type MfaChallenge = typeof t.mfaChallenge.$inferSelect;
 
 export interface InviteCodeWithUses extends InviteCode {
 	uses: InviteCodeUse[];
@@ -1040,6 +1046,350 @@ export class AccountManager implements Disposable {
 
 	// #endregion
 
+	// #region TOTP two-factor authentication
+
+	/**
+	 * create a TOTP credential for an account.
+	 * @param options TOTP credential options
+	 * @returns created credential
+	 */
+	createTotpCredential(options: CreateTotpCredentialOptions): TotpCredential {
+		const count = this.countTotpCredentials(options.did);
+		if (count >= MAX_TOTP_CREDENTIALS) {
+			throw new InvalidRequestError({
+				error: 'TooManyTotpCredentials',
+				description: `cannot have more than ${MAX_TOTP_CREDENTIALS} authenticators`,
+			});
+		}
+
+		const name = options.name?.trim() || this.generateTotpName(options.did);
+
+		// check for duplicate name
+		const existing = this.db
+			.select()
+			.from(t.totpCredential)
+			.where(and(eq(t.totpCredential.did, options.did), eq(t.totpCredential.name, name)))
+			.get();
+
+		if (existing) {
+			throw new InvalidRequestError({
+				error: 'DuplicateTotpName',
+				description: `an authenticator with this name already exists`,
+			});
+		}
+
+		const inserted = this.db
+			.insert(t.totpCredential)
+			.values({
+				did: options.did,
+				name: name,
+				secret: Buffer.from(options.secret),
+				created_at: new Date(),
+				last_used_counter: options.lastUsedCounter,
+			})
+			.returning()
+			.get();
+
+		if (!inserted) {
+			throw new Error(`failed to create TOTP credential`);
+		}
+
+		return inserted;
+	}
+
+	/**
+	 * list TOTP credentials for an account.
+	 * @param did account did
+	 * @returns TOTP credentials
+	 */
+	listTotpCredentials(did: Did): TotpCredential[] {
+		return this.db.select().from(t.totpCredential).where(eq(t.totpCredential.did, did)).all();
+	}
+
+	/**
+	 * get a TOTP credential by id.
+	 * @param did account did
+	 * @param id credential id
+	 * @returns TOTP credential or null
+	 */
+	getTotpCredential(did: Did, id: number): TotpCredential | null {
+		const credential = this.db
+			.select()
+			.from(t.totpCredential)
+			.where(and(eq(t.totpCredential.did, did), eq(t.totpCredential.id, id)))
+			.get();
+
+		return credential ?? null;
+	}
+
+	/**
+	 * delete a TOTP credential.
+	 * @param did account did
+	 * @param id credential id
+	 */
+	deleteTotpCredential(did: Did, id: number): void {
+		this.db
+			.delete(t.totpCredential)
+			.where(and(eq(t.totpCredential.did, did), eq(t.totpCredential.id, id)))
+			.run();
+	}
+
+	/**
+	 * check if MFA is enabled for an account.
+	 * @param did account did
+	 * @returns true if at least one MFA credential exists
+	 */
+	isMfaEnabled(did: Did): boolean {
+		const count =
+			this.db
+				.select({ count: sql<number>`count(*)` })
+				.from(t.totpCredential)
+				.where(eq(t.totpCredential.did, did))
+				.get()?.count ?? 0;
+
+		return count > 0;
+	}
+
+	/**
+	 * count TOTP credentials for an account.
+	 * @param did account did
+	 * @returns number of credentials
+	 */
+	countTotpCredentials(did: Did): number {
+		return (
+			this.db
+				.select({ count: sql<number>`count(*)` })
+				.from(t.totpCredential)
+				.where(eq(t.totpCredential.did, did))
+				.get()?.count ?? 0
+		);
+	}
+
+	/**
+	 * verify a TOTP code against any of the account's credentials.
+	 * updates last_used_counter on successful verification to prevent replay attacks.
+	 * @param did account did
+	 * @param code the code to verify
+	 * @returns true if the code is valid for any credential
+	 */
+	async verifyAccountTotpCode(did: Did, code: string): Promise<boolean> {
+		const credentials = this.listTotpCredentials(did);
+
+		for (const credential of credentials) {
+			const counter = await verifyTotpCode(credential.secret, code, credential.last_used_counter);
+
+			if (counter !== null) {
+				// update last_used_counter to prevent replay attacks
+				this.db
+					.update(t.totpCredential)
+					.set({ last_used_counter: counter })
+					.where(eq(t.totpCredential.id, credential.id))
+					.run();
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * generate a unique name for a new TOTP credential.
+	 * @param did account did
+	 * @returns generated name like "Authenticator" or "Authenticator 2"
+	 */
+	generateTotpName(did: Did): string {
+		const existing = this.listTotpCredentials(did);
+		const baseName = 'Authenticator';
+
+		if (existing.length === 0) {
+			return baseName;
+		}
+
+		// find the next available number
+		const existingNames = new Set(existing.map((c) => c.name));
+		let num = 2;
+		while (existingNames.has(`${baseName} ${num}`)) {
+			num++;
+		}
+
+		return `${baseName} ${num}`;
+	}
+
+	// #endregion
+
+	// #region backup codes
+
+	/**
+	 * generate and store recovery codes for an account.
+	 * deletes any existing codes first.
+	 * @param did account did
+	 */
+	generateRecoveryCodes(did: Did): void {
+		const codes = generateBackupCodes();
+		const now = new Date();
+
+		this.db.transaction((tx) => {
+			tx.delete(t.recoveryCode).where(eq(t.recoveryCode.did, did)).run();
+
+			for (const code of codes) {
+				tx.insert(t.recoveryCode)
+					.values({
+						did: did,
+						code: code,
+						created_at: now,
+					})
+					.run();
+			}
+		});
+	}
+
+	/**
+	 * get all unused recovery codes for an account.
+	 * @param did account did
+	 * @returns array of unused codes
+	 */
+	getRecoveryCodes(did: Did): string[] {
+		return this.db
+			.select({ code: t.recoveryCode.code })
+			.from(t.recoveryCode)
+			.where(and(eq(t.recoveryCode.did, did), isNull(t.recoveryCode.used_at)))
+			.all()
+			.map((row) => row.code);
+	}
+
+	/**
+	 * get count of unused recovery codes.
+	 * @param did account did
+	 * @returns number of unused codes
+	 */
+	getRecoveryCodeCount(did: Did): number {
+		return (
+			this.db
+				.select({ count: sql<number>`count(*)` })
+				.from(t.recoveryCode)
+				.where(and(eq(t.recoveryCode.did, did), isNull(t.recoveryCode.used_at)))
+				.get()?.count ?? 0
+		);
+	}
+
+	/**
+	 * verify and consume a recovery code.
+	 * @param did account did
+	 * @param code the code to verify
+	 * @returns true if the code was valid and consumed
+	 */
+	consumeRecoveryCode(did: Did, code: string): boolean {
+		const result = this.db
+			.update(t.recoveryCode)
+			.set({ used_at: new Date() })
+			.where(and(eq(t.recoveryCode.did, did), eq(t.recoveryCode.code, code), isNull(t.recoveryCode.used_at)))
+			.returning()
+			.get();
+
+		return result != null;
+	}
+
+	/**
+	 * delete all recovery codes for an account.
+	 * @param did account did
+	 */
+	deleteRecoveryCodes(did: Did): void {
+		this.db.delete(t.recoveryCode).where(eq(t.recoveryCode.did, did)).run();
+	}
+
+	// #endregion
+
+	// #region MFA challenges
+
+	/**
+	 * create an MFA challenge for login.
+	 * @param did account did
+	 * @returns token for the MFA page
+	 */
+	createMfaChallenge(did: Did): string {
+		const token = nanoid(32);
+		const now = new Date();
+		const expiresAt = new Date(now.getTime() + MFA_CHALLENGE_TTL_MS);
+
+		this.db
+			.insert(t.mfaChallenge)
+			.values({
+				token: token,
+				did: did,
+				created_at: now,
+				expires_at: expiresAt,
+			})
+			.run();
+
+		return token;
+	}
+
+	/**
+	 * get an MFA challenge by token.
+	 * @param token the token
+	 * @returns MFA challenge or null if expired/not found
+	 */
+	getMfaChallenge(token: string): MfaChallenge | null {
+		const challenge = this.db.select().from(t.mfaChallenge).where(eq(t.mfaChallenge.token, token)).get();
+
+		if (!challenge) {
+			return null;
+		}
+
+		const now = new Date();
+		if (challenge.expires_at <= now) {
+			this.db.delete(t.mfaChallenge).where(eq(t.mfaChallenge.token, token)).run();
+			return null;
+		}
+
+		return challenge;
+	}
+
+	/**
+	 * delete an MFA challenge.
+	 * @param token the token
+	 */
+	deleteMfaChallenge(token: string): void {
+		this.db.delete(t.mfaChallenge).where(eq(t.mfaChallenge.token, token)).run();
+	}
+
+	/**
+	 * clean up expired MFA challenges.
+	 */
+	cleanupExpiredMfaChallenges(): void {
+		const now = new Date();
+		this.db.delete(t.mfaChallenge).where(lte(t.mfaChallenge.expires_at, now)).run();
+	}
+
+	// #endregion
+
+	// #region sudo mode
+
+	/**
+	 * elevate a session to sudo mode.
+	 * @param sessionId the session id
+	 */
+	elevateSession(sessionId: string): void {
+		this.db.update(t.webSession).set({ sudo_at: new Date() }).where(eq(t.webSession.id, sessionId)).run();
+	}
+
+	/**
+	 * check if a session is in sudo mode.
+	 * @param session the session
+	 * @returns true if session is elevated
+	 */
+	isSessionElevated(session: WebSession): boolean {
+		if (session.sudo_at === null) {
+			return false;
+		}
+		const now = Date.now();
+		const elevatedAt = session.sudo_at.getTime();
+		return now - elevatedAt < SUDO_MODE_TTL_MS;
+	}
+
+	// #endregion
+
 	async importAccount(_options: ImportAccountOptions) {}
 
 	private resolveIdentifier(identifier: string, options: AccountAvailabilityOptions): Account | null {
@@ -1155,4 +1505,11 @@ interface ListInviteCodesOptions {
 	cursor?: string;
 	includeDisabled?: boolean;
 	includeUsed?: boolean;
+}
+
+interface CreateTotpCredentialOptions {
+	did: Did;
+	name?: string;
+	secret: Uint8Array;
+	lastUsedCounter: number;
 }

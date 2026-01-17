@@ -20,12 +20,14 @@
 		"<THIRD_PARTY_MODULES>",
 		"",
 		"^#app/(.*)$",
-		"^#frontend/(.*)$",
+		"",
+		"^#web/(.*)$",
 		"",
 		"^\\.\\.",
 		"",
 		"^\\."
 	],
+	"importOrderParserPlugins": ["typescript", "jsx", "decorators"],
 	"importOrderTypeScriptVersion": "5.0.0",
 
 	"tailwindStylesheet": "./packages/danaus/src/web/styles/main.css",

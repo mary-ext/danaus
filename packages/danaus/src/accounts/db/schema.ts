@@ -2,6 +2,7 @@ import type { Did, Handle } from '@atcute/lexicons/syntax';
 
 import { sql } from 'drizzle-orm';
 import {
+	blob,
 	foreignKey,
 	index,
 	integer,
@@ -109,6 +110,9 @@ export const webSession = sqliteTable(
 
 		created_at: integer({ mode: 'timestamp' }).notNull(),
 		expires_at: integer({ mode: 'timestamp' }).notNull(),
+
+		/** when sudo mode was last activated (null = not in sudo mode) */
+		sudo_at: integer({ mode: 'timestamp' }),
 	},
 	(t) => [index('web_session_did_idx').on(t.did)],
 );
@@ -162,3 +166,67 @@ export const inviteCodeUse = sqliteTable(
 	},
 	(t) => [primaryKey({ columns: [t.code, t.used_by] })],
 );
+
+// #region TOTP two-factor authentication
+
+/** TOTP credentials for two-factor authentication */
+export const totpCredential = sqliteTable(
+	'totp_credential',
+	{
+		id: integer().primaryKey({ autoIncrement: true }),
+
+		did: text()
+			.$type<Did>()
+			.notNull()
+			.references(() => account.did, { onDelete: 'cascade' }),
+
+		/** user-provided or auto-generated name */
+		name: text().notNull(),
+		/** 20-byte TOTP secret */
+		secret: blob({ mode: 'buffer' }).notNull(),
+
+		created_at: integer({ mode: 'timestamp' }).notNull(),
+		/** last TOTP counter value used (prevents replay attacks) */
+		last_used_counter: integer().notNull(),
+	},
+	(t) => [index('totp_credential_did_idx').on(t.did), unique().on(t.did, t.name)],
+);
+
+/** backup codes for account recovery */
+export const recoveryCode = sqliteTable(
+	'recovery_code',
+	{
+		id: integer().primaryKey({ autoIncrement: true }),
+
+		did: text()
+			.$type<Did>()
+			.notNull()
+			.references(() => account.did, { onDelete: 'cascade' }),
+
+		/** plaintext recovery code */
+		code: text().notNull(),
+
+		used_at: integer({ mode: 'timestamp' }),
+		created_at: integer({ mode: 'timestamp' }).notNull(),
+	},
+	(t) => [index('recovery_code_did_idx').on(t.did)],
+);
+
+/** MFA challenges during login */
+export const mfaChallenge = sqliteTable(
+	'mfa_challenge',
+	{
+		token: text().primaryKey(),
+
+		did: text()
+			.$type<Did>()
+			.notNull()
+			.references(() => account.did, { onDelete: 'cascade' }),
+
+		created_at: integer({ mode: 'timestamp' }).notNull(),
+		expires_at: integer({ mode: 'timestamp' }).notNull(),
+	},
+	(t) => [index('mfa_challenge_expires_idx').on(t.expires_at)],
+);
+
+// #endregion

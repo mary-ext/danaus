@@ -4,7 +4,8 @@
 	"type": "module",
 	"private": true,
 	"imports": {
-		"#app/*": "./src/*"
+		"#app/*": "./src/*",
+		"#web/*": "./src/web/*"
 	},
 	"exports": {
 		".": "./src/index.ts"
@@ -43,7 +44,7 @@
 		"@atcute/xrpc-server-bun": "^0.1.1",
 		"@kelinci/danaus-lexicons": "workspace:*",
 		"@oomfware/fetch-router": "^0.2.1",
-		"@oomfware/forms": "^0.2.0",
+		"@oomfware/forms": "^0.2.2",
 		"@oomfware/jsx": "^0.1.4",
 		"cva": "1.0.0-beta.4",
 		"drizzle-orm": "1.0.0-beta.6-4414a19",
@@ -51,6 +52,7 @@
 		"jose": "^6.1.3",
 		"nanoid": "^5.1.6",
 		"p-queue": "^9.1.0",
+		"qrcode": "^1.5.4",
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
@@ -58,6 +60,7 @@
 		"@standard-schema/spec": "^1.1.0",
 		"@tailwindcss/cli": "^4.1.18",
 		"@types/bun": "^1.3.5",
+		"@types/qrcode": "^1.5.6",
 		"concurrently": "^9.2.1",
 		"drizzle-kit": "1.0.0-beta.6-4414a19",
 		"tailwindcss": "^4.1.18"

@@ -2,60 +2,16 @@ import { PlcClientError, signOperation, type UnsignedOperation } from '@atcute/d
 import type { Did, Handle } from '@atcute/lexicons';
 import { isHandle } from '@atcute/lexicons/syntax';
 import { XRPCError } from '@atcute/xrpc-server';
-import { redirect } from '@oomfware/fetch-router';
-import { getContext } from '@oomfware/fetch-router/middlewares/async-context';
 import { form, invalid } from '@oomfware/forms';
 
 import * as v from 'valibot';
 
 import { parseAppPasswordPrivilege } from '#app/accounts/app-passwords.ts';
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '#app/accounts/passwords.ts';
-import { setWebSessionToken } from '#app/auth/web.ts';
 import type { AppContext } from '#app/context.ts';
 import { isHostnameSuffix } from '#app/utils/schema.ts';
 
 import { getAppContext } from '../middlewares/app-context.ts';
 import { getSession } from '../middlewares/session.ts';
-
-/**
- * validates credentials, creates session, sets cookie, and redirects.
- */
-export const signInForm = form(
-	v.object({
-		identifier: v.pipe(v.string(), v.minLength(1, `Enter your email or username`)),
-		_password: v.pipe(v.string(), v.minLength(1, `Enter your password`)),
-		remember: v.optional(v.boolean()),
-		redirect: v.optional(v.string()),
-	}),
-	async (data, issue) => {
-		const { accountManager } = getAppContext();
-		const { request } = getContext();
-
-		if (data._password.length < MIN_PASSWORD_LENGTH || data._password.length > MAX_PASSWORD_LENGTH) {
-			invalid(issue.identifier(`Invalid account credentials`));
-		}
-
-		const account = await accountManager.verifyAccountPassword(data.identifier, data._password);
-		if (account === null) {
-			invalid(issue.identifier(`Invalid account credentials`));
-		}
-
-		const { session, token } = await accountManager.createWebSession({
-			did: account.did,
-			remember: data.remember ?? false,
-			userAgent: request.headers.get('user-agent') ?? undefined,
-		});
-
-		setWebSessionToken(request, token, {
-			expires: session.expires_at,
-			httpOnly: true,
-			sameSite: 'lax',
-			path: '/',
-		});
-
-		redirect(data.redirect ?? '/account');
-	},
-);
 
 /**
  * creates an app password and returns the secret for display.

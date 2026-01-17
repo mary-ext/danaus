@@ -4,6 +4,8 @@ import { getContext } from '@oomfware/fetch-router/middlewares/async-context';
 import type { WebSession } from '#app/accounts/manager.ts';
 import { readWebSessionToken, verifyWebSessionToken } from '#app/auth/web.ts';
 
+import { routes } from '../routes.ts';
+
 import { getAppContext } from './app-context.ts';
 
 const sessionKey = createInjectionKey<WebSession>();
@@ -14,22 +16,24 @@ const sessionKey = createInjectionKey<WebSession>();
  */
 export const requireSession = (): Middleware => {
 	return async ({ request, url, store }, next) => {
-		const ctx = getAppContext();
+		const { accountManager, config } = getAppContext();
 		const path = url.pathname;
+
+		const redirectUrl = routes.login.show.href(undefined, { redirect: path });
 
 		const token = readWebSessionToken(request);
 		if (!token) {
-			redirect(`/account/login?redirect=${encodeURIComponent(path)}`);
+			redirect(redirectUrl);
 		}
 
-		const sessionId = verifyWebSessionToken(ctx.config.secrets.jwtKey, token);
+		const sessionId = verifyWebSessionToken(config.secrets.jwtKey, token);
 		if (!sessionId) {
-			redirect(`/account/login?redirect=${encodeURIComponent(path)}`);
+			redirect(redirectUrl);
 		}
 
-		const session = ctx.accountManager.getWebSession(sessionId);
+		const session = accountManager.getWebSession(sessionId);
 		if (!session) {
-			redirect(`/account/login?redirect=${encodeURIComponent(path)}`);
+			redirect(redirectUrl);
 		}
 
 		store.provide(sessionKey, session);
@@ -47,5 +51,6 @@ export const getSession = (): WebSession => {
 	if (!session) {
 		throw new Error('Session not found in request context');
 	}
+
 	return session;
 };

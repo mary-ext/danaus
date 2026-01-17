@@ -33,7 +33,7 @@ export const AccountLayout = (props: AccountLayoutProps) => {
 							App passwords
 						</AsideItem>
 
-						<AsideItem href={routes.account.security.href()} icon={<ShieldOutlined size={20} />}>
+						<AsideItem href={routes.account.security.overview.href()} icon={<ShieldOutlined size={20} />}>
 							Security
 						</AsideItem>
 					</div>
