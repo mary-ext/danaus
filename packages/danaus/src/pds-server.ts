@@ -13,6 +13,7 @@ import { localDanaus } from './api/local.danaus/index.ts';
 import type { AppConfig } from './config.ts';
 import { createAppContext, type AppContext } from './context.ts';
 import { createWebRouter } from './web/router.ts';
+import { runWithServer } from './web/server-context.ts';
 
 export interface PdsServerOptions {
 	config: AppConfig;
@@ -124,7 +125,7 @@ export class PdsServer implements AsyncDisposable {
 				'/assets/webauthn-register.js': new Response(Bun.file(webauthnRegisterScript)),
 				'/assets/webauthn-authenticate.js': new Response(Bun.file(webauthnAuthenticateScript)),
 
-				'/*': (request) => web.fetch(request),
+				'/*': (request, server) => runWithServer(server, () => web.fetch(request)),
 			},
 		});
 		disposables.defer(() => server.stop());

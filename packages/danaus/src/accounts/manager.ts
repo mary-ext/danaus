@@ -1874,8 +1874,8 @@ interface CreateAccountOptions {
 interface CreateWebSessionOptions {
 	did: Did;
 	remember: boolean;
-	userAgent?: string;
-	ip?: string;
+	userAgent: string | undefined;
+	ip: string | undefined;
 }
 
 interface CreateLegacySessionOptions {

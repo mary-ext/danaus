@@ -13,6 +13,7 @@ import { setWebSessionToken } from '#app/auth/web.ts';
 
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { routes } from '#web/routes.ts';
+import { getServer } from '#web/server-context.ts';
 
 export type AuthFactor = 'totp' | 'recovery' | 'password' | 'webauthn';
 
@@ -139,6 +140,7 @@ export const loginForm = form(
 			did: account.did,
 			remember: data.remember ?? false,
 			userAgent: request.headers.get('user-agent') ?? undefined,
+			ip: getServer().requestIP(request)?.address,
 		});
 
 		setWebSessionToken(request, token, {
@@ -203,6 +205,7 @@ export const verifyForm = form(
 				did: challenge.did,
 				remember: challenge.remember,
 				userAgent: request.headers.get('user-agent') ?? undefined,
+				ip: getServer().requestIP(request)?.address,
 			});
 
 			setWebSessionToken(request, token, {
@@ -306,6 +309,7 @@ export const verifyWebAuthnForm = form(
 				did: challenge.did,
 				remember: challenge.remember,
 				userAgent: request.headers.get('user-agent') ?? undefined,
+				ip: getServer().requestIP(request)?.address,
 			});
 
 			setWebSessionToken(request, token, {
