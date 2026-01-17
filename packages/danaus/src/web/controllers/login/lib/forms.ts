@@ -15,7 +15,7 @@ import { getAppContext } from '#web/middlewares/app-context.ts';
 import { getSession } from '#web/middlewares/session.ts';
 import { routes } from '#web/routes.ts';
 
-export type AuthFactor = 'totp' | 'recovery' | 'password';
+export type AuthFactor = 'totp' | 'recovery' | 'password' | 'webauthn';
 
 interface VerifyFactorOptions {
 	did: Did;
@@ -129,7 +129,7 @@ export const loginForm = form(
 		accountManager.cleanupExpiredMfaChallenges();
 
 		// check if MFA is enabled
-		if (accountManager.isMfaEnabled(account.did)) {
+		if (accountManager.getMfaStatus(account.did) !== null) {
 			// create MFA challenge and redirect
 			const token = accountManager.createMfaChallenge(account.did);
 
@@ -196,7 +196,99 @@ export const verifyMfaLoginForm = form(
 	},
 );
 
-const SUDO_ALLOWED_MFA_FACTORS: AuthFactor[] = ['totp', 'recovery'];
+const authenticationResponseSchema = v.object({
+	id: v.string(),
+	rawId: v.string(),
+	response: v.object({
+		clientDataJSON: v.string(),
+		authenticatorData: v.string(),
+		signature: v.string(),
+		userHandle: v.optional(v.string()),
+	}),
+	authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
+	clientExtensionResults: v.object({
+		appid: v.optional(v.boolean()),
+		credProps: v.optional(
+			v.object({
+				rk: v.optional(v.boolean()),
+			}),
+		),
+		hmacCreateSecret: v.optional(v.boolean()),
+	}),
+	type: v.literal('public-key'),
+});
+
+export const verifyWebAuthnMfaForm = form(
+	v.object({
+		challenge: v.string(),
+		response: v.pipe(v.string(), v.minLength(1), v.parseJson(), authenticationResponseSchema),
+		remember: v.optional(v.boolean(), false),
+		redirect: v.string(),
+	}),
+	async (data) => {
+		const { accountManager, config } = getAppContext();
+		const { request } = getContext();
+
+		const mfaChallenge = accountManager.getMfaChallenge(data.challenge);
+		if (mfaChallenge === null) {
+			redirect(routes.login.show.href(undefined, { redirect: data.redirect }));
+		}
+
+		if (!mfaChallenge.webauthn_challenge) {
+			invalid(`WebAuthn not initiated for this session`);
+		}
+
+		// find the credential being used
+		const credential = accountManager.getWebAuthnCredentialByCredentialId(data.response.id);
+		if (credential === null || credential.did !== mfaChallenge.did) {
+			invalid(`Invalid security key`);
+		}
+
+		// verify the authentication response
+		const { verifyWebAuthnAuthentication } = await import('#app/accounts/webauthn.ts');
+
+		try {
+			const verification = await verifyWebAuthnAuthentication({
+				response: data.response,
+				expectedChallenge: mfaChallenge.webauthn_challenge,
+				expectedOrigin: config.service.publicUrl,
+				expectedRpId: new URL(config.service.publicUrl).hostname,
+				credential,
+			});
+
+			if (!verification.verified) {
+				invalid(`Security key verification failed`);
+			}
+
+			// update counter
+			accountManager.updateWebAuthnCredentialCounter(
+				credential.id,
+				verification.authenticationInfo.newCounter,
+			);
+		} catch {
+			invalid(`Security key verification failed`);
+		}
+
+		accountManager.deleteMfaChallenge(data.challenge);
+
+		const { session, token } = await accountManager.createWebSession({
+			did: mfaChallenge.did,
+			remember: data.remember ?? false,
+			userAgent: request.headers.get('user-agent') ?? undefined,
+		});
+
+		setWebSessionToken(request, token, {
+			expires: session.expires_at,
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+		});
+
+		redirect(data.redirect);
+	},
+);
+
+const SUDO_ALLOWED_MFA_FACTORS: AuthFactor[] = ['totp', 'webauthn', 'recovery'];
 const SUDO_ALLOWED_OFA_FACTORS: AuthFactor[] = ['password'];
 
 export const verifySudoForm = form(
@@ -210,7 +302,7 @@ export const verifySudoForm = form(
 		const session = getSession();
 
 		// determine allowed factors based on MFA status
-		const hasMfa = accountManager.isMfaEnabled(session.did);
+		const hasMfa = accountManager.getMfaStatus(session.did) !== null;
 		const allowedFactors = hasMfa ? SUDO_ALLOWED_MFA_FACTORS : SUDO_ALLOWED_OFA_FACTORS;
 
 		await verifyFactor({
@@ -219,6 +311,87 @@ export const verifySudoForm = form(
 			code: data._code,
 			allowedFactors,
 		});
+
+		// elevate session and redirect
+		accountManager.elevateSession(session.id);
+		redirect(data.redirect);
+	},
+);
+
+const sudoAuthenticationResponseSchema = v.object({
+	id: v.string(),
+	rawId: v.string(),
+	response: v.object({
+		clientDataJSON: v.string(),
+		authenticatorData: v.string(),
+		signature: v.string(),
+		userHandle: v.optional(v.string()),
+	}),
+	authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
+	clientExtensionResults: v.object({
+		appid: v.optional(v.boolean()),
+		credProps: v.optional(
+			v.object({
+				rk: v.optional(v.boolean()),
+			}),
+		),
+		hmacCreateSecret: v.optional(v.boolean()),
+	}),
+	type: v.literal('public-key'),
+});
+
+export const verifyWebAuthnSudoForm = form(
+	v.object({
+		challenge: v.string(),
+		response: v.pipe(v.string(), v.minLength(1), v.parseJson(), sudoAuthenticationResponseSchema),
+		redirect: v.pipe(v.string(), v.minLength(1)),
+	}),
+	async (data) => {
+		const { accountManager, config } = getAppContext();
+		const session = getSession();
+
+		if (accountManager.getMfaStatus(session.did) === null) {
+			redirect(routes.login.sudo.index.href(undefined, { redirect: data.redirect }));
+		}
+
+		const sudoChallenge = accountManager.getWebAuthnChallenge(data.challenge);
+		if (sudoChallenge === null || sudoChallenge.did !== session.did) {
+			invalid(`Invalid or expired challenge`);
+		}
+
+		// find the credential being used
+		const credential = accountManager.getWebAuthnCredentialByCredentialId(data.response.id);
+		if (credential === null || credential.did !== session.did) {
+			invalid(`Invalid security key`);
+		}
+
+		// verify the authentication response
+		const { verifyWebAuthnAuthentication } = await import('#app/accounts/webauthn.ts');
+
+		try {
+			const verification = await verifyWebAuthnAuthentication({
+				response: data.response,
+				expectedChallenge: sudoChallenge.challenge,
+				expectedOrigin: config.service.publicUrl,
+				expectedRpId: new URL(config.service.publicUrl).hostname,
+				credential,
+			});
+
+			if (!verification.verified) {
+				invalid(`Security key verification failed`);
+			}
+
+			// update counter
+			accountManager.updateWebAuthnCredentialCounter(
+				credential.id,
+				verification.authenticationInfo.newCounter,
+			);
+		} catch {
+			invalid(`Security key verification failed`);
+		}
+
+		// clean up the challenge
+		accountManager.deleteWebAuthnChallenge(data.challenge);
 
 		// elevate session and redirect
 		accountManager.elevateSession(session.id);

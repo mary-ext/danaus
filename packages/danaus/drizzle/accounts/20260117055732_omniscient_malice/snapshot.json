@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "5f7c0714-f369-47f1-88ab-4294528beada",
+  "id": "ac52481d-ca5d-445c-b696-ae857bf5467f",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -44,6 +44,14 @@
     },
     {
       "name": "web_session",
+      "entityType": "tables"
+    },
+    {
+      "name": "webauthn_challenge",
+      "entityType": "tables"
+    },
+    {
+      "name": "webauthn_credential",
       "entityType": "tables"
     },
     {
@@ -143,6 +151,16 @@
       "default": null,
       "generated": null,
       "name": "email_confirmed_at",
+      "entityType": "columns",
+      "table": "account"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "preferred_mfa",
       "entityType": "columns",
       "table": "account"
     },
@@ -407,6 +425,16 @@
       "table": "mfa_challenge"
     },
     {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "webauthn_challenge",
+      "entityType": "columns",
+      "table": "mfa_challenge"
+    },
+    {
       "type": "integer",
       "notNull": true,
       "autoincrement": false,
@@ -597,6 +625,146 @@
       "table": "web_session"
     },
     {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "token",
+      "entityType": "columns",
+      "table": "webauthn_challenge"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "webauthn_challenge"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "challenge",
+      "entityType": "columns",
+      "table": "webauthn_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "webauthn_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "table": "webauthn_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "credential_id",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "blob",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "public_key",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "counter",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transports",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "webauthn_credential"
+    },
+    {
       "columns": [
         "did"
       ],
@@ -763,6 +931,36 @@
     },
     {
       "columns": [
+        "did"
+      ],
+      "tableTo": "account",
+      "columnsTo": [
+        "did"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_webauthn_challenge_did_account_did_fk",
+      "entityType": "fks",
+      "table": "webauthn_challenge"
+    },
+    {
+      "columns": [
+        "did"
+      ],
+      "tableTo": "account",
+      "columnsTo": [
+        "did"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_webauthn_credential_did_account_did_fk",
+      "entityType": "fks",
+      "table": "webauthn_credential"
+    },
+    {
+      "columns": [
         "did",
         "purpose"
       ],
@@ -851,6 +1049,24 @@
       "nameExplicit": false,
       "name": "web_session_pk",
       "table": "web_session",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "token"
+      ],
+      "nameExplicit": false,
+      "name": "webauthn_challenge_pk",
+      "table": "webauthn_challenge",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "webauthn_credential_pk",
+      "table": "webauthn_credential",
       "entityType": "pks"
     },
     {
@@ -971,6 +1187,48 @@
     },
     {
       "columns": [
+        {
+          "value": "expires_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "webauthn_challenge_expires_idx",
+      "entityType": "indexes",
+      "table": "webauthn_challenge"
+    },
+    {
+      "columns": [
+        {
+          "value": "did",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "webauthn_credential_did_idx",
+      "entityType": "indexes",
+      "table": "webauthn_credential"
+    },
+    {
+      "columns": [
+        {
+          "value": "credential_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "webauthn_credential_id_idx",
+      "entityType": "indexes",
+      "table": "webauthn_credential"
+    },
+    {
+      "columns": [
         "did",
         "name"
       ],
@@ -988,6 +1246,16 @@
       "name": "totp_credential_did_name_unique",
       "entityType": "uniques",
       "table": "totp_credential"
+    },
+    {
+      "columns": [
+        "did",
+        "name"
+      ],
+      "nameExplicit": false,
+      "name": "webauthn_credential_did_name_unique",
+      "entityType": "uniques",
+      "table": "webauthn_credential"
     }
   ],
   "renames": []

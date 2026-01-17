@@ -1,6 +1,7 @@
 import type { Did, Handle } from '@atcute/lexicons/syntax';
 
 import { sql } from 'drizzle-orm';
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import {
 	blob,
 	foreignKey,
@@ -12,6 +13,14 @@ import {
 	unique,
 	uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
+
+/** preferred MFA method */
+export const enum PreferredMfa {
+	/** TOTP authenticator app */
+	Totp = 0,
+	/** WebAuthn security key */
+	WebAuthn = 1,
+}
 
 /** user accounts */
 export const account = sqliteTable(
@@ -30,6 +39,9 @@ export const account = sqliteTable(
 
 		email: text().notNull(),
 		email_confirmed_at: integer({ mode: 'timestamp' }),
+
+		/** preferred MFA method (null = no MFA configured) */
+		preferred_mfa: integer().$type<PreferredMfa>(),
 	},
 	(t) => [
 		index('account_created_at_did_idx').on(t.created_at, t.did),
@@ -223,10 +235,79 @@ export const mfaChallenge = sqliteTable(
 			.notNull()
 			.references(() => account.did, { onDelete: 'cascade' }),
 
+		/** WebAuthn challenge (base64url) for authentication */
+		webauthn_challenge: text(),
+
 		created_at: integer({ mode: 'timestamp' }).notNull(),
 		expires_at: integer({ mode: 'timestamp' }).notNull(),
 	},
 	(t) => [index('mfa_challenge_expires_idx').on(t.expires_at)],
+);
+
+// #endregion
+
+// #region WebAuthn credentials
+
+/** WebAuthn credential types */
+export const enum WebAuthnCredentialType {
+	/** security key - non-discoverable, 2FA only */
+	SecurityKey = 0,
+	/** passkey - discoverable, can be used for passwordless (future) */
+	Passkey = 1,
+}
+
+/** WebAuthn credentials for security keys and passkeys */
+export const webauthnCredential = sqliteTable(
+	'webauthn_credential',
+	{
+		id: integer().primaryKey({ autoIncrement: true }),
+
+		did: text()
+			.$type<Did>()
+			.notNull()
+			.references(() => account.did, { onDelete: 'cascade' }),
+
+		/** credential type: security key or passkey */
+		type: integer().$type<WebAuthnCredentialType>().notNull(),
+		/** user-provided name */
+		name: text().notNull(),
+
+		/** base64url-encoded credential ID */
+		credential_id: text().notNull(),
+		/** COSE public key (binary) */
+		public_key: blob({ mode: 'buffer' }).notNull(),
+		/** signature counter for replay detection */
+		counter: integer().notNull(),
+		/** transport hints */
+		transports: text({ mode: 'json' }).$type<AuthenticatorTransportFuture[]>(),
+
+		created_at: integer({ mode: 'timestamp' }).notNull(),
+	},
+	(t) => [
+		index('webauthn_credential_did_idx').on(t.did),
+		unique().on(t.did, t.name),
+		uniqueIndex('webauthn_credential_id_idx').on(t.credential_id),
+	],
+);
+
+/** WebAuthn registration challenges */
+export const webauthnChallenge = sqliteTable(
+	'webauthn_challenge',
+	{
+		token: text().primaryKey(),
+
+		did: text()
+			.$type<Did>()
+			.notNull()
+			.references(() => account.did, { onDelete: 'cascade' }),
+
+		/** base64url challenge */
+		challenge: text().notNull(),
+
+		created_at: integer({ mode: 'timestamp' }).notNull(),
+		expires_at: integer({ mode: 'timestamp' }).notNull(),
+	},
+	(t) => [index('webauthn_challenge_expires_idx').on(t.expires_at)],
 );
 
 // #endregion

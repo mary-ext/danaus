@@ -1,0 +1,33 @@
+{
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.server.tsbuildinfo",
+		"target": "ESNext",
+		"module": "ESNext",
+		"lib": ["ESNext"],
+		"types": ["bun"],
+		"skipLibCheck": true,
+
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"composite": true,
+
+		/* JSX */
+		"jsx": "react-jsx",
+		"jsxImportSource": "@oomfware/jsx",
+
+		/* Linting */
+		"strict": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noUncheckedIndexedAccess": true,
+		"noUncheckedSideEffectImports": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
+	},
+	"include": ["src/**/*", "tests/**/*"],
+	"exclude": ["src/web/scripts/**/*"]
+}

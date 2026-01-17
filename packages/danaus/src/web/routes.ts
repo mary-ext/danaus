@@ -3,6 +3,8 @@ import { route } from '@oomfware/fetch-router';
 export const routes = route({
 	home: '/',
 
+	assets: '/assets/*path',
+
 	admin: {
 		dashboard: '/admin',
 		accounts: {
@@ -25,6 +27,7 @@ export const routes = route({
 		sudo: {
 			index: '/account/sudo',
 			totp: '/account/sudo/totp',
+			webauthn: '/account/sudo/webauthn',
 			recovery: '/account/sudo/recovery',
 			password: '/account/sudo/password',
 		},
@@ -39,6 +42,10 @@ export const routes = route({
 			totp: {
 				register: '/account/security/totp/register',
 				remove: '/account/security/totp/:id/remove',
+			},
+			webauthn: {
+				register: '/account/security/webauthn/register',
+				remove: '/account/security/webauthn/:id/remove',
 			},
 			recovery: {
 				show: '/account/security/recovery',

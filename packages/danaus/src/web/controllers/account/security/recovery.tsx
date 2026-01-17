@@ -21,7 +21,7 @@ export default {
 			const { accountManager } = getAppContext();
 			const session = getSession();
 
-			if (!accountManager.isMfaEnabled(session.did)) {
+			if (accountManager.getMfaStatus(session.did) === null) {
 				redirect(routes.account.security.overview.href());
 			}
 
@@ -75,7 +75,7 @@ export default {
 				const { accountManager } = getAppContext();
 				const session = getSession();
 
-				if (!accountManager.isMfaEnabled(session.did)) {
+				if (accountManager.getMfaStatus(session.did) === null) {
 					redirect(routes.account.security.overview.href());
 				}
 
@@ -133,7 +133,7 @@ export default {
 				const { accountManager } = getAppContext();
 				const session = getSession();
 
-				if (!accountManager.isMfaEnabled(session.did)) {
+				if (accountManager.getMfaStatus(session.did) === null) {
 					redirect(routes.account.security.overview.href());
 				}
 

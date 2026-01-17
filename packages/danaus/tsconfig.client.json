@@ -1,0 +1,31 @@
+{
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.client.tsbuildinfo",
+		"target": "ESNext",
+		"module": "ESNext",
+		"lib": ["ESNext", "DOM"],
+		"types": [],
+		"skipLibCheck": true,
+
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"verbatimModuleSyntax": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"composite": true,
+
+		/* Check JS files with JSDoc (only files with // @ts-check) */
+		"allowJs": true,
+		"checkJs": false,
+
+		/* Linting */
+		"strict": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noUncheckedIndexedAccess": true,
+		"noUncheckedSideEffectImports": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
+	},
+	"include": ["src/web/scripts/**/*"]
+}

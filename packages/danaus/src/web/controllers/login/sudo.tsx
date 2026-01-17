@@ -2,12 +2,14 @@ import { redirect, type Controller } from '@oomfware/fetch-router';
 import { forms } from '@oomfware/forms';
 import { render, type JSXNode } from '@oomfware/jsx';
 
+import { PreferredMfa } from '#app/accounts/db/schema.ts';
 import {
 	RECOVERY_CODE_LENGTH,
 	RECOVERY_CODE_RE,
 	TOTP_CODE_LENGTH,
 	TOTP_CODE_RE,
 } from '#app/accounts/totp.ts';
+import { generateWebAuthnAuthenticationOptions } from '#app/accounts/webauthn.ts';
 
 import { BaseLayout } from '#web/layouts/base.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
@@ -22,12 +24,12 @@ import MenuTrigger from '#web/primitives/menu-trigger.tsx';
 import Menu from '#web/primitives/menu.tsx';
 import { routes } from '#web/routes.ts';
 
-import { verifySudoForm, type AuthFactor } from './lib/forms.ts';
+import { verifySudoForm, verifyWebAuthnSudoForm, type AuthFactor } from './lib/forms.ts';
 
 export default {
-	middleware: [requireSession(), forms({ verifySudoForm })],
+	middleware: [requireSession(), forms({ verifySudoForm, verifyWebAuthnSudoForm })],
 	actions: {
-		index({ url }) {
+		index({ url }): never {
 			const { accountManager } = getAppContext();
 			const session = getSession();
 
@@ -41,12 +43,18 @@ export default {
 				redirect(redirectUrl);
 			}
 
-			const hasMfa = accountManager.isMfaEnabled(session.did);
-			if (hasMfa) {
-				// TODO: redirect to preferred MFA
-				redirect(routes.login.sudo.totp.href(undefined, { redirect: redirectUrl }));
-			} else {
+			const mfaStatus = accountManager.getMfaStatus(session.did);
+			if (mfaStatus === null) {
 				redirect(routes.login.sudo.password.href(undefined, { redirect: redirectUrl }));
+			}
+
+			switch (mfaStatus.preferred) {
+				case PreferredMfa.WebAuthn: {
+					redirect(routes.login.sudo.webauthn.href(undefined, { redirect: redirectUrl }));
+				}
+				case PreferredMfa.Totp: {
+					redirect(routes.login.sudo.totp.href(undefined, { redirect: redirectUrl }));
+				}
 			}
 		},
 		totp({ url }) {
@@ -60,7 +68,7 @@ export default {
 				redirect(routes.account.overview.href());
 			}
 
-			if (!accountManager.isMfaEnabled(session.did)) {
+			if (accountManager.getMfaStatus(session.did) === null) {
 				redirect(routes.login.sudo.index.href(undefined, { redirect: redirectUrl }));
 			}
 
@@ -104,7 +112,7 @@ export default {
 				redirect(routes.account.overview.href());
 			}
 
-			if (!accountManager.isMfaEnabled(session.did)) {
+			if (accountManager.getMfaStatus(session.did) === null) {
 				redirect(routes.login.sudo.index.href(undefined, { redirect: redirectUrl }));
 			}
 
@@ -135,6 +143,92 @@ export default {
 				</BaseForm>,
 			);
 		},
+		async webauthn({ url }) {
+			const { accountManager, config } = getAppContext();
+			const session = getSession();
+
+			const { fields } = verifyWebAuthnSudoForm;
+
+			const redirectUrl = url.searchParams.get('redirect') ?? fields.redirect.value();
+			if (!redirectUrl) {
+				redirect(routes.account.overview.href());
+			}
+
+			if (accountManager.getMfaStatus(session.did) === null) {
+				redirect(routes.login.sudo.index.href(undefined, { redirect: redirectUrl }));
+			}
+
+			// get user's WebAuthn credentials (security keys or passkeys)
+			const webauthnCredentials = accountManager.listWebAuthnCredentials(session.did);
+			if (webauthnCredentials.length === 0) {
+				// no WebAuthn credentials, redirect to TOTP
+				redirect(routes.login.sudo.totp.href(undefined, { redirect: redirectUrl }));
+			}
+
+			// generate authentication options
+			const options = await generateWebAuthnAuthenticationOptions({
+				rpId: new URL(config.service.publicUrl).hostname,
+				allowCredentials: webauthnCredentials,
+			});
+
+			// store the challenge for verification (reuse webauthn challenge table)
+			const challengeToken = accountManager.createWebAuthnChallenge(session.did, options.challenge);
+
+			return render(
+				<BaseLayout>
+					<title>Confirm your identity - Danaus</title>
+
+					<script src="/assets/webauthn-authenticate.js" type="module" />
+
+					<div class="flex flex-1 items-center justify-center p-4">
+						<div class="w-full max-w-96 rounded-xl bg-neutral-background-1 p-6 shadow-16">
+							<form {...verifyWebAuthnSudoForm} class="flex flex-col gap-6">
+								<input {...fields.challenge.as('hidden', challengeToken)} />
+								<input {...fields.redirect.as('hidden', redirectUrl)} />
+
+								<div class="flex flex-col gap-2">
+									<h1 class="text-base-500 font-semibold">Confirm your identity</h1>
+									<p class="text-base-300 text-neutral-foreground-3">
+										Insert your security key and touch it to continue.
+									</p>
+								</div>
+
+								<danaus-webauthn-authenticate data-options={JSON.stringify(options)}>
+									<input {...fields.response.as('hidden', '')} data-target="webauthn-authenticate.response" />
+
+									<Button data-target="webauthn-authenticate.start" type="button" variant="primary">
+										Use security key
+									</Button>
+
+									<div
+										data-target="webauthn-authenticate.status"
+										class="text-center text-base-300 text-neutral-foreground-3"
+									/>
+								</danaus-webauthn-authenticate>
+
+								<Menu>
+									<MenuTrigger>
+										<Button>Show other methods</Button>
+									</MenuTrigger>
+
+									<MenuPopover>
+										<MenuList>
+											<MenuItem href={routes.login.sudo.totp.href(undefined, { redirect: redirectUrl })}>
+												Use authenticator app
+											</MenuItem>
+
+											<MenuItem href={routes.login.sudo.recovery.href(undefined, { redirect: redirectUrl })}>
+												Use 2FA recovery code
+											</MenuItem>
+										</MenuList>
+									</MenuPopover>
+								</Menu>
+							</form>
+						</div>
+					</div>
+				</BaseLayout>,
+			);
+		},
 		password({ url }) {
 			const { accountManager } = getAppContext();
 			const session = getSession();
@@ -146,7 +240,7 @@ export default {
 				redirect(routes.account.overview.href());
 			}
 
-			if (accountManager.isMfaEnabled(session.did)) {
+			if (accountManager.getMfaStatus(session.did) !== null) {
 				redirect(routes.login.sudo.index.href(undefined, { redirect: redirectUrl }));
 			}
 
@@ -176,7 +270,7 @@ const BaseForm = (props: { factor: AuthFactor; redirectUrl: string; children: JS
 
 	const { fields } = verifySudoForm;
 
-	const hasMfa = accountManager.isMfaEnabled(did);
+	const mfaStatus = accountManager.getMfaStatus(did);
 
 	return (
 		<BaseLayout>
@@ -190,7 +284,7 @@ const BaseForm = (props: { factor: AuthFactor; redirectUrl: string; children: JS
 
 						{props.children}
 
-						{hasMfa && props.factor !== 'password' && (
+						{mfaStatus !== null && (
 							<Menu>
 								<MenuTrigger>
 									<Button>Show other methods</Button>
@@ -198,7 +292,17 @@ const BaseForm = (props: { factor: AuthFactor; redirectUrl: string; children: JS
 
 								<MenuPopover>
 									<MenuList>
-										{props.factor !== 'totp' && (
+										{props.factor !== 'webauthn' && mfaStatus.hasWebAuthn && (
+											<MenuItem
+												href={routes.login.sudo.webauthn.href(undefined, {
+													redirect: props.redirectUrl,
+												})}
+											>
+												Use security key
+											</MenuItem>
+										)}
+
+										{props.factor !== 'totp' && mfaStatus.hasTotp && (
 											<MenuItem
 												href={routes.login.sudo.totp.href(undefined, {
 													redirect: props.redirectUrl,
@@ -208,7 +312,7 @@ const BaseForm = (props: { factor: AuthFactor; redirectUrl: string; children: JS
 											</MenuItem>
 										)}
 
-										{props.factor !== 'recovery' && (
+										{props.factor !== 'recovery' && mfaStatus.hasRecoveryCodes && (
 											<MenuItem
 												href={routes.login.sudo.recovery.href(undefined, {
 													redirect: props.redirectUrl,

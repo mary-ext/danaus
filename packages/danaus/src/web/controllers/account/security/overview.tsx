@@ -1,7 +1,8 @@
 import type { BuildAction } from '@oomfware/fetch-router';
 import { render } from '@oomfware/jsx';
 
-import type { Account, TotpCredential } from '#app/accounts/manager.ts';
+import type { Account, TotpCredential, WebauthnCredential } from '#app/accounts/manager.ts';
+import { WebAuthnCredentialType } from '#app/accounts/db/schema.ts';
 
 import DotGrid1x3HorizontalOutlined from '#web/icons/central/dot-grid-1x3-horizontal-outlined.tsx';
 import PasskeysOutlined from '#web/icons/central/passkeys-outlined.tsx';
@@ -36,7 +37,8 @@ export default {
 		const account = accountManager.getAccount(did)!;
 
 		const totpCredentials = accountManager.listTotpCredentials(did);
-		const hasTotp = totpCredentials.length > 0;
+		const securityKeys = accountManager.listWebAuthnCredentialsByType(did, WebAuthnCredentialType.SecurityKey);
+		const hasMfa = totpCredentials.length > 0 || securityKeys.length > 0;
 
 		return render(
 			<AccountLayout>
@@ -50,9 +52,13 @@ export default {
 					<div class="flex flex-col gap-8">
 						<InformationSection account={account} />
 
-						<AuthenticationSection account={account} totpCredentials={totpCredentials} />
+						<AuthenticationSection
+							account={account}
+							totpCredentials={totpCredentials}
+							securityKeys={securityKeys}
+						/>
 
-						{hasTotp && <RecoverySection />}
+						{hasMfa && <RecoverySection />}
 					</div>
 				</div>
 			</AccountLayout>,
@@ -98,9 +104,11 @@ const InformationSection = ({ account }: { account: Account }) => {
 const AuthenticationSection = ({
 	account,
 	totpCredentials,
+	securityKeys,
 }: {
 	account: Account;
 	totpCredentials: TotpCredential[];
+	securityKeys: WebauthnCredential[];
 }) => {
 	return (
 		<div class="flex flex-col gap-2">
@@ -161,7 +169,36 @@ const AuthenticationSection = ({
 					</div>
 				))}
 
-				{/* Security keys placeholder (future) */}
+				{/* Security keys */}
+				{securityKeys.map((key) => (
+					<div class="flex items-center gap-4 px-4 py-3">
+						<UsbOutlined size={24} class="shrink-0" />
+
+						<div class="min-w-0 grow">
+							<p class="text-base-300 font-medium wrap-break-word">{key.name}</p>
+							<p class="text-base-300 text-neutral-foreground-3">
+								Security key · Added {key.created_at.toLocaleDateString()}
+							</p>
+						</div>
+
+						<Menu>
+							<MenuTrigger>
+								<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
+									<DotGrid1x3HorizontalOutlined size={16} />
+								</button>
+							</MenuTrigger>
+
+							<MenuPopover>
+								<MenuList>
+									<MenuItem href={routes.account.security.webauthn.remove.href({ id: key.id })}>
+										Remove
+									</MenuItem>
+								</MenuList>
+							</MenuPopover>
+						</Menu>
+					</div>
+				))}
+
 				{/* Passkeys placeholder (future) */}
 
 				{/* Add another way to sign in */}
@@ -200,16 +237,19 @@ const AuthenticationSection = ({
 								</div>
 							</a>
 
-							<button disabled class="flex items-center gap-4 rounded-md px-4 py-3 text-left opacity-50">
+							<a
+								href={routes.account.security.webauthn.register.href()}
+								class="flex items-center gap-4 rounded-md px-4 py-3 text-left outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active"
+							>
 								<UsbOutlined size={24} class="shrink-0" />
 
 								<div class="min-w-0 grow">
 									<p class="text-base-300 font-medium">Security key</p>
 									<p class="text-base-300 text-neutral-foreground-3">
-										Use a hardware key like YubiKey (coming soon)
+										Use a hardware key like YubiKey
 									</p>
 								</div>
-							</button>
+							</a>
 
 							<button disabled class="flex items-center gap-4 rounded-md px-4 py-3 text-left opacity-50">
 								<PasskeysOutlined size={24} class="shrink-0" />

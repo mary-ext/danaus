@@ -5,12 +5,14 @@ import type { routes } from '#web/routes.ts';
 import overview from './security/overview.tsx';
 import recovery from './security/recovery.tsx';
 import totp from './security/totp.tsx';
+import webauthn from './security/webauthn.tsx';
 
 export default {
 	middleware: [],
 	actions: {
 		overview,
 		totp,
+		webauthn,
 		recovery,
 	},
 } satisfies Controller<typeof routes.account.security>;

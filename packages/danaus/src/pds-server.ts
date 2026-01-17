@@ -3,13 +3,16 @@ import { defaultExceptionHandler, XRPCRouter } from '@atcute/xrpc-server';
 import { createBunWebSocket } from '@atcute/xrpc-server-bun';
 import { cors } from '@atcute/xrpc-server/middlewares/cors';
 
+import webauthnAuthenticateScript from '#web/scripts/webauthn-authenticate.js' with { type: 'file' };
+import webauthnRegisterScript from '#web/scripts/webauthn-register.js' with { type: 'file' };
+import styles from '#web/styles/main.out.css' with { type: 'file' };
+
 import { appBsky } from './api/app.bsky/index.ts';
 import { comAtproto } from './api/com.atproto/index.ts';
 import { localDanaus } from './api/local.danaus/index.ts';
 import type { AppConfig } from './config.ts';
 import { createAppContext, type AppContext } from './context.ts';
 import { createWebRouter } from './web/router.ts';
-import styles from './web/styles/main.out.css' with { type: 'file' };
 
 export interface PdsServerOptions {
 	config: AppConfig;
@@ -117,7 +120,10 @@ export class PdsServer implements AsyncDisposable {
 				),
 				'/xrpc/*': wrapped.fetch,
 
-				'/assets/style.css': new Response(Bun.file(styles), { headers: { 'cache-control': 'no-cache' } }),
+				'/assets/style.css': new Response(Bun.file(styles)),
+				'/assets/webauthn-register.js': new Response(Bun.file(webauthnRegisterScript)),
+				'/assets/webauthn-authenticate.js': new Response(Bun.file(webauthnAuthenticateScript)),
+
 				'/*': (request) => web.fetch(request),
 			},
 		});

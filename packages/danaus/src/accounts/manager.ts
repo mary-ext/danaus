@@ -15,12 +15,15 @@ import { TimeKeyset } from '#app/utils/keyset.ts';
 import { DAY, HOUR } from '#app/utils/times.ts';
 import { generateAppPassword, generateInviteCode } from '#app/utils/token.ts';
 
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
+
 import { getAccountDb, t, type AccountDb } from './db';
-import { AppPasswordPrivilege, EmailTokenPurpose } from './db/schema';
+import { AppPasswordPrivilege, EmailTokenPurpose, PreferredMfa, WebAuthnCredentialType } from './db/schema';
 import { isServiceDomain, isValidTld } from './handle';
 import { hashPassword, verifyPassword } from './passwords';
 import { generateBackupCodes, MAX_TOTP_CREDENTIALS, verifyTotpCode } from './totp';
 import { AccountStatus, formatAccountStatus } from './types';
+import { MAX_WEBAUTHN_CREDENTIALS, WEBAUTHN_CHALLENGE_TTL_MS } from './webauthn';
 
 const WEB_SESSION_TTL_MS = 7 * DAY;
 const WEB_SESSION_LONG_TTL_MS = 365 * DAY;
@@ -40,6 +43,20 @@ export type InviteCodeUse = typeof t.inviteCodeUse.$inferSelect;
 export type TotpCredential = typeof t.totpCredential.$inferSelect;
 export type BackupCode = typeof t.recoveryCode.$inferSelect;
 export type MfaChallenge = typeof t.mfaChallenge.$inferSelect;
+export type WebauthnCredential = typeof t.webauthnCredential.$inferSelect;
+export type WebauthnChallenge = typeof t.webauthnChallenge.$inferSelect;
+
+/** MFA status for an account */
+export interface MfaStatus {
+	/** preferred MFA method */
+	preferred: PreferredMfa;
+	/** has TOTP credentials */
+	hasTotp: boolean;
+	/** has WebAuthn security keys */
+	hasWebAuthn: boolean;
+	/** has recovery codes */
+	hasRecoveryCodes: boolean;
+}
 
 export interface InviteCodeWithUses extends InviteCode {
 	uses: InviteCodeUse[];
@@ -1054,7 +1071,7 @@ export class AccountManager implements Disposable {
 	 * @returns created credential
 	 */
 	createTotpCredential(options: CreateTotpCredentialOptions): TotpCredential {
-		const count = this.countTotpCredentials(options.did);
+		const count = this.#countTotpCredentials(options.did);
 		if (count >= MAX_TOTP_CREDENTIALS) {
 			throw new InvalidRequestError({
 				error: 'TooManyTotpCredentials',
@@ -1094,6 +1111,8 @@ export class AccountManager implements Disposable {
 			throw new Error(`failed to create TOTP credential`);
 		}
 
+		this.#syncPreferredMfa(options.did);
+
 		return inserted;
 	}
 
@@ -1132,22 +1151,72 @@ export class AccountManager implements Disposable {
 			.delete(t.totpCredential)
 			.where(and(eq(t.totpCredential.did, did), eq(t.totpCredential.id, id)))
 			.run();
+
+		this.#syncPreferredMfa(did);
 	}
 
 	/**
-	 * check if MFA is enabled for an account.
-	 * @param did account did
-	 * @returns true if at least one MFA credential exists
+	 * sync preferred_mfa to reflect current MFA credentials.
+	 * - if null and credentials exist → set to first available type
+	 * - if set but that type has no credentials → switch to another type or clear
 	 */
-	isMfaEnabled(did: Did): boolean {
-		const count =
-			this.db
-				.select({ count: sql<number>`count(*)` })
-				.from(t.totpCredential)
-				.where(eq(t.totpCredential.did, did))
-				.get()?.count ?? 0;
+	#syncPreferredMfa(did: Did): void {
+		const account = this.db
+			.select({ preferred_mfa: t.account.preferred_mfa })
+			.from(t.account)
+			.where(eq(t.account.did, did))
+			.get();
 
-		return count > 0;
+		if (!account) {
+			return;
+		}
+
+		const hasTotp = this.#countTotpCredentials(did) > 0;
+		const hasWebAuthn = this.countWebAuthnCredentials(did) > 0;
+
+		// check if current preference is still valid
+		if (account.preferred_mfa === PreferredMfa.Totp && hasTotp) {
+			return;
+		}
+		if (account.preferred_mfa === PreferredMfa.WebAuthn && hasWebAuthn) {
+			return;
+		}
+
+		// need to set or switch: prefer the type that was just added (TOTP first for backwards compat)
+		let newPreferred: PreferredMfa | null = null;
+		if (hasTotp) {
+			newPreferred = PreferredMfa.Totp;
+		} else if (hasWebAuthn) {
+			newPreferred = PreferredMfa.WebAuthn;
+		}
+
+		if (newPreferred !== account.preferred_mfa) {
+			this.db.update(t.account).set({ preferred_mfa: newPreferred }).where(eq(t.account.did, did)).run();
+		}
+	}
+
+	/**
+	 * get MFA status for an account.
+	 * @param did account did
+	 * @returns MFA status with preferred method and available methods, or null if no MFA configured
+	 */
+	getMfaStatus(did: Did): MfaStatus | null {
+		const account = this.db
+			.select({ preferred_mfa: t.account.preferred_mfa })
+			.from(t.account)
+			.where(eq(t.account.did, did))
+			.get();
+
+		if (!account || account.preferred_mfa == null) {
+			return null;
+		}
+
+		return {
+			preferred: account.preferred_mfa,
+			hasTotp: this.#countTotpCredentials(did) > 0,
+			hasWebAuthn: this.countWebAuthnCredentials(did) > 0,
+			hasRecoveryCodes: this.getRecoveryCodeCount(did) > 0,
+		};
 	}
 
 	/**
@@ -1155,7 +1224,7 @@ export class AccountManager implements Disposable {
 	 * @param did account did
 	 * @returns number of credentials
 	 */
-	countTotpCredentials(did: Did): number {
+	#countTotpCredentials(did: Did): number {
 		return (
 			this.db
 				.select({ count: sql<number>`count(*)` })
@@ -1390,6 +1459,284 @@ export class AccountManager implements Disposable {
 
 	// #endregion
 
+	// #region WebAuthn credentials
+
+	/**
+	 * create a WebAuthn credential for an account.
+	 * @param options credential options
+	 * @returns created credential
+	 */
+	createWebAuthnCredential(options: CreateWebAuthnCredentialOptions): WebauthnCredential {
+		const count = this.countWebAuthnCredentials(options.did);
+		if (count >= MAX_WEBAUTHN_CREDENTIALS) {
+			throw new InvalidRequestError({
+				error: 'TooManyWebAuthnCredentials',
+				description: `cannot have more than ${MAX_WEBAUTHN_CREDENTIALS} security keys`,
+			});
+		}
+
+		const name = options.name?.trim() || this.generateWebAuthnName(options.did, options.type);
+
+		// check for duplicate name
+		const existing = this.db
+			.select()
+			.from(t.webauthnCredential)
+			.where(and(eq(t.webauthnCredential.did, options.did), eq(t.webauthnCredential.name, name)))
+			.get();
+
+		if (existing) {
+			throw new InvalidRequestError({
+				error: 'DuplicateWebAuthnName',
+				description: `a credential with this name already exists`,
+			});
+		}
+
+		// check for duplicate credential ID
+		const existingCredId = this.db
+			.select()
+			.from(t.webauthnCredential)
+			.where(eq(t.webauthnCredential.credential_id, options.credentialId))
+			.get();
+
+		if (existingCredId) {
+			throw new InvalidRequestError({
+				error: 'DuplicateCredentialId',
+				description: `this security key is already registered`,
+			});
+		}
+
+		const inserted = this.db
+			.insert(t.webauthnCredential)
+			.values({
+				did: options.did,
+				type: options.type,
+				name: name,
+				credential_id: options.credentialId,
+				public_key: Buffer.from(options.publicKey),
+				counter: options.counter,
+				transports: options.transports,
+				created_at: new Date(),
+			})
+			.returning()
+			.get();
+
+		if (!inserted) {
+			throw new Error(`failed to create WebAuthn credential`);
+		}
+
+		// sync preferred MFA (only for security keys, not passkeys)
+		if (options.type === WebAuthnCredentialType.SecurityKey) {
+			this.#syncPreferredMfa(options.did);
+		}
+
+		return inserted;
+	}
+
+	/**
+	 * list WebAuthn credentials for an account.
+	 * @param did account did
+	 * @returns WebAuthn credentials
+	 */
+	listWebAuthnCredentials(did: Did): WebauthnCredential[] {
+		return this.db.select().from(t.webauthnCredential).where(eq(t.webauthnCredential.did, did)).all();
+	}
+
+	/**
+	 * list WebAuthn credentials for an account filtered by type.
+	 * @param did account did
+	 * @param type credential type
+	 * @returns WebAuthn credentials of the specified type
+	 */
+	listWebAuthnCredentialsByType(did: Did, type: WebAuthnCredentialType): WebauthnCredential[] {
+		return this.db
+			.select()
+			.from(t.webauthnCredential)
+			.where(and(eq(t.webauthnCredential.did, did), eq(t.webauthnCredential.type, type)))
+			.all();
+	}
+
+	/**
+	 * get a WebAuthn credential by id.
+	 * @param did account did
+	 * @param id credential id
+	 * @returns WebAuthn credential or null
+	 */
+	getWebAuthnCredential(did: Did, id: number): WebauthnCredential | null {
+		const credential = this.db
+			.select()
+			.from(t.webauthnCredential)
+			.where(and(eq(t.webauthnCredential.did, did), eq(t.webauthnCredential.id, id)))
+			.get();
+
+		return credential ?? null;
+	}
+
+	/**
+	 * get a WebAuthn credential by credential ID.
+	 * @param credentialId base64url credential ID
+	 * @returns WebAuthn credential or null
+	 */
+	getWebAuthnCredentialByCredentialId(credentialId: string): WebauthnCredential | null {
+		const credential = this.db
+			.select()
+			.from(t.webauthnCredential)
+			.where(eq(t.webauthnCredential.credential_id, credentialId))
+			.get();
+
+		return credential ?? null;
+	}
+
+	/**
+	 * delete a WebAuthn credential.
+	 * @param did account did
+	 * @param id credential id
+	 */
+	deleteWebAuthnCredential(did: Did, id: number): void {
+		this.db
+			.delete(t.webauthnCredential)
+			.where(and(eq(t.webauthnCredential.did, did), eq(t.webauthnCredential.id, id)))
+			.run();
+
+		this.#syncPreferredMfa(did);
+	}
+
+	/**
+	 * count WebAuthn credentials for an account.
+	 * @param did account did
+	 * @returns number of credentials
+	 */
+	countWebAuthnCredentials(did: Did): number {
+		return (
+			this.db
+				.select({ count: sql<number>`count(*)` })
+				.from(t.webauthnCredential)
+				.where(eq(t.webauthnCredential.did, did))
+				.get()?.count ?? 0
+		);
+	}
+
+	/**
+	 * update the counter for a WebAuthn credential.
+	 * @param id credential id
+	 * @param counter new counter value
+	 */
+	updateWebAuthnCredentialCounter(id: number, counter: number): void {
+		this.db.update(t.webauthnCredential).set({ counter }).where(eq(t.webauthnCredential.id, id)).run();
+	}
+
+	/**
+	 * generate a unique name for a new WebAuthn credential.
+	 * @param did account did
+	 * @param type credential type
+	 * @returns generated name like "Security Key" or "Security Key 2"
+	 */
+	generateWebAuthnName(did: Did, type: WebAuthnCredentialType): string {
+		const existing = this.listWebAuthnCredentialsByType(did, type);
+		const baseName = type === WebAuthnCredentialType.SecurityKey ? 'Security Key' : 'Passkey';
+
+		if (existing.length === 0) {
+			return baseName;
+		}
+
+		// find the next available number
+		const existingNames = new Set(existing.map((c) => c.name));
+		let num = 2;
+		while (existingNames.has(`${baseName} ${num}`)) {
+			num++;
+		}
+
+		return `${baseName} ${num}`;
+	}
+
+	// #endregion
+
+	// #region WebAuthn registration challenges
+
+	/**
+	 * create a WebAuthn registration challenge.
+	 * @param did account did
+	 * @param challenge base64url challenge
+	 * @returns token for retrieving the challenge
+	 */
+	createWebAuthnChallenge(did: Did, challenge: string): string {
+		const token = nanoid(32);
+		const now = new Date();
+		const expiresAt = new Date(now.getTime() + WEBAUTHN_CHALLENGE_TTL_MS);
+
+		this.db
+			.insert(t.webauthnChallenge)
+			.values({
+				token: token,
+				did: did,
+				challenge: challenge,
+				created_at: now,
+				expires_at: expiresAt,
+			})
+			.run();
+
+		return token;
+	}
+
+	/**
+	 * get a WebAuthn registration challenge by token.
+	 * @param token the token
+	 * @returns WebAuthn challenge or null if expired/not found
+	 */
+	getWebAuthnChallenge(token: string): WebauthnChallenge | null {
+		const challenge = this.db
+			.select()
+			.from(t.webauthnChallenge)
+			.where(eq(t.webauthnChallenge.token, token))
+			.get();
+
+		if (!challenge) {
+			return null;
+		}
+
+		const now = new Date();
+		if (challenge.expires_at <= now) {
+			this.db.delete(t.webauthnChallenge).where(eq(t.webauthnChallenge.token, token)).run();
+			return null;
+		}
+
+		return challenge;
+	}
+
+	/**
+	 * delete a WebAuthn registration challenge.
+	 * @param token the token
+	 */
+	deleteWebAuthnChallenge(token: string): void {
+		this.db.delete(t.webauthnChallenge).where(eq(t.webauthnChallenge.token, token)).run();
+	}
+
+	/**
+	 * clean up expired WebAuthn registration challenges.
+	 */
+	cleanupExpiredWebAuthnChallenges(): void {
+		const now = new Date();
+		this.db.delete(t.webauthnChallenge).where(lte(t.webauthnChallenge.expires_at, now)).run();
+	}
+
+	// #endregion
+
+	// #region MFA challenge WebAuthn support
+
+	/**
+	 * set the WebAuthn challenge on an existing MFA challenge.
+	 * @param token MFA challenge token
+	 * @param webauthnChallenge base64url WebAuthn challenge
+	 */
+	setMfaChallengeWebAuthn(token: string, webauthnChallenge: string): void {
+		this.db
+			.update(t.mfaChallenge)
+			.set({ webauthn_challenge: webauthnChallenge })
+			.where(eq(t.mfaChallenge.token, token))
+			.run();
+	}
+
+	// #endregion
+
 	async importAccount(_options: ImportAccountOptions) {}
 
 	private resolveIdentifier(identifier: string, options: AccountAvailabilityOptions): Account | null {
@@ -1512,4 +1859,14 @@ interface CreateTotpCredentialOptions {
 	name?: string;
 	secret: Uint8Array;
 	lastUsedCounter: number;
+}
+
+interface CreateWebAuthnCredentialOptions {
+	did: Did;
+	type: WebAuthnCredentialType;
+	name?: string;
+	credentialId: string;
+	publicKey: Uint8Array;
+	counter: number;
+	transports?: AuthenticatorTransportFuture[];
 }

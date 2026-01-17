@@ -59,3 +59,7 @@ export const didKey = v.custom<Did<'key'>>(
 	(input) => typeof input === 'string' && isKeyDid(input),
 	`must be a did:key`,
 );
+
+export const normalizeWhitespace = v.transform<string, string>((input) => {
+	return input.replace(/\s+/, ' ').trim();
+});
