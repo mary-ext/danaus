@@ -6,10 +6,8 @@ import { form, invalid } from '@oomfware/forms';
 import * as v from 'valibot';
 
 import { WebAuthnCredentialType } from '#app/accounts/db/schema.ts';
-import {
-	generateWebAuthnRegistrationOptions,
-	verifyWebAuthnRegistration,
-} from '#app/accounts/webauthn.ts';
+import { generateWebAuthnRegistrationOptions, verifyWebAuthnRegistration } from '#app/accounts/webauthn.ts';
+import { normalizeWhitespace } from '#app/utils/schema.ts';
 import { requireSudo } from '#app/web/lib/forms.ts';
 
 import { getAppContext } from '#web/middlewares/app-context.ts';
@@ -81,7 +79,7 @@ export const initiateWebAuthnRegistration = async (
 export const completeWebAuthnForm = form(
 	v.object({
 		token: v.pipe(v.string(), v.minLength(1)),
-		name: v.optional(v.pipe(v.string(), v.maxLength(32, `Name is too long`))),
+		name: v.optional(v.pipe(v.string(), normalizeWhitespace, v.maxLength(32, `Name is too long`))),
 		response: v.pipe(v.string(), v.minLength(1), v.parseJson(), registrationResponseSchema),
 	}),
 	async (data, issue) => {

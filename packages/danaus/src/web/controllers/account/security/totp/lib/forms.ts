@@ -5,6 +5,7 @@ import { form, invalid } from '@oomfware/forms';
 import * as v from 'valibot';
 
 import { decodeSecret, verifyTotpCode } from '#app/accounts/totp.ts';
+import { normalizeWhitespace } from '#app/utils/schema.ts';
 import { requireSudo } from '#app/web/lib/forms.ts';
 
 import { getAppContext } from '#web/middlewares/app-context.ts';
@@ -16,7 +17,7 @@ import { routes } from '#web/routes.ts';
  */
 export const setupTotpForm = form(
 	v.object({
-		name: v.optional(v.pipe(v.string(), v.maxLength(32, `Name is too long`))),
+		name: v.optional(v.pipe(v.string(), normalizeWhitespace, v.maxLength(32, `Name is too long`))),
 		secret: v.pipe(v.string(), v.minLength(1)),
 		_code: v.pipe(v.string(), v.length(6, `Enter the 6-digit code`)),
 	}),
