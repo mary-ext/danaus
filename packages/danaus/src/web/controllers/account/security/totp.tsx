@@ -36,7 +36,7 @@ export default {
 
 				// require sudo mode
 				if (!accountManager.isSessionElevated(session)) {
-					redirect(routes.login.sudo.index.href(undefined, { redirect: url.pathname }));
+					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 
 				const account = accountManager.getAccount(session.did)!;
@@ -173,7 +173,7 @@ export default {
 
 				// require sudo mode
 				if (!accountManager.isSessionElevated(session)) {
-					redirect(routes.login.sudo.index.href(undefined, { redirect: url.pathname }));
+					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 
 				const { fields } = removeTotpForm;

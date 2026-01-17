@@ -224,9 +224,13 @@ export const recoveryCode = sqliteTable(
 	(t) => [index('recovery_code_did_idx').on(t.did)],
 );
 
-/** MFA challenges during login */
-export const mfaChallenge = sqliteTable(
-	'mfa_challenge',
+/**
+ * verification challenges for MFA login and sudo elevation.
+ * - session_id null → MFA login flow (creates new session on success)
+ * - session_id set → sudo flow (elevates existing session on success)
+ */
+export const verifyChallenge = sqliteTable(
+	'verify_challenge',
 	{
 		token: text().primaryKey(),
 
@@ -235,13 +239,16 @@ export const mfaChallenge = sqliteTable(
 			.notNull()
 			.references(() => account.did, { onDelete: 'cascade' }),
 
+		/** session to elevate (null = MFA login, creates new session) */
+		session_id: text().references(() => webSession.id, { onDelete: 'cascade' }),
+
 		/** WebAuthn challenge (base64url) for authentication */
 		webauthn_challenge: text(),
 
 		created_at: integer({ mode: 'timestamp' }).notNull(),
 		expires_at: integer({ mode: 'timestamp' }).notNull(),
 	},
-	(t) => [index('mfa_challenge_expires_idx').on(t.expires_at)],
+	(t) => [index('verify_challenge_expires_idx').on(t.expires_at)],
 );
 
 // #endregion

@@ -19,7 +19,7 @@ export const requireSession = (): Middleware => {
 		const { accountManager, config } = getAppContext();
 		const path = url.pathname;
 
-		const redirectUrl = routes.login.show.href(undefined, { redirect: path });
+		const redirectUrl = routes.login.href(undefined, { redirect: path });
 
 		const token = readWebSessionToken(request);
 		if (!token) {
@@ -52,5 +52,28 @@ export const getSession = (): WebSession => {
 		throw new Error('Session not found in request context');
 	}
 
+	return session;
+};
+
+/**
+ * tries to get a web session from the current request.
+ * does not require the requireSession middleware.
+ * @returns the web session or null if not found/invalid
+ */
+export const tryGetSession = (): WebSession | null => {
+	const { accountManager, config } = getAppContext();
+	const { request } = getContext();
+
+	const token = readWebSessionToken(request);
+	if (!token) {
+		return null;
+	}
+
+	const sessionId = verifyWebSessionToken(config.secrets.jwtKey, token);
+	if (!sessionId) {
+		return null;
+	}
+
+	const session = accountManager.getWebSession(sessionId);
 	return session;
 };

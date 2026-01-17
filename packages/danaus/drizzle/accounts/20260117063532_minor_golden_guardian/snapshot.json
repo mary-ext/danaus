@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "ac52481d-ca5d-445c-b696-ae857bf5467f",
+  "id": "932710cc-55eb-4151-8b21-3135d4bb9a08",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -31,15 +31,15 @@
       "entityType": "tables"
     },
     {
-      "name": "mfa_challenge",
-      "entityType": "tables"
-    },
-    {
       "name": "recovery_code",
       "entityType": "tables"
     },
     {
       "name": "totp_credential",
+      "entityType": "tables"
+    },
+    {
+      "name": "verify_challenge",
       "entityType": "tables"
     },
     {
@@ -405,56 +405,6 @@
       "table": "legacy_session"
     },
     {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "token",
-      "entityType": "columns",
-      "table": "mfa_challenge"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "did",
-      "entityType": "columns",
-      "table": "mfa_challenge"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "webauthn_challenge",
-      "entityType": "columns",
-      "table": "mfa_challenge"
-    },
-    {
-      "type": "integer",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "table": "mfa_challenge"
-    },
-    {
-      "type": "integer",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "expires_at",
-      "entityType": "columns",
-      "table": "mfa_challenge"
-    },
-    {
       "type": "integer",
       "notNull": false,
       "autoincrement": true,
@@ -563,6 +513,66 @@
       "name": "last_used_counter",
       "entityType": "columns",
       "table": "totp_credential"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "token",
+      "entityType": "columns",
+      "table": "verify_challenge"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "verify_challenge"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "session_id",
+      "entityType": "columns",
+      "table": "verify_challenge"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "webauthn_challenge",
+      "entityType": "columns",
+      "table": "verify_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "verify_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "table": "verify_challenge"
     },
     {
       "type": "text",
@@ -880,21 +890,6 @@
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "nameExplicit": false,
-      "name": "fk_mfa_challenge_did_account_did_fk",
-      "entityType": "fks",
-      "table": "mfa_challenge"
-    },
-    {
-      "columns": [
-        "did"
-      ],
-      "tableTo": "account",
-      "columnsTo": [
-        "did"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "nameExplicit": false,
       "name": "fk_recovery_code_did_account_did_fk",
       "entityType": "fks",
       "table": "recovery_code"
@@ -913,6 +908,36 @@
       "name": "fk_totp_credential_did_account_did_fk",
       "entityType": "fks",
       "table": "totp_credential"
+    },
+    {
+      "columns": [
+        "did"
+      ],
+      "tableTo": "account",
+      "columnsTo": [
+        "did"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_verify_challenge_did_account_did_fk",
+      "entityType": "fks",
+      "table": "verify_challenge"
+    },
+    {
+      "columns": [
+        "session_id"
+      ],
+      "tableTo": "web_session",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_verify_challenge_session_id_web_session_id_fk",
+      "entityType": "fks",
+      "table": "verify_challenge"
     },
     {
       "columns": [
@@ -1017,15 +1042,6 @@
     },
     {
       "columns": [
-        "token"
-      ],
-      "nameExplicit": false,
-      "name": "mfa_challenge_pk",
-      "table": "mfa_challenge",
-      "entityType": "pks"
-    },
-    {
-      "columns": [
         "id"
       ],
       "nameExplicit": false,
@@ -1040,6 +1056,15 @@
       "nameExplicit": false,
       "name": "totp_credential_pk",
       "table": "totp_credential",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "token"
+      ],
+      "nameExplicit": false,
+      "name": "verify_challenge_pk",
+      "table": "verify_challenge",
       "entityType": "pks"
     },
     {
@@ -1132,20 +1157,6 @@
     {
       "columns": [
         {
-          "value": "expires_at",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "mfa_challenge_expires_idx",
-      "entityType": "indexes",
-      "table": "mfa_challenge"
-    },
-    {
-      "columns": [
-        {
           "value": "did",
           "isExpression": false
         }
@@ -1170,6 +1181,20 @@
       "name": "totp_credential_did_idx",
       "entityType": "indexes",
       "table": "totp_credential"
+    },
+    {
+      "columns": [
+        {
+          "value": "expires_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "verify_challenge_expires_idx",
+      "entityType": "indexes",
+      "table": "verify_challenge"
     },
     {
       "columns": [

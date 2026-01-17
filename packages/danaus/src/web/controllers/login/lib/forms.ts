@@ -12,7 +12,6 @@ import { isRecoveryCode, isTotpCode } from '#app/accounts/totp.ts';
 import { setWebSessionToken } from '#app/auth/web.ts';
 
 import { getAppContext } from '#web/middlewares/app-context.ts';
-import { getSession } from '#web/middlewares/session.ts';
 import { routes } from '#web/routes.ts';
 
 export type AuthFactor = 'totp' | 'recovery' | 'password' | 'webauthn';
@@ -125,15 +124,15 @@ export const loginForm = form(
 			throw err;
 		}
 
-		// clean up any expired MFA challenges
-		accountManager.cleanupExpiredMfaChallenges();
+		// clean up any expired verify challenges
+		accountManager.cleanupExpiredVerifyChallenges();
 
 		// check if MFA is enabled
 		if (accountManager.getMfaStatus(account.did) !== null) {
-			// create MFA challenge and redirect
-			const token = accountManager.createMfaChallenge(account.did);
+			// create verify challenge and redirect
+			const token = accountManager.createVerifyChallenge(account.did);
 
-			redirect(routes.login.mfa.index.href(undefined, { token, redirect: data.redirect }));
+			redirect(routes.verify.index.href(undefined, { token, redirect: data.redirect }));
 		}
 
 		const { session, token } = await accountManager.createWebSession({
@@ -153,10 +152,14 @@ export const loginForm = form(
 	},
 );
 
-export const verifyMfaLoginForm = form(
+const VERIFY_ALLOWED_MFA_FACTORS: AuthFactor[] = ['totp', 'recovery'];
+const VERIFY_ALLOWED_SUDO_MFA_FACTORS: AuthFactor[] = ['totp', 'webauthn', 'recovery'];
+const VERIFY_ALLOWED_SUDO_OFA_FACTORS: AuthFactor[] = ['password'];
+
+export const verifyForm = form(
 	v.object({
 		challenge: v.string(),
-		factor: v.picklist<AuthFactor[]>(['totp', 'recovery']),
+		factor: v.picklist<AuthFactor[]>(['totp', 'recovery', 'password']),
 		_code: v.string(),
 		remember: v.optional(v.boolean(), false),
 		redirect: v.string(),
@@ -165,34 +168,53 @@ export const verifyMfaLoginForm = form(
 		const { accountManager } = getAppContext();
 		const { request } = getContext();
 
-		const challenge = accountManager.getMfaChallenge(data.challenge);
+		const challenge = accountManager.getVerifyChallenge(data.challenge);
 		if (challenge === null) {
-			redirect(routes.login.show.href(undefined, { redirect: data.redirect }));
+			redirect(routes.login.href(undefined, { redirect: data.redirect }));
+		}
+
+		const isSudo = challenge.session_id !== null;
+
+		// determine allowed factors based on mode and MFA status
+		let allowedFactors: AuthFactor[];
+		if (isSudo) {
+			const hasMfa = accountManager.getMfaStatus(challenge.did) !== null;
+			allowedFactors = hasMfa ? VERIFY_ALLOWED_SUDO_MFA_FACTORS : VERIFY_ALLOWED_SUDO_OFA_FACTORS;
+		} else {
+			allowedFactors = VERIFY_ALLOWED_MFA_FACTORS;
 		}
 
 		await verifyFactor({
 			did: challenge.did,
 			factor: data.factor,
 			code: data._code,
-			allowedFactors: ['totp', 'recovery'],
+			allowedFactors,
 		});
 
-		accountManager.deleteMfaChallenge(data.challenge);
+		// delete challenge
+		accountManager.deleteVerifyChallenge(data.challenge);
 
-		const { session, token } = await accountManager.createWebSession({
-			did: challenge.did,
-			remember: data.remember ?? false,
-			userAgent: request.headers.get('user-agent') ?? undefined,
-		});
+		if (isSudo) {
+			// elevate session and redirect
+			accountManager.elevateSession(challenge.session_id!);
+			redirect(data.redirect);
+		} else {
+			// MFA login: create new session
+			const { session, token } = await accountManager.createWebSession({
+				did: challenge.did,
+				remember: data.remember ?? false,
+				userAgent: request.headers.get('user-agent') ?? undefined,
+			});
 
-		setWebSessionToken(request, token, {
-			expires: session.expires_at,
-			httpOnly: true,
-			sameSite: 'lax',
-			path: '/',
-		});
+			setWebSessionToken(request, token, {
+				expires: session.expires_at,
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+			});
 
-		redirect(data.redirect);
+			redirect(data.redirect);
+		}
 	},
 );
 
@@ -218,7 +240,7 @@ const authenticationResponseSchema = v.object({
 	type: v.literal('public-key'),
 });
 
-export const verifyWebAuthnMfaForm = form(
+export const verifyWebAuthnForm = form(
 	v.object({
 		challenge: v.string(),
 		response: v.pipe(v.string(), v.minLength(1), v.parseJson(), authenticationResponseSchema),
@@ -229,18 +251,18 @@ export const verifyWebAuthnMfaForm = form(
 		const { accountManager, config } = getAppContext();
 		const { request } = getContext();
 
-		const mfaChallenge = accountManager.getMfaChallenge(data.challenge);
-		if (mfaChallenge === null) {
-			redirect(routes.login.show.href(undefined, { redirect: data.redirect }));
+		const challenge = accountManager.getVerifyChallenge(data.challenge);
+		if (challenge === null) {
+			redirect(routes.login.href(undefined, { redirect: data.redirect }));
 		}
 
-		if (!mfaChallenge.webauthn_challenge) {
+		if (!challenge.webauthn_challenge) {
 			invalid(`WebAuthn not initiated for this session`);
 		}
 
 		// find the credential being used
 		const credential = accountManager.getWebAuthnCredentialByCredentialId(data.response.id);
-		if (credential === null || credential.did !== mfaChallenge.did) {
+		if (credential === null || credential.did !== challenge.did) {
 			invalid(`Invalid security key`);
 		}
 
@@ -250,7 +272,7 @@ export const verifyWebAuthnMfaForm = form(
 		try {
 			const verification = await verifyWebAuthnAuthentication({
 				response: data.response,
-				expectedChallenge: mfaChallenge.webauthn_challenge,
+				expectedChallenge: challenge.webauthn_challenge,
 				expectedOrigin: config.service.publicUrl,
 				expectedRpId: new URL(config.service.publicUrl).hostname,
 				credential,
@@ -269,132 +291,31 @@ export const verifyWebAuthnMfaForm = form(
 			invalid(`Security key verification failed`);
 		}
 
-		accountManager.deleteMfaChallenge(data.challenge);
+		const isSudo = challenge.session_id !== null;
 
-		const { session, token } = await accountManager.createWebSession({
-			did: mfaChallenge.did,
-			remember: data.remember ?? false,
-			userAgent: request.headers.get('user-agent') ?? undefined,
-		});
+		// delete challenge
+		accountManager.deleteVerifyChallenge(data.challenge);
 
-		setWebSessionToken(request, token, {
-			expires: session.expires_at,
-			httpOnly: true,
-			sameSite: 'lax',
-			path: '/',
-		});
-
-		redirect(data.redirect);
-	},
-);
-
-const SUDO_ALLOWED_MFA_FACTORS: AuthFactor[] = ['totp', 'webauthn', 'recovery'];
-const SUDO_ALLOWED_OFA_FACTORS: AuthFactor[] = ['password'];
-
-export const verifySudoForm = form(
-	v.object({
-		factor: v.picklist<AuthFactor[]>(['totp', 'recovery', 'password']),
-		_code: v.string(),
-		redirect: v.pipe(v.string(), v.minLength(1)),
-	}),
-	async (data) => {
-		const { accountManager } = getAppContext();
-		const session = getSession();
-
-		// determine allowed factors based on MFA status
-		const hasMfa = accountManager.getMfaStatus(session.did) !== null;
-		const allowedFactors = hasMfa ? SUDO_ALLOWED_MFA_FACTORS : SUDO_ALLOWED_OFA_FACTORS;
-
-		await verifyFactor({
-			did: session.did,
-			factor: data.factor,
-			code: data._code,
-			allowedFactors,
-		});
-
-		// elevate session and redirect
-		accountManager.elevateSession(session.id);
-		redirect(data.redirect);
-	},
-);
-
-const sudoAuthenticationResponseSchema = v.object({
-	id: v.string(),
-	rawId: v.string(),
-	response: v.object({
-		clientDataJSON: v.string(),
-		authenticatorData: v.string(),
-		signature: v.string(),
-		userHandle: v.optional(v.string()),
-	}),
-	authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
-	clientExtensionResults: v.object({
-		appid: v.optional(v.boolean()),
-		credProps: v.optional(
-			v.object({
-				rk: v.optional(v.boolean()),
-			}),
-		),
-		hmacCreateSecret: v.optional(v.boolean()),
-	}),
-	type: v.literal('public-key'),
-});
-
-export const verifyWebAuthnSudoForm = form(
-	v.object({
-		challenge: v.string(),
-		response: v.pipe(v.string(), v.minLength(1), v.parseJson(), sudoAuthenticationResponseSchema),
-		redirect: v.pipe(v.string(), v.minLength(1)),
-	}),
-	async (data) => {
-		const { accountManager, config } = getAppContext();
-		const session = getSession();
-
-		if (accountManager.getMfaStatus(session.did) === null) {
-			redirect(routes.login.sudo.index.href(undefined, { redirect: data.redirect }));
-		}
-
-		const sudoChallenge = accountManager.getWebAuthnChallenge(data.challenge);
-		if (sudoChallenge === null || sudoChallenge.did !== session.did) {
-			invalid(`Invalid or expired challenge`);
-		}
-
-		// find the credential being used
-		const credential = accountManager.getWebAuthnCredentialByCredentialId(data.response.id);
-		if (credential === null || credential.did !== session.did) {
-			invalid(`Invalid security key`);
-		}
-
-		// verify the authentication response
-		const { verifyWebAuthnAuthentication } = await import('#app/accounts/webauthn.ts');
-
-		try {
-			const verification = await verifyWebAuthnAuthentication({
-				response: data.response,
-				expectedChallenge: sudoChallenge.challenge,
-				expectedOrigin: config.service.publicUrl,
-				expectedRpId: new URL(config.service.publicUrl).hostname,
-				credential,
+		if (isSudo) {
+			// elevate session and redirect
+			accountManager.elevateSession(challenge.session_id!);
+			redirect(data.redirect);
+		} else {
+			// MFA login: create new session
+			const { session, token } = await accountManager.createWebSession({
+				did: challenge.did,
+				remember: data.remember ?? false,
+				userAgent: request.headers.get('user-agent') ?? undefined,
 			});
 
-			if (!verification.verified) {
-				invalid(`Security key verification failed`);
-			}
+			setWebSessionToken(request, token, {
+				expires: session.expires_at,
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+			});
 
-			// update counter
-			accountManager.updateWebAuthnCredentialCounter(
-				credential.id,
-				verification.authenticationInfo.newCounter,
-			);
-		} catch {
-			invalid(`Security key verification failed`);
+			redirect(data.redirect);
 		}
-
-		// clean up the challenge
-		accountManager.deleteWebAuthnChallenge(data.challenge);
-
-		// elevate session and redirect
-		accountManager.elevateSession(session.id);
-		redirect(data.redirect);
 	},
 );

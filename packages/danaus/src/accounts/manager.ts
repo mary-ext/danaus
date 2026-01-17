@@ -42,7 +42,7 @@ export type InviteCode = typeof t.inviteCode.$inferSelect;
 export type InviteCodeUse = typeof t.inviteCodeUse.$inferSelect;
 export type TotpCredential = typeof t.totpCredential.$inferSelect;
 export type BackupCode = typeof t.recoveryCode.$inferSelect;
-export type MfaChallenge = typeof t.mfaChallenge.$inferSelect;
+export type VerifyChallenge = typeof t.verifyChallenge.$inferSelect;
 export type WebauthnCredential = typeof t.webauthnCredential.$inferSelect;
 export type WebauthnChallenge = typeof t.webauthnChallenge.$inferSelect;
 
@@ -1369,23 +1369,24 @@ export class AccountManager implements Disposable {
 
 	// #endregion
 
-	// #region MFA challenges
+	// #region verification challenges
 
 	/**
-	 * create an MFA challenge for login.
+	 * create a verification challenge for MFA login (no session, creates one on success).
 	 * @param did account did
-	 * @returns token for the MFA page
+	 * @returns token for the verify page
 	 */
-	createMfaChallenge(did: Did): string {
+	createVerifyChallenge(did: Did): string {
 		const token = nanoid(32);
 		const now = new Date();
 		const expiresAt = new Date(now.getTime() + MFA_CHALLENGE_TTL_MS);
 
 		this.db
-			.insert(t.mfaChallenge)
+			.insert(t.verifyChallenge)
 			.values({
 				token: token,
 				did: did,
+				session_id: null,
 				created_at: now,
 				expires_at: expiresAt,
 			})
@@ -1395,12 +1396,59 @@ export class AccountManager implements Disposable {
 	}
 
 	/**
-	 * get an MFA challenge by token.
-	 * @param token the token
-	 * @returns MFA challenge or null if expired/not found
+	 * create or get an existing sudo challenge for session elevation.
+	 * @param sessionId the session to elevate
+	 * @param did account did
+	 * @returns the verify challenge row
 	 */
-	getMfaChallenge(token: string): MfaChallenge | null {
-		const challenge = this.db.select().from(t.mfaChallenge).where(eq(t.mfaChallenge.token, token)).get();
+	getOrCreateSudoChallenge(sessionId: string, did: Did): VerifyChallenge {
+		// check for existing sudo challenge for this session
+		const existing = this.db
+			.select()
+			.from(t.verifyChallenge)
+			.where(eq(t.verifyChallenge.session_id, sessionId))
+			.get();
+
+		const now = new Date();
+
+		if (existing && existing.expires_at > now) {
+			return existing;
+		}
+
+		// delete expired challenge if it exists
+		if (existing) {
+			this.db.delete(t.verifyChallenge).where(eq(t.verifyChallenge.token, existing.token)).run();
+		}
+
+		const token = nanoid(32);
+		const expiresAt = new Date(now.getTime() + MFA_CHALLENGE_TTL_MS);
+
+		const inserted = this.db
+			.insert(t.verifyChallenge)
+			.values({
+				token: token,
+				did: did,
+				session_id: sessionId,
+				created_at: now,
+				expires_at: expiresAt,
+			})
+			.returning()
+			.get();
+
+		return inserted;
+	}
+
+	/**
+	 * get a verification challenge by token.
+	 * @param token the token
+	 * @returns verify challenge or null if expired/not found
+	 */
+	getVerifyChallenge(token: string): VerifyChallenge | null {
+		const challenge = this.db
+			.select()
+			.from(t.verifyChallenge)
+			.where(eq(t.verifyChallenge.token, token))
+			.get();
 
 		if (!challenge) {
 			return null;
@@ -1408,7 +1456,7 @@ export class AccountManager implements Disposable {
 
 		const now = new Date();
 		if (challenge.expires_at <= now) {
-			this.db.delete(t.mfaChallenge).where(eq(t.mfaChallenge.token, token)).run();
+			this.db.delete(t.verifyChallenge).where(eq(t.verifyChallenge.token, token)).run();
 			return null;
 		}
 
@@ -1416,19 +1464,32 @@ export class AccountManager implements Disposable {
 	}
 
 	/**
-	 * delete an MFA challenge.
+	 * delete a verification challenge.
 	 * @param token the token
 	 */
-	deleteMfaChallenge(token: string): void {
-		this.db.delete(t.mfaChallenge).where(eq(t.mfaChallenge.token, token)).run();
+	deleteVerifyChallenge(token: string): void {
+		this.db.delete(t.verifyChallenge).where(eq(t.verifyChallenge.token, token)).run();
 	}
 
 	/**
-	 * clean up expired MFA challenges.
+	 * clean up expired verification challenges.
 	 */
-	cleanupExpiredMfaChallenges(): void {
+	cleanupExpiredVerifyChallenges(): void {
 		const now = new Date();
-		this.db.delete(t.mfaChallenge).where(lte(t.mfaChallenge.expires_at, now)).run();
+		this.db.delete(t.verifyChallenge).where(lte(t.verifyChallenge.expires_at, now)).run();
+	}
+
+	/**
+	 * set the WebAuthn challenge on an existing verification challenge.
+	 * @param token verify challenge token
+	 * @param webauthnChallenge base64url WebAuthn challenge
+	 */
+	setVerifyChallengeWebAuthn(token: string, webauthnChallenge: string): void {
+		this.db
+			.update(t.verifyChallenge)
+			.set({ webauthn_challenge: webauthnChallenge })
+			.where(eq(t.verifyChallenge.token, token))
+			.run();
 	}
 
 	// #endregion
@@ -1716,23 +1777,6 @@ export class AccountManager implements Disposable {
 	cleanupExpiredWebAuthnChallenges(): void {
 		const now = new Date();
 		this.db.delete(t.webauthnChallenge).where(lte(t.webauthnChallenge.expires_at, now)).run();
-	}
-
-	// #endregion
-
-	// #region MFA challenge WebAuthn support
-
-	/**
-	 * set the WebAuthn challenge on an existing MFA challenge.
-	 * @param token MFA challenge token
-	 * @param webauthnChallenge base64url WebAuthn challenge
-	 */
-	setMfaChallengeWebAuthn(token: string, webauthnChallenge: string): void {
-		this.db
-			.update(t.mfaChallenge)
-			.set({ webauthn_challenge: webauthnChallenge })
-			.where(eq(t.mfaChallenge.token, token))
-			.run();
 	}
 
 	// #endregion

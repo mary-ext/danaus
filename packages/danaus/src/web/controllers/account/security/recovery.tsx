@@ -27,7 +27,7 @@ export default {
 
 			// require sudo mode
 			if (!accountManager.isSessionElevated(session)) {
-				redirect(routes.login.sudo.index.href(undefined, { redirect: url.pathname }));
+				redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 			}
 
 			// generate codes if none exist
@@ -81,7 +81,7 @@ export default {
 
 				// require sudo mode
 				if (!accountManager.isSessionElevated(session)) {
-					redirect(routes.login.sudo.index.href(undefined, { redirect: url.pathname }));
+					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 
 				const { fields } = generateBackupCodesForm;
@@ -139,7 +139,7 @@ export default {
 
 				// require sudo mode
 				if (!accountManager.isSessionElevated(session)) {
-					redirect(routes.login.sudo.index.href(undefined, { redirect: url.pathname }));
+					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 
 				const { fields } = deleteBackupCodesForm;

@@ -13,24 +13,16 @@ export const routes = route({
 		},
 	},
 
-	// login routes
-	login: {
-		show: '/account/login',
-		mfa: {
-			index: '/account/login/mfa',
-			totp: '/account/login/mfa/totp',
-			webauthn: '/account/login/mfa/webauthn',
-			recovery: '/account/login/mfa/recovery',
-		},
+	// login route
+	login: '/account/login',
 
-		// sudo is located here just so we can share some parts with the MFA page
-		sudo: {
-			index: '/account/sudo',
-			totp: '/account/sudo/totp',
-			webauthn: '/account/sudo/webauthn',
-			recovery: '/account/sudo/recovery',
-			password: '/account/sudo/password',
-		},
+	// verification routes - handles both MFA login (?token) and sudo (session-based)
+	verify: {
+		index: '/account/verify',
+		totp: '/account/verify/totp',
+		webauthn: '/account/verify/webauthn',
+		recovery: '/account/verify/recovery',
+		password: '/account/verify/password',
 	},
 
 	// account routes - all require session

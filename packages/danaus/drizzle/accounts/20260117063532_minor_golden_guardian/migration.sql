@@ -61,15 +61,6 @@ CREATE TABLE `legacy_session` (
 	CONSTRAINT `fk_legacy_session_next_id_legacy_session_id_fk` FOREIGN KEY (`next_id`) REFERENCES `legacy_session`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
-CREATE TABLE `mfa_challenge` (
-	`token` text PRIMARY KEY,
-	`did` text NOT NULL,
-	`webauthn_challenge` text,
-	`created_at` integer NOT NULL,
-	`expires_at` integer NOT NULL,
-	CONSTRAINT `fk_mfa_challenge_did_account_did_fk` FOREIGN KEY (`did`) REFERENCES `account`(`did`) ON DELETE CASCADE
-);
---> statement-breakpoint
 CREATE TABLE `recovery_code` (
 	`id` integer PRIMARY KEY AUTOINCREMENT,
 	`did` text NOT NULL,
@@ -88,6 +79,17 @@ CREATE TABLE `totp_credential` (
 	`last_used_counter` integer NOT NULL,
 	CONSTRAINT `fk_totp_credential_did_account_did_fk` FOREIGN KEY (`did`) REFERENCES `account`(`did`) ON DELETE CASCADE,
 	CONSTRAINT `totp_credential_did_name_unique` UNIQUE(`did`,`name`)
+);
+--> statement-breakpoint
+CREATE TABLE `verify_challenge` (
+	`token` text PRIMARY KEY,
+	`did` text NOT NULL,
+	`session_id` text,
+	`webauthn_challenge` text,
+	`created_at` integer NOT NULL,
+	`expires_at` integer NOT NULL,
+	CONSTRAINT `fk_verify_challenge_did_account_did_fk` FOREIGN KEY (`did`) REFERENCES `account`(`did`) ON DELETE CASCADE,
+	CONSTRAINT `fk_verify_challenge_session_id_web_session_id_fk` FOREIGN KEY (`session_id`) REFERENCES `web_session`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
 CREATE TABLE `web_session` (
@@ -127,9 +129,9 @@ CREATE INDEX `account_created_at_did_idx` ON `account` (`created_at`,`did`);--> 
 CREATE UNIQUE INDEX `account_handle_lower_idx` ON `account` (lower("handle"));--> statement-breakpoint
 CREATE UNIQUE INDEX `account_email_lower_idx` ON `account` (lower("email"));--> statement-breakpoint
 CREATE INDEX `legacy_session_did_idx` ON `legacy_session` (`did`);--> statement-breakpoint
-CREATE INDEX `mfa_challenge_expires_idx` ON `mfa_challenge` (`expires_at`);--> statement-breakpoint
 CREATE INDEX `recovery_code_did_idx` ON `recovery_code` (`did`);--> statement-breakpoint
 CREATE INDEX `totp_credential_did_idx` ON `totp_credential` (`did`);--> statement-breakpoint
+CREATE INDEX `verify_challenge_expires_idx` ON `verify_challenge` (`expires_at`);--> statement-breakpoint
 CREATE INDEX `web_session_did_idx` ON `web_session` (`did`);--> statement-breakpoint
 CREATE INDEX `webauthn_challenge_expires_idx` ON `webauthn_challenge` (`expires_at`);--> statement-breakpoint
 CREATE INDEX `webauthn_credential_did_idx` ON `webauthn_credential` (`did`);--> statement-breakpoint
