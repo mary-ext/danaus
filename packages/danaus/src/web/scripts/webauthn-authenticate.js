@@ -26,6 +26,11 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 		return this.querySelector('[data-target="webauthn-authenticate.status"]');
 	}
 
+	/** @type {HTMLFormElement | null} */
+	get formElement() {
+		return this.querySelector('[data-target="webauthn-authenticate.form"]');
+	}
+
 	connectedCallback() {
 		const optionsJson = this.dataset.options;
 		if (!optionsJson) {
@@ -103,7 +108,7 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			status.textContent = 'Security key verified!';
 
 			// auto-submit the form
-			this.closest('form')?.submit();
+			this.formElement?.submit();
 		} catch (err) {
 			if (startButton) {
 				startButton.disabled = false;

@@ -200,21 +200,21 @@ export default {
 
 					<div class="flex flex-1 items-center justify-center p-4">
 						<div class="w-full max-w-96 rounded-xl bg-neutral-background-1 p-6 shadow-16">
-							<form {...verifyWebAuthnForm} class="flex flex-col gap-6">
-								<input {...fields.challenge.as('hidden', ctx.challenge.token)} />
-								<input {...fields.redirect.as('hidden', ctx.redirectUrl)} />
+							<danaus-webauthn-authenticate class="contents" data-options={JSON.stringify(options)}>
+								<form {...verifyWebAuthnForm} class="flex flex-col gap-6" data-target="webauthn-authenticate.form">
+									<input {...fields.challenge.as('hidden', ctx.challenge.token)} />
+									<input {...fields.redirect.as('hidden', ctx.redirectUrl)} />
 
-								<div class="flex flex-col gap-2">
-									<h1 class="text-base-500 font-semibold">
-										{ctx.isSudo ? 'Confirm your identity' : 'Two-factor authentication'}
-									</h1>
-									<p class="text-base-300 text-neutral-foreground-3">
-										Insert your security key and touch it
-										{ctx.isSudo ? ' to continue.' : ' to verify your identity.'}
-									</p>
-								</div>
+									<div class="flex flex-col gap-2">
+										<h1 class="text-base-500 font-semibold">
+											{ctx.isSudo ? 'Confirm your identity' : 'Two-factor authentication'}
+										</h1>
+										<p class="text-base-300 text-neutral-foreground-3">
+											Insert your security key and touch it
+											{ctx.isSudo ? ' to continue.' : ' to verify your identity.'}
+										</p>
+									</div>
 
-								<danaus-webauthn-authenticate data-options={JSON.stringify(options)}>
 									<input {...fields.response.as('hidden', '')} data-target="webauthn-authenticate.response" />
 
 									<Button data-target="webauthn-authenticate.start" type="button" variant="primary">
@@ -225,16 +225,16 @@ export default {
 										data-target="webauthn-authenticate.status"
 										class="text-center text-base-300 text-neutral-foreground-3"
 									/>
-								</danaus-webauthn-authenticate>
 
-								<OtherMethodsMenu
-									factor="webauthn"
-									challenge={ctx.challenge.token}
-									redirectUrl={ctx.redirectUrl}
-									mfaStatus={ctx.mfaStatus}
-									isSudo={ctx.isSudo}
-								/>
-							</form>
+									<OtherMethodsMenu
+										factor="webauthn"
+										challenge={ctx.challenge.token}
+										redirectUrl={ctx.redirectUrl}
+										mfaStatus={ctx.mfaStatus}
+										isSudo={ctx.isSudo}
+									/>
+								</form>
+							</danaus-webauthn-authenticate>
 						</div>
 					</div>
 				</BaseLayout>,

@@ -65,6 +65,7 @@ export default {
 
 						<div class="flex flex-1 items-center justify-center p-4">
 							<div class="w-full max-w-120 rounded-xl bg-neutral-background-1 shadow-64">
+								<danaus-webauthn-register class="contents" data-options={JSON.stringify(options)}>
 								<form {...completeWebAuthnForm} class="contents">
 									<Dialog.Body>
 										<Dialog.Title>Set up security key</Dialog.Title>
@@ -76,33 +77,31 @@ export default {
 
 											<input {...fields.token.as('hidden', token!)} />
 
-											<danaus-webauthn-register data-options={JSON.stringify(options)}>
-												<p
-													data-target="webauthn-register.status"
-													class="text-base-300 text-neutral-foreground-3"
-												>
-													Initializing...
-												</p>
+											<p
+												data-target="webauthn-register.status"
+												class="text-base-300 text-neutral-foreground-3"
+											>
+												Initializing...
+											</p>
 
-												<input
-													{...fields.response.as('hidden', '')}
-													data-target="webauthn-register.response"
+											<input
+												{...fields.response.as('hidden', '')}
+												data-target="webauthn-register.response"
+											/>
+
+											<Field
+												label="Name"
+												hint="Give this security key a name to help you identify it"
+												validationMessageText={fields.name.issues()?.at(0)?.message}
+											>
+												<Input
+													{...fields.name.as('text')}
+													placeholder={accountManager.generateWebAuthnName(
+														session.did,
+														WebAuthnCredentialType.SecurityKey,
+													)}
 												/>
-
-												<Field
-													label="Name"
-													hint="Give this security key a name to help you identify it"
-													validationMessageText={fields.name.issues()?.at(0)?.message}
-												>
-													<Input
-														{...fields.name.as('text')}
-														placeholder={accountManager.generateWebAuthnName(
-															session.did,
-															WebAuthnCredentialType.SecurityKey,
-														)}
-													/>
-												</Field>
-											</danaus-webauthn-register>
+											</Field>
 
 											{generalError && (
 												<p role="alert" class="text-base-300 text-status-danger-foreground-1">
@@ -122,6 +121,7 @@ export default {
 										</Dialog.Actions>
 									</Dialog.Body>
 								</form>
+							</danaus-webauthn-register>
 							</div>
 						</div>
 					</BaseLayout>,
