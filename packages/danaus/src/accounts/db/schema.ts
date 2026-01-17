@@ -259,10 +259,10 @@ export const verifyChallenge = sqliteTable(
 // #region WebAuthn credentials
 
 /** WebAuthn credential types */
-export const enum WebAuthnCredentialType {
+export enum WebAuthnCredentialType {
 	/** security key - non-discoverable, 2FA only */
 	SecurityKey = 0,
-	/** passkey - discoverable, can be used for passwordless (future) */
+	/** passkey - discoverable, can be used for passwordless */
 	Passkey = 1,
 }
 
@@ -301,8 +301,8 @@ export const webauthnCredential = sqliteTable(
 );
 
 /** WebAuthn registration challenges */
-export const webauthnChallenge = sqliteTable(
-	'webauthn_challenge',
+export const webauthnRegistrationChallenge = sqliteTable(
+	'webauthn_registration_challenge',
 	{
 		token: text().primaryKey(),
 
@@ -317,7 +317,20 @@ export const webauthnChallenge = sqliteTable(
 		created_at: integer({ mode: 'timestamp' }).notNull(),
 		expires_at: integer({ mode: 'timestamp' }).notNull(),
 	},
-	(t) => [index('webauthn_challenge_expires_idx').on(t.expires_at)],
+	(t) => [index('webauthn_registration_challenge_expires_idx').on(t.expires_at)],
+);
+
+/** challenges for passkey (passwordless) login - no DID since user is unknown */
+export const passkeyLoginChallenge = sqliteTable(
+	'passkey_login_challenge',
+	{
+		/** base64url challenge (used as primary key) */
+		challenge: text().primaryKey(),
+
+		created_at: integer({ mode: 'timestamp' }).notNull(),
+		expires_at: integer({ mode: 'timestamp' }).notNull(),
+	},
+	(t) => [index('passkey_login_challenge_expires_idx').on(t.expires_at)],
 );
 
 // #endregion

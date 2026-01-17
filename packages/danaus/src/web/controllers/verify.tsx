@@ -15,7 +15,7 @@ import { generateWebAuthnAuthenticationOptions } from '#app/accounts/webauthn.ts
 import { BaseLayout } from '#web/layouts/base.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { tryGetSession } from '#web/middlewares/session.ts';
-import { Button, Field, Input, Menu } from '#web/primitives/index.ts';
+import { Button, Field, Input, Menu, MessageBar } from '#web/primitives/index.ts';
 import { routes } from '#web/routes.ts';
 
 import { verifyForm, verifyWebAuthnForm, type AuthFactor } from './login/lib/forms.ts';
@@ -48,13 +48,13 @@ const resolveVerifyContext = (url: URL): VerifyContext => {
 		const challenge = accountManager.getVerifyChallenge(tokenParam);
 		if (challenge === null) {
 			// invalid or expired token → redirect to login (don't fall back to sudo)
-			redirect(routes.login.href(undefined, { redirect: redirectUrl }));
+			redirect(routes.login.index.href(undefined, { redirect: redirectUrl }));
 		}
 
 		const mfaStatus = accountManager.getMfaStatus(challenge.did);
 		if (mfaStatus === null) {
 			// no MFA configured (shouldn't happen, but handle it)
-			redirect(routes.login.href(undefined, { redirect: redirectUrl }));
+			redirect(routes.login.index.href(undefined, { redirect: redirectUrl }));
 		}
 
 		return {
@@ -68,7 +68,7 @@ const resolveVerifyContext = (url: URL): VerifyContext => {
 	// mode 2: sudo - no token, but has session
 	const session = tryGetSession();
 	if (session === null) {
-		redirect(routes.login.href(undefined, { redirect: redirectUrl }));
+		redirect(routes.login.index.href(undefined, { redirect: redirectUrl }));
 	}
 
 	// already elevated? redirect directly to target
@@ -101,7 +101,7 @@ export default {
 
 			// for MFA login without mfaStatus, this shouldn't happen but redirect to login
 			if (ctx.mfaStatus === null) {
-				redirect(routes.login.href(undefined, { redirect: ctx.redirectUrl }));
+				redirect(routes.login.index.href(undefined, { redirect: ctx.redirectUrl }));
 			}
 
 			// redirect to preferred method
@@ -198,10 +198,20 @@ export default {
 
 					<script src="/assets/webauthn-authenticate.js" type="module" />
 
-					<div class="flex flex-1 items-center justify-center p-4">
+					<div class="flex flex-1 flex-col items-center justify-center gap-4 p-4">
+						<noscript>
+							<MessageBar.Root intent="warning" layout="singleline" class="w-full max-w-96">
+								<MessageBar.Body>JavaScript is required to use security keys.</MessageBar.Body>
+							</MessageBar.Root>
+						</noscript>
+
 						<div class="w-full max-w-96 rounded-xl bg-neutral-background-1 p-6 shadow-16">
 							<danaus-webauthn-authenticate class="contents" data-options={JSON.stringify(options)}>
-								<form {...verifyWebAuthnForm} class="flex flex-col gap-6" data-target="webauthn-authenticate.form">
+								<form
+									{...verifyWebAuthnForm}
+									class="flex flex-col gap-6"
+									data-target="webauthn-authenticate.form"
+								>
 									<input {...fields.challenge.as('hidden', ctx.challenge.token)} />
 									<input {...fields.redirect.as('hidden', ctx.redirectUrl)} />
 
@@ -217,13 +227,13 @@ export default {
 
 									<input {...fields.response.as('hidden', '')} data-target="webauthn-authenticate.response" />
 
-									<Button data-target="webauthn-authenticate.start" type="button" variant="primary">
+									<Button data-target="webauthn-authenticate.start" variant="primary" disabled>
 										Use security key
 									</Button>
 
 									<div
 										data-target="webauthn-authenticate.status"
-										class="text-center text-base-300 text-neutral-foreground-3"
+										class="text-center text-base-300 text-neutral-foreground-3 empty:hidden"
 									/>
 
 									<OtherMethodsMenu
@@ -293,7 +303,7 @@ export default {
 
 			// password is only allowed in sudo mode for non-MFA users
 			if (!ctx.isSudo) {
-				redirect(routes.login.href(undefined, { redirect: ctx.redirectUrl }));
+				redirect(routes.login.index.href(undefined, { redirect: ctx.redirectUrl }));
 			}
 
 			// MFA users must use MFA methods

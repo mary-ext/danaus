@@ -10,6 +10,7 @@ import {
 	type VerifiedRegistrationResponse,
 } from '@simplewebauthn/server';
 
+import { WebAuthnCredentialType } from './db/schema.ts';
 import type { WebauthnCredential } from './manager';
 
 // #region constants
@@ -35,15 +36,21 @@ export interface GenerateRegistrationOptionsParams {
 	userName: string;
 	/** existing credentials to exclude */
 	excludeCredentials?: WebauthnCredential[];
+	/** credential type to register */
+	credentialType: WebAuthnCredentialType;
 }
 
 /**
- * generates WebAuthn registration options for creating a new security key credential.
+ * generates WebAuthn registration options for creating a new credential.
  * @param params registration parameters
  * @returns registration options to send to the client
  */
 export const generateWebAuthnRegistrationOptions = async (params: GenerateRegistrationOptionsParams) => {
-	const { rpId, rpName, userId, userName, excludeCredentials = [] } = params;
+	const { rpId, rpName, userId, userName, excludeCredentials = [], credentialType } = params;
+
+	// passkeys require discoverable credentials and user verification
+	// security keys are non-discoverable 2FA only
+	const isPasskey = credentialType === WebAuthnCredentialType.Passkey;
 
 	return await generateRegistrationOptions({
 		rpName,
@@ -56,10 +63,8 @@ export const generateWebAuthnRegistrationOptions = async (params: GenerateRegist
 			transports: cred.transports ?? undefined,
 		})),
 		authenticatorSelection: {
-			// non-discoverable for security keys (2FA only)
-			residentKey: 'discouraged',
-			// password already verified, no need for PIN/biometric
-			userVerification: 'discouraged',
+			residentKey: isPasskey ? 'required' : 'discouraged',
+			userVerification: isPasskey ? 'required' : 'discouraged',
 		},
 	});
 };
@@ -100,8 +105,10 @@ export const verifyWebAuthnRegistration = async (
 export interface GenerateAuthenticationOptionsParams {
 	/** relying party ID (domain) */
 	rpId: string;
-	/** allowed credentials */
+	/** allowed credentials (omit for discoverable/passkey flow) */
 	allowCredentials?: WebauthnCredential[];
+	/** whether user verification is required (true for passkey login) */
+	userVerificationRequired?: boolean;
 }
 
 /**
@@ -110,12 +117,12 @@ export interface GenerateAuthenticationOptionsParams {
  * @returns authentication options to send to the client
  */
 export const generateWebAuthnAuthenticationOptions = async (params: GenerateAuthenticationOptionsParams) => {
-	const { rpId, allowCredentials = [] } = params;
+	const { rpId, allowCredentials, userVerificationRequired = false } = params;
 
 	return await generateAuthenticationOptions({
 		rpID: rpId,
-		userVerification: 'discouraged',
-		allowCredentials: allowCredentials.map((cred) => ({
+		userVerification: userVerificationRequired ? 'required' : 'discouraged',
+		allowCredentials: allowCredentials?.map((cred) => ({
 			id: cred.credential_id,
 			transports: cred.transports ?? undefined,
 		})),

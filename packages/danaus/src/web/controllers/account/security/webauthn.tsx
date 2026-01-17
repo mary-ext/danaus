@@ -8,7 +8,7 @@ import { coerceToInteger } from '#app/web/lib/coerce.ts';
 import { BaseLayout } from '#web/layouts/base.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { getSession } from '#web/middlewares/session.ts';
-import { Button, Dialog, Field, Input } from '#web/primitives/index.ts';
+import { Button, Dialog, Field, Input, MessageBar } from '#web/primitives/index.ts';
 import { routes } from '#web/routes.ts';
 
 import { completeWebAuthnForm, initiateWebAuthnRegistration, removeWebAuthnForm } from './webauthn/lib/forms';
@@ -24,10 +24,16 @@ export default {
 
 				// require sudo mode
 				if (!accountManager.isSessionElevated(session)) {
-					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
+					redirect(routes.verify.index.href(undefined, { redirect: url.pathname + url.search }));
 				}
 
 				const account = accountManager.getAccount(session.did)!;
+
+				// determine credential type from query param
+				const typeParam = url.searchParams.get('type');
+				const credentialType =
+					typeParam === 'passkey' ? WebAuthnCredentialType.Passkey : WebAuthnCredentialType.SecurityKey;
+				const isPasskey = credentialType === WebAuthnCredentialType.Passkey;
 
 				const { fields } = completeWebAuthnForm;
 
@@ -37,12 +43,16 @@ export default {
 
 				if (token) {
 					// try to get existing challenge
-					const existingChallenge = accountManager.getWebAuthnChallenge(token);
+					const existingChallenge = accountManager.getWebAuthnRegistrationChallenge(token);
 					if (existingChallenge) {
 						// regenerate options with the same challenge
-						const state = await initiateWebAuthnRegistration(session.did, account.handle ?? session.did);
+						const state = await initiateWebAuthnRegistration(
+							session.did,
+							account.handle ?? session.did,
+							credentialType,
+						);
 						// delete old challenge and use new one
-						accountManager.deleteWebAuthnChallenge(token);
+						accountManager.deleteWebAuthnRegistrationChallenge(token);
 						token = state.token;
 						options = state.options;
 					}
@@ -50,78 +60,88 @@ export default {
 
 				if (!options) {
 					// generate new registration
-					const state = await initiateWebAuthnRegistration(session.did, account.handle ?? session.did);
+					const state = await initiateWebAuthnRegistration(
+						session.did,
+						account.handle ?? session.did,
+						credentialType,
+					);
 					token = state.token;
 					options = state.options;
 				}
 
 				const generalError = fields.issues()?.at(0);
 
+				const credentialLabel = isPasskey ? 'passkey' : 'security key';
+
 				return render(
 					<BaseLayout>
-						<title>Set up security key - Danaus</title>
+						<title>Set up {credentialLabel} - Danaus</title>
 
 						<script type="module" src={routes.assets.href({ path: 'webauthn-register.js' })} />
 
-						<div class="flex flex-1 items-center justify-center p-4">
+						<div class="flex flex-1 flex-col items-center justify-center gap-4 p-4">
+							<noscript>
+								<MessageBar.Root intent="warning" layout="singleline" class="w-full max-w-120">
+									<MessageBar.Body>JavaScript is required to set up {credentialLabel}s.</MessageBar.Body>
+								</MessageBar.Root>
+							</noscript>
+
 							<div class="w-full max-w-120 rounded-xl bg-neutral-background-1 shadow-64">
 								<danaus-webauthn-register class="contents" data-options={JSON.stringify(options)}>
-								<form {...completeWebAuthnForm} class="contents">
-									<Dialog.Body>
-										<Dialog.Title>Set up security key</Dialog.Title>
+									<form {...completeWebAuthnForm} class="contents">
+										<Dialog.Body>
+											<Dialog.Title>Set up {credentialLabel}</Dialog.Title>
 
-										<Dialog.Content class="flex flex-col gap-4">
-											<p class="text-base-300">
-												Insert your security key and follow your browser's prompts to register it.
-											</p>
-
-											<input {...fields.token.as('hidden', token!)} />
-
-											<p
-												data-target="webauthn-register.status"
-												class="text-base-300 text-neutral-foreground-3"
-											>
-												Initializing...
-											</p>
-
-											<input
-												{...fields.response.as('hidden', '')}
-												data-target="webauthn-register.response"
-											/>
-
-											<Field
-												label="Name"
-												hint="Give this security key a name to help you identify it"
-												validationMessageText={fields.name.issues()?.at(0)?.message}
-											>
-												<Input
-													{...fields.name.as('text')}
-													placeholder={accountManager.generateWebAuthnName(
-														session.did,
-														WebAuthnCredentialType.SecurityKey,
-													)}
-												/>
-											</Field>
-
-											{generalError && (
-												<p role="alert" class="text-base-300 text-status-danger-foreground-1">
-													{generalError.message}
+											<Dialog.Content class="flex flex-col gap-4">
+												<p class="text-base-300">
+													{isPasskey
+														? "Follow your browser's prompts to register your passkey."
+														: "Insert your security key and follow your browser's prompts to register it."}
 												</p>
-											)}
-										</Dialog.Content>
 
-										<Dialog.Actions>
-											<Button type="button" href={routes.account.security.overview.href()}>
-												Cancel
-											</Button>
+												<input {...fields.token.as('hidden', token!)} />
+												<input
+													{...fields.credentialType.as('hidden', isPasskey ? 'passkey' : 'security-key')}
+												/>
 
-											<Button type="submit" variant="primary" disabled data-target="webauthn-register.submit">
-												Save
-											</Button>
-										</Dialog.Actions>
-									</Dialog.Body>
-								</form>
-							</danaus-webauthn-register>
+												<p
+													data-target="webauthn-register.status"
+													class="text-base-300 text-neutral-foreground-3 empty:hidden"
+												/>
+
+												<input
+													{...fields.response.as('hidden', '')}
+													data-target="webauthn-register.response"
+												/>
+
+												<Field
+													label="Name"
+													hint={`Give this ${credentialLabel} a name to help you identify it`}
+													validationMessageText={fields.name.issues()?.at(0)?.message}
+												>
+													<Input
+														{...fields.name.as('text')}
+														placeholder={accountManager.generateWebAuthnName(session.did, credentialType)}
+													/>
+												</Field>
+
+												{generalError && (
+													<p role="alert" class="text-base-300 text-status-danger-foreground-1">
+														{generalError.message}
+													</p>
+												)}
+											</Dialog.Content>
+
+											<Dialog.Actions>
+												<Button href={routes.account.security.overview.href()}>Cancel</Button>
+
+												<Button variant="primary" data-target="webauthn-register.start" disabled>
+													Register {credentialLabel}
+												</Button>
+											</Dialog.Actions>
+										</Dialog.Body>
+									</form>
+								</danaus-webauthn-register>
 							</div>
 						</div>
 					</BaseLayout>,
@@ -178,9 +198,7 @@ export default {
 										</Dialog.Content>
 
 										<Dialog.Actions>
-											<Button type="button" href={routes.account.security.overview.href()}>
-												Cancel
-											</Button>
+											<Button href={routes.account.security.overview.href()}>Cancel</Button>
 
 											<Button type="submit" variant="primary">
 												Remove

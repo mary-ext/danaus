@@ -3,41 +3,36 @@
 import { fromBase64Url, toBase64Url } from './base64url.js';
 
 /**
- * WebAuthn authentication element.
+ * Passkey login element - fetches challenge and handles discoverable credential authentication.
  *
- * @attr {string} data-options - JSON PublicKeyCredentialRequestOptions
+ * @attr {string} data-challenge-url - URL to fetch authentication challenge from
  */
-class WebAuthnAuthenticateElement extends HTMLElement {
-	/** @type {PublicKeyCredentialRequestOptionsJSON | null} */
-	#options = null;
-
+class PasskeyLoginElement extends HTMLElement {
 	/** @type {HTMLButtonElement | null} */
 	get startButton() {
-		return this.querySelector('[data-target="webauthn-authenticate.start"]');
+		return this.querySelector('[data-target="passkey-login.start"]');
 	}
 
 	/** @type {HTMLInputElement | null} */
 	get responseInput() {
-		return this.querySelector('[data-target="webauthn-authenticate.response"]');
+		return this.querySelector('[data-target="passkey-login.response"]');
 	}
 
 	/** @type {HTMLElement | null} */
 	get statusElement() {
-		return this.querySelector('[data-target="webauthn-authenticate.status"]');
+		return this.querySelector('[data-target="passkey-login.status"]');
 	}
 
 	/** @type {HTMLFormElement | null} */
 	get formElement() {
-		return this.querySelector('[data-target="webauthn-authenticate.form"]');
+		return this.querySelector('[data-target="passkey-login.form"]');
 	}
 
 	connectedCallback() {
-		const optionsJson = this.dataset.options;
-		if (!optionsJson) {
+		const challengeUrl = this.dataset.challengeUrl;
+		if (!challengeUrl) {
 			return;
 		}
-
-		this.#options = JSON.parse(optionsJson);
 
 		const startButton = this.startButton;
 		if (startButton) {
@@ -45,19 +40,21 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			startButton.disabled = false;
 			startButton.addEventListener('click', (e) => {
 				e.preventDefault();
-				this.#handleAuthentication();
+				this.#handlePasskeyLogin(challengeUrl);
 			});
 		}
 	}
 
-	async #handleAuthentication() {
-		const options = this.#options;
+	/**
+	 * @param {string} challengeUrl
+	 */
+	async #handlePasskeyLogin(challengeUrl) {
 		const status = this.statusElement;
 		const responseInput = this.responseInput;
 		const startButton = this.startButton;
 
-		if (!options || !status || !responseInput) {
-			console.error('WebAuthn authenticate: missing required elements');
+		if (!status || !responseInput) {
+			console.error('Passkey login: missing required elements');
 			return;
 		}
 
@@ -65,17 +62,27 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			if (startButton) {
 				startButton.disabled = true;
 			}
-			status.textContent = 'Waiting for security key...';
+			status.textContent = 'Fetching challenge...';
+
+			// fetch challenge options from server
+			const challengeResponse = await fetch(challengeUrl);
+			if (!challengeResponse.ok) {
+				throw new Error('Failed to fetch challenge');
+			}
+
+			/** @type {PublicKeyCredentialRequestOptionsJSON} */
+			const options = await challengeResponse.json();
+
+			status.textContent = 'Waiting for passkey...';
 
 			// convert options to the format expected by navigator.credentials.get
+			// omit allowCredentials for discoverable flow
+			const { allowCredentials: _, ...rest } = options;
+
 			/** @type {PublicKeyCredentialRequestOptions} */
 			const publicKeyOptions = {
-				...options,
+				...rest,
 				challenge: fromBase64Url(options.challenge),
-				allowCredentials: options.allowCredentials?.map((cred) => ({
-					...cred,
-					id: fromBase64Url(cred.id),
-				})),
 			};
 
 			const credential = /** @type {PublicKeyCredential | null} */ (
@@ -93,6 +100,7 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			const response = /** @type {AuthenticatorAssertionResponse} */ (credential.response);
 
 			// serialize the response for the server
+			// TODO: investigate if we can avoid double JSON encoding (stringified JSON in form field)
 			const serialized = JSON.stringify({
 				id: credential.id,
 				rawId: toBase64Url(credential.rawId),
@@ -107,9 +115,9 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			});
 
 			responseInput.value = serialized;
-			status.textContent = 'Security key verified!';
+			status.textContent = 'Passkey verified!';
 
-			// auto-submit the form
+			// submit the form
 			this.formElement?.submit();
 		} catch (err) {
 			if (startButton) {
@@ -125,12 +133,12 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			} else {
 				status.textContent = 'Authentication failed. Please try again.';
 			}
-			console.error('WebAuthn authentication error:', err);
+			console.error('Passkey login error:', err);
 		}
 	}
 }
 
-customElements.define('danaus-webauthn-authenticate', WebAuthnAuthenticateElement);
+customElements.define('danaus-passkey-login', PasskeyLoginElement);
 
 /**
  * @typedef {object} PublicKeyCredentialRequestOptionsJSON

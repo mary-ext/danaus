@@ -171,7 +171,7 @@ export const verifyForm = form(
 
 		const challenge = accountManager.getVerifyChallenge(data.challenge);
 		if (challenge === null) {
-			redirect(routes.login.href(undefined, { redirect: data.redirect }));
+			redirect(routes.login.index.href(undefined, { redirect: data.redirect }));
 		}
 
 		const isSudo = challenge.session_id !== null;
@@ -220,6 +220,99 @@ export const verifyForm = form(
 	},
 );
 
+export const passkeyLoginForm = form(
+	v.object({
+		response: v.pipe(
+			v.string(),
+			v.parseJson(),
+			v.object({
+				id: v.string(),
+				rawId: v.string(),
+				response: v.object({
+					clientDataJSON: v.string(),
+					authenticatorData: v.string(),
+					signature: v.string(),
+					userHandle: v.optional(v.string()),
+				}),
+				authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
+				clientExtensionResults: v.object({
+					appid: v.optional(v.boolean()),
+					credProps: v.optional(
+						v.object({
+							rk: v.optional(v.boolean()),
+						}),
+					),
+					hmacCreateSecret: v.optional(v.boolean()),
+				}),
+				type: v.literal('public-key'),
+			}),
+		),
+		redirect: v.string(),
+	}),
+	async (data) => {
+		const { accountManager, config } = getAppContext();
+		const { request } = getContext();
+
+		// find the credential by ID (discoverable flow)
+		const credential = accountManager.getWebAuthnCredentialByCredentialId(data.response.id);
+		if (credential === null) {
+			invalid(`Passkey not recognized`);
+		}
+
+		// extract challenge from clientDataJSON and verify it's one we issued
+		const clientDataJSON = JSON.parse(
+			Buffer.from(data.response.response.clientDataJSON, 'base64url').toString('utf-8'),
+		);
+		const challenge = clientDataJSON.challenge;
+
+		if (!accountManager.consumePasskeyLoginChallenge(challenge)) {
+			invalid(`Invalid or expired challenge`);
+		}
+
+		// verify the authentication response
+		const { verifyWebAuthnAuthentication } = await import('#app/accounts/webauthn.ts');
+
+		try {
+			const verification = await verifyWebAuthnAuthentication({
+				response: data.response,
+				expectedChallenge: challenge,
+				expectedOrigin: config.service.publicUrl,
+				expectedRpId: new URL(config.service.publicUrl).hostname,
+				credential,
+			});
+
+			if (!verification.verified) {
+				invalid(`Passkey verification failed`);
+			}
+
+			// update counter
+			accountManager.updateWebAuthnCredentialCounter(
+				credential.id,
+				verification.authenticationInfo.newCounter,
+			);
+		} catch {
+			invalid(`Passkey verification failed`);
+		}
+
+		// create session
+		const { session, token } = await accountManager.createWebSession({
+			did: credential.did,
+			remember: true, // passkey login implies trusted device
+			userAgent: request.headers.get('user-agent') ?? undefined,
+			ip: getServer().requestIP(request)?.address,
+		});
+
+		setWebSessionToken(request, token, {
+			expires: session.expires_at,
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+		});
+
+		redirect(data.redirect);
+	},
+);
+
 export const verifyWebAuthnForm = form(
 	v.object({
 		challenge: v.string(),
@@ -256,7 +349,7 @@ export const verifyWebAuthnForm = form(
 
 		const challenge = accountManager.getVerifyChallenge(data.challenge);
 		if (challenge === null) {
-			redirect(routes.login.href(undefined, { redirect: data.redirect }));
+			redirect(routes.login.index.href(undefined, { redirect: data.redirect }));
 		}
 
 		if (!challenge.webauthn_challenge) {

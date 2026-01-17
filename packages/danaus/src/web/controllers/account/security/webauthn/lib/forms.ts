@@ -23,11 +23,13 @@ export interface WebAuthnRegistrationState {
  * initiates WebAuthn registration by generating a challenge.
  * @param did account DID
  * @param userName user display name (handle)
+ * @param credentialType type of credential to register
  * @returns registration state with token and options
  */
 export const initiateWebAuthnRegistration = async (
 	did: Did,
 	userName: string,
+	credentialType: WebAuthnCredentialType,
 ): Promise<WebAuthnRegistrationState> => {
 	const { accountManager, config } = getAppContext();
 
@@ -39,10 +41,11 @@ export const initiateWebAuthnRegistration = async (
 		userId: did,
 		userName: userName,
 		excludeCredentials: existingCredentials,
+		credentialType,
 	});
 
 	// store the challenge
-	const token = accountManager.createWebAuthnChallenge(did, options.challenge);
+	const token = accountManager.createWebAuthnRegistrationChallenge(did, options.challenge);
 
 	return { token, options };
 };
@@ -53,6 +56,7 @@ export const initiateWebAuthnRegistration = async (
 export const completeWebAuthnForm = form(
 	v.object({
 		token: v.pipe(v.string(), v.minLength(1)),
+		credentialType: v.picklist(['security-key', 'passkey']),
 		name: v.optional(v.pipe(v.string(), normalizeWhitespace, v.maxLength(32, `Name is too long`))),
 		response: v.pipe(
 			v.string(),
@@ -78,7 +82,7 @@ export const completeWebAuthnForm = form(
 		const { did } = getSession();
 
 		// get the challenge
-		const challenge = accountManager.getWebAuthnChallenge(data.token);
+		const challenge = accountManager.getWebAuthnRegistrationChallenge(data.token);
 		if (!challenge) {
 			invalid(`Registration expired, please try again`);
 		}
@@ -106,16 +110,19 @@ export const completeWebAuthnForm = form(
 		}
 
 		// delete the challenge
-		accountManager.deleteWebAuthnChallenge(data.token);
+		accountManager.deleteWebAuthnRegistrationChallenge(data.token);
 
 		requireSudo();
 
 		// store the credential
 		const { registrationInfo } = verification;
+		const credentialType =
+			data.credentialType === 'passkey' ? WebAuthnCredentialType.Passkey : WebAuthnCredentialType.SecurityKey;
+
 		try {
 			accountManager.createWebAuthnCredential({
 				did: did,
-				type: WebAuthnCredentialType.SecurityKey,
+				type: credentialType,
 				name: data.name,
 				credentialId: registrationInfo.credential.id,
 				publicKey: registrationInfo.credential.publicKey,

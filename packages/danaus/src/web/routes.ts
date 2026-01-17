@@ -13,8 +13,13 @@ export const routes = route({
 		},
 	},
 
-	// login route
-	login: '/account/login',
+	// login routes
+	login: {
+		index: '/account/login',
+		passkey: {
+			challenge: '/account/login/passkey',
+		},
+	},
 
 	// verification routes - handles both MFA login (?token) and sudo (session-based)
 	verify: {

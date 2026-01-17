@@ -107,9 +107,7 @@ export default {
 										</Dialog.Content>
 
 										<Dialog.Actions>
-											<Button type="button" href={routes.account.security.overview.href()}>
-												Cancel
-											</Button>
+											<Button href={routes.account.security.overview.href()}>Cancel</Button>
 
 											<Button type="submit" variant="primary">
 												Regenerate
@@ -165,9 +163,7 @@ export default {
 										</Dialog.Content>
 
 										<Dialog.Actions>
-											<Button type="button" href={routes.account.security.overview.href()}>
-												Cancel
-											</Button>
+											<Button href={routes.account.security.overview.href()}>Cancel</Button>
 
 											<Button type="submit" variant="primary">
 												Delete

@@ -19,7 +19,7 @@ export const requireSession = (): Middleware => {
 		const { accountManager, config } = getAppContext();
 		const path = url.pathname;
 
-		const redirectUrl = routes.login.href(undefined, { redirect: path });
+		const redirectUrl = routes.login.index.href(undefined, { redirect: path });
 
 		const token = readWebSessionToken(request);
 		if (!token) {

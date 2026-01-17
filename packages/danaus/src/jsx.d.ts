@@ -10,6 +10,9 @@ declare module '@oomfware/jsx' {
 				'data-options': string;
 				'data-auto-submit'?: 'true' | 'false';
 			};
+			'danaus-passkey-login': HTMLAttributes & {
+				'data-challenge-url': string;
+			};
 		}
 	}
 }

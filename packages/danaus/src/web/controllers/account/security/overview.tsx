@@ -28,6 +28,7 @@ export default {
 			did,
 			WebAuthnCredentialType.SecurityKey,
 		);
+		const passkeys = accountManager.listWebAuthnCredentialsByType(did, WebAuthnCredentialType.Passkey);
 		const hasMfa = totpCredentials.length > 0 || securityKeys.length > 0;
 
 		return render(
@@ -46,6 +47,7 @@ export default {
 							account={account}
 							totpCredentials={totpCredentials}
 							securityKeys={securityKeys}
+							passkeys={passkeys}
 						/>
 
 						{hasMfa && <RecoverySection />}
@@ -95,10 +97,12 @@ const AuthenticationSection = ({
 	account,
 	totpCredentials,
 	securityKeys,
+	passkeys,
 }: {
 	account: Account;
 	totpCredentials: TotpCredential[];
 	securityKeys: WebauthnCredential[];
+	passkeys: WebauthnCredential[];
 }) => {
 	return (
 		<div class="flex flex-col gap-2">
@@ -191,7 +195,35 @@ const AuthenticationSection = ({
 					</div>
 				))}
 
-				{/* Passkeys placeholder (future) */}
+				{/* Passkeys */}
+				{passkeys.map((key) => (
+					<div class="flex items-center gap-4 px-4 py-3">
+						<PasskeysOutlined size={24} class="shrink-0" />
+
+						<div class="min-w-0 grow">
+							<p class="text-base-300 font-medium wrap-break-word">{key.name}</p>
+							<p class="text-base-300 text-neutral-foreground-3">
+								Passkey · Added {key.created_at.toLocaleDateString()}
+							</p>
+						</div>
+
+						<Menu.Root>
+							<Menu.Trigger>
+								<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
+									<DotGrid1x3HorizontalOutlined size={16} />
+								</button>
+							</Menu.Trigger>
+
+							<Menu.Popover>
+								<Menu.List>
+									<Menu.Item href={routes.account.security.webauthn.remove.href({ id: key.id })}>
+										Remove
+									</Menu.Item>
+								</Menu.List>
+							</Menu.Popover>
+						</Menu.Root>
+					</div>
+				))}
 
 				{/* Add another way to sign in */}
 				<button
@@ -241,16 +273,19 @@ const AuthenticationSection = ({
 								</div>
 							</a>
 
-							<button disabled class="flex items-center gap-4 rounded-md px-4 py-3 text-left opacity-50">
+							<a
+								href={routes.account.security.webauthn.register.href(undefined, { type: 'passkey' })}
+								class="flex items-center gap-4 rounded-md px-4 py-3 text-left outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active"
+							>
 								<PasskeysOutlined size={24} class="shrink-0" />
 
 								<div class="min-w-0 grow">
 									<p class="text-base-300 font-medium">Passkey</p>
 									<p class="text-base-300 text-neutral-foreground-3">
-										Use Face ID, Touch ID, or Windows Hello (coming soon)
+										Use Face ID, Touch ID, or Windows Hello
 									</p>
 								</div>
-							</button>
+							</a>
 						</Dialog.Content>
 
 						<Dialog.Actions>

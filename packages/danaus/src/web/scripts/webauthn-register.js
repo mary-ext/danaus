@@ -8,14 +8,17 @@ import { fromBase64Url, toBase64Url } from './base64url.js';
  * @attr {string} data-options - JSON PublicKeyCredentialCreationOptions
  */
 class WebAuthnRegisterElement extends HTMLElement {
+	/** @type {PublicKeyCredentialCreationOptionsJSON | null} */
+	#options = null;
+
+	/** @type {HTMLButtonElement | null} */
+	get startButton() {
+		return this.querySelector('[data-target="webauthn-register.start"]');
+	}
+
 	/** @type {HTMLInputElement | null} */
 	get responseInput() {
 		return this.querySelector('[data-target="webauthn-register.response"]');
-	}
-
-	/** @type {HTMLButtonElement | null} */
-	get submitButton() {
-		return this.querySelector('[data-target="webauthn-register.submit"]');
 	}
 
 	/** @type {HTMLElement | null} */
@@ -23,27 +26,44 @@ class WebAuthnRegisterElement extends HTMLElement {
 		return this.querySelector('[data-target="webauthn-register.status"]');
 	}
 
+	/** @type {HTMLFormElement | null} */
+	get formElement() {
+		return this.querySelector('form');
+	}
+
 	connectedCallback() {
-		const options = this.dataset.options;
-		if (options) {
-			this.#handleRegistration(JSON.parse(options));
+		const optionsJson = this.dataset.options;
+		if (!optionsJson) {
+			return;
+		}
+
+		this.#options = JSON.parse(optionsJson);
+
+		const startButton = this.startButton;
+		if (startButton) {
+			startButton.disabled = false;
+			startButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				this.#handleRegistration();
+			});
 		}
 	}
 
-	/**
-	 * @param {PublicKeyCredentialCreationOptionsJSON} options
-	 */
-	async #handleRegistration(options) {
+	async #handleRegistration() {
+		const options = this.#options;
 		const status = this.statusElement;
-		const submitButton = this.submitButton;
+		const startButton = this.startButton;
 		const responseInput = this.responseInput;
 
-		if (!status || !submitButton || !responseInput) {
+		if (!options || !status || !responseInput) {
 			console.error('WebAuthn register: missing required elements');
 			return;
 		}
 
 		try {
+			if (startButton) {
+				startButton.disabled = true;
+			}
 			status.textContent = 'Waiting for security key...';
 
 			// convert options to the format expected by navigator.credentials.create
@@ -67,6 +87,9 @@ class WebAuthnRegisterElement extends HTMLElement {
 
 			if (!credential) {
 				status.textContent = 'Registration cancelled';
+				if (startButton) {
+					startButton.disabled = false;
+				}
 				return;
 			}
 
@@ -86,9 +109,15 @@ class WebAuthnRegisterElement extends HTMLElement {
 			});
 
 			responseInput.value = serialized;
-			submitButton.disabled = false;
-			status.textContent = 'Security key registered! Click Save to continue.';
+			status.textContent = 'Security key registered!';
+
+			// auto-submit the form
+			this.formElement?.submit();
 		} catch (err) {
+			if (startButton) {
+				startButton.disabled = false;
+			}
+
 			if (err instanceof Error) {
 				if (err.name === 'NotAllowedError') {
 					status.textContent = 'Registration was cancelled or timed out. Please try again.';

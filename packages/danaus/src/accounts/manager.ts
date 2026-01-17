@@ -43,7 +43,7 @@ export type TotpCredential = typeof t.totpCredential.$inferSelect;
 export type BackupCode = typeof t.recoveryCode.$inferSelect;
 export type VerifyChallenge = typeof t.verifyChallenge.$inferSelect;
 export type WebauthnCredential = typeof t.webauthnCredential.$inferSelect;
-export type WebauthnChallenge = typeof t.webauthnChallenge.$inferSelect;
+export type WebauthnRegistrationChallenge = typeof t.webauthnRegistrationChallenge.$inferSelect;
 
 /** MFA status for an account */
 export interface MfaStatus {
@@ -1483,12 +1483,12 @@ export class AccountManager implements Disposable {
 	/**
 	 * set the WebAuthn challenge on an existing verification challenge.
 	 * @param token verify challenge token
-	 * @param webauthnChallenge base64url WebAuthn challenge
+	 * @param webauthnRegistrationChallenge base64url WebAuthn challenge
 	 */
-	setVerifyChallengeWebAuthn(token: string, webauthnChallenge: string): void {
+	setVerifyChallengeWebAuthn(token: string, webauthnRegistrationChallenge: string): void {
 		this.db
 			.update(t.verifyChallenge)
-			.set({ webauthn_challenge: webauthnChallenge })
+			.set({ webauthn_challenge: webauthnRegistrationChallenge })
 			.where(eq(t.verifyChallenge.token, token))
 			.run();
 	}
@@ -1720,13 +1720,13 @@ export class AccountManager implements Disposable {
 	 * @param challenge base64url challenge
 	 * @returns token for retrieving the challenge
 	 */
-	createWebAuthnChallenge(did: Did, challenge: string): string {
+	createWebAuthnRegistrationChallenge(did: Did, challenge: string): string {
 		const token = nanoid(32);
 		const now = new Date();
 		const expiresAt = new Date(now.getTime() + WEBAUTHN_CHALLENGE_TTL_MS);
 
 		this.db
-			.insert(t.webauthnChallenge)
+			.insert(t.webauthnRegistrationChallenge)
 			.values({
 				token: token,
 				did: did,
@@ -1744,11 +1744,11 @@ export class AccountManager implements Disposable {
 	 * @param token the token
 	 * @returns WebAuthn challenge or null if expired/not found
 	 */
-	getWebAuthnChallenge(token: string): WebauthnChallenge | null {
+	getWebAuthnRegistrationChallenge(token: string): WebauthnRegistrationChallenge | null {
 		const challenge = this.db
 			.select()
-			.from(t.webauthnChallenge)
-			.where(eq(t.webauthnChallenge.token, token))
+			.from(t.webauthnRegistrationChallenge)
+			.where(eq(t.webauthnRegistrationChallenge.token, token))
 			.get();
 
 		if (!challenge) {
@@ -1757,7 +1757,10 @@ export class AccountManager implements Disposable {
 
 		const now = new Date();
 		if (challenge.expires_at <= now) {
-			this.db.delete(t.webauthnChallenge).where(eq(t.webauthnChallenge.token, token)).run();
+			this.db
+				.delete(t.webauthnRegistrationChallenge)
+				.where(eq(t.webauthnRegistrationChallenge.token, token))
+				.run();
 			return null;
 		}
 
@@ -1768,16 +1771,65 @@ export class AccountManager implements Disposable {
 	 * delete a WebAuthn registration challenge.
 	 * @param token the token
 	 */
-	deleteWebAuthnChallenge(token: string): void {
-		this.db.delete(t.webauthnChallenge).where(eq(t.webauthnChallenge.token, token)).run();
+	deleteWebAuthnRegistrationChallenge(token: string): void {
+		this.db
+			.delete(t.webauthnRegistrationChallenge)
+			.where(eq(t.webauthnRegistrationChallenge.token, token))
+			.run();
 	}
 
 	/**
 	 * clean up expired WebAuthn registration challenges.
 	 */
-	cleanupExpiredWebAuthnChallenges(): void {
+	cleanupExpiredWebAuthnRegistrationChallenges(): void {
 		const now = new Date();
-		this.db.delete(t.webauthnChallenge).where(lte(t.webauthnChallenge.expires_at, now)).run();
+		this.db
+			.delete(t.webauthnRegistrationChallenge)
+			.where(lte(t.webauthnRegistrationChallenge.expires_at, now))
+			.run();
+	}
+
+	// #endregion
+
+	// #region passkey login challenges
+
+	/**
+	 * create a passkey login challenge for passwordless authentication.
+	 * @param challenge base64url challenge string
+	 */
+	createPasskeyLoginChallenge(challenge: string): void {
+		const now = new Date();
+		const expiresAt = new Date(now.getTime() + WEBAUTHN_CHALLENGE_TTL_MS);
+
+		this.db
+			.insert(t.passkeyLoginChallenge)
+			.values({
+				challenge: challenge,
+				created_at: now,
+				expires_at: expiresAt,
+			})
+			.run();
+	}
+
+	/**
+	 * consume a passkey login challenge (delete and return if valid).
+	 * @param challenge base64url challenge string
+	 * @returns true if challenge was valid and consumed
+	 */
+	consumePasskeyLoginChallenge(challenge: string): boolean {
+		const now = new Date();
+
+		// clean up expired challenges
+		this.db.delete(t.passkeyLoginChallenge).where(lte(t.passkeyLoginChallenge.expires_at, now)).run();
+
+		// try to delete the challenge (returns the deleted row if it existed)
+		const result = this.db
+			.delete(t.passkeyLoginChallenge)
+			.where(eq(t.passkeyLoginChallenge.challenge, challenge))
+			.returning()
+			.get();
+
+		return result != null;
 	}
 
 	// #endregion
