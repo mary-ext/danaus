@@ -2,18 +2,15 @@ import type { Controller } from '@oomfware/fetch-router';
 import { forms } from '@oomfware/forms';
 import { render } from '@oomfware/jsx';
 
-import StatCard from '../admin/components/stat-card.tsx';
-import { createAccountForm } from '../admin/forms.ts';
-import MagnifyingGlassOutlined from '../icons/central/magnifying-glass-outlined.tsx';
-import PlusLargeOutlined from '../icons/central/plus-large-outlined.tsx';
-import { AdminLayout } from '../layouts/admin.tsx';
-import { getAppContext } from '../middlewares/app-context.ts';
-import { requireAdmin } from '../middlewares/basic-auth.ts';
-import Button from '../primitives/button.tsx';
-import Field from '../primitives/field.tsx';
-import Input from '../primitives/input.tsx';
-import Select from '../primitives/select.tsx';
-import { routes } from '../routes.ts';
+import StatCard from '#web/admin/components/stat-card.tsx';
+import { createAccountForm } from '#web/admin/forms.ts';
+import MagnifyingGlassOutlined from '#web/icons/central/magnifying-glass-outlined.tsx';
+import PlusLargeOutlined from '#web/icons/central/plus-large-outlined.tsx';
+import { AdminLayout } from '#web/layouts/admin.tsx';
+import { getAppContext } from '#web/middlewares/app-context.ts';
+import { requireAdmin } from '#web/middlewares/basic-auth.ts';
+import { Button, Field, Input, Select } from '#web/primitives/index.ts';
+import { routes } from '#web/routes.ts';
 
 export default {
 	middleware: [requireAdmin(), forms({ createAccountForm })],

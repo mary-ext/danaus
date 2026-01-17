@@ -1,8 +1,8 @@
 import type { BuildAction } from '@oomfware/fetch-router';
 import { render } from '@oomfware/jsx';
 
-import type { Account, TotpCredential, WebauthnCredential } from '#app/accounts/manager.ts';
 import { WebAuthnCredentialType } from '#app/accounts/db/schema.ts';
+import type { Account, TotpCredential, WebauthnCredential } from '#app/accounts/manager.ts';
 
 import DotGrid1x3HorizontalOutlined from '#web/icons/central/dot-grid-1x3-horizontal-outlined.tsx';
 import PasskeysOutlined from '#web/icons/central/passkeys-outlined.tsx';
@@ -13,20 +13,7 @@ import UsbOutlined from '#web/icons/central/usb-outlined.tsx';
 import { AccountLayout } from '#web/layouts/account.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { getSession } from '#web/middlewares/session.ts';
-import Button from '#web/primitives/button.tsx';
-import DialogActions from '#web/primitives/dialog-actions.tsx';
-import DialogBody from '#web/primitives/dialog-body.tsx';
-import DialogClose from '#web/primitives/dialog-close.tsx';
-import DialogContent from '#web/primitives/dialog-content.tsx';
-import DialogSurface from '#web/primitives/dialog-surface.tsx';
-import DialogTitle from '#web/primitives/dialog-title.tsx';
-import Dialog from '#web/primitives/dialog.tsx';
-import MenuDivider from '#web/primitives/menu-divider.tsx';
-import MenuItem from '#web/primitives/menu-item.tsx';
-import MenuList from '#web/primitives/menu-list.tsx';
-import MenuPopover from '#web/primitives/menu-popover.tsx';
-import MenuTrigger from '#web/primitives/menu-trigger.tsx';
-import Menu from '#web/primitives/menu.tsx';
+import { Button, Dialog, Menu } from '#web/primitives/index.ts';
 import { routes } from '#web/routes.ts';
 
 export default {
@@ -37,7 +24,10 @@ export default {
 		const account = accountManager.getAccount(did)!;
 
 		const totpCredentials = accountManager.listTotpCredentials(did);
-		const securityKeys = accountManager.listWebAuthnCredentialsByType(did, WebAuthnCredentialType.SecurityKey);
+		const securityKeys = accountManager.listWebAuthnCredentialsByType(
+			did,
+			WebAuthnCredentialType.SecurityKey,
+		);
 		const hasMfa = totpCredentials.length > 0 || securityKeys.length > 0;
 
 		return render(
@@ -82,19 +72,19 @@ const InformationSection = ({ account }: { account: Account }) => {
 
 					{!account?.email_confirmed_at && <Button>Verify</Button>}
 
-					<Menu>
-						<MenuTrigger>
+					<Menu.Root>
+						<Menu.Trigger>
 							<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
 								<DotGrid1x3HorizontalOutlined size={16} />
 							</button>
-						</MenuTrigger>
+						</Menu.Trigger>
 
-						<MenuPopover>
-							<MenuList>
-								<MenuItem>Change email</MenuItem>
-							</MenuList>
-						</MenuPopover>
-					</Menu>
+						<Menu.Popover>
+							<Menu.List>
+								<Menu.Item>Change email</Menu.Item>
+							</Menu.List>
+						</Menu.Popover>
+					</Menu.Root>
 				</div>
 			</div>
 		</div>
@@ -126,19 +116,19 @@ const AuthenticationSection = ({
 						</p>
 					</div>
 
-					<Menu>
-						<MenuTrigger>
+					<Menu.Root>
+						<Menu.Trigger>
 							<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
 								<DotGrid1x3HorizontalOutlined size={16} />
 							</button>
-						</MenuTrigger>
+						</Menu.Trigger>
 
-						<MenuPopover>
-							<MenuList>
-								<MenuItem>Change password</MenuItem>
-							</MenuList>
-						</MenuPopover>
-					</Menu>
+						<Menu.Popover>
+							<Menu.List>
+								<Menu.Item>Change password</Menu.Item>
+							</Menu.List>
+						</Menu.Popover>
+					</Menu.Root>
 				</div>
 
 				{/* TOTP credentials */}
@@ -153,19 +143,21 @@ const AuthenticationSection = ({
 							</p>
 						</div>
 
-						<Menu>
-							<MenuTrigger>
+						<Menu.Root>
+							<Menu.Trigger>
 								<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
 									<DotGrid1x3HorizontalOutlined size={16} />
 								</button>
-							</MenuTrigger>
+							</Menu.Trigger>
 
-							<MenuPopover>
-								<MenuList>
-									<MenuItem href={routes.account.security.totp.remove.href({ id: totp.id })}>Remove</MenuItem>
-								</MenuList>
-							</MenuPopover>
-						</Menu>
+							<Menu.Popover>
+								<Menu.List>
+									<Menu.Item href={routes.account.security.totp.remove.href({ id: totp.id })}>
+										Remove
+									</Menu.Item>
+								</Menu.List>
+							</Menu.Popover>
+						</Menu.Root>
 					</div>
 				))}
 
@@ -181,21 +173,21 @@ const AuthenticationSection = ({
 							</p>
 						</div>
 
-						<Menu>
-							<MenuTrigger>
+						<Menu.Root>
+							<Menu.Trigger>
 								<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
 									<DotGrid1x3HorizontalOutlined size={16} />
 								</button>
-							</MenuTrigger>
+							</Menu.Trigger>
 
-							<MenuPopover>
-								<MenuList>
-									<MenuItem href={routes.account.security.webauthn.remove.href({ id: key.id })}>
+							<Menu.Popover>
+								<Menu.List>
+									<Menu.Item href={routes.account.security.webauthn.remove.href({ id: key.id })}>
 										Remove
-									</MenuItem>
-								</MenuList>
-							</MenuPopover>
-						</Menu>
+									</Menu.Item>
+								</Menu.List>
+							</Menu.Popover>
+						</Menu.Root>
 					</div>
 				))}
 
@@ -217,12 +209,12 @@ const AuthenticationSection = ({
 				</button>
 			</div>
 
-			<Dialog id="add-auth-method-dialog">
-				<DialogSurface>
-					<DialogBody>
-						<DialogTitle>Add sign-in method</DialogTitle>
+			<Dialog.Root id="add-auth-method-dialog">
+				<Dialog.Surface>
+					<Dialog.Body>
+						<Dialog.Title>Add sign-in method</Dialog.Title>
 
-						<DialogContent class="flex flex-col">
+						<Dialog.Content class="flex flex-col">
 							<a
 								href={routes.account.security.totp.register.href()}
 								class="flex items-center gap-4 rounded-md px-4 py-3 text-left outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active"
@@ -245,9 +237,7 @@ const AuthenticationSection = ({
 
 								<div class="min-w-0 grow">
 									<p class="text-base-300 font-medium">Security key</p>
-									<p class="text-base-300 text-neutral-foreground-3">
-										Use a hardware key like YubiKey
-									</p>
+									<p class="text-base-300 text-neutral-foreground-3">Use a hardware key like YubiKey</p>
 								</div>
 							</a>
 
@@ -261,16 +251,16 @@ const AuthenticationSection = ({
 									</p>
 								</div>
 							</button>
-						</DialogContent>
+						</Dialog.Content>
 
-						<DialogActions>
-							<DialogClose>
+						<Dialog.Actions>
+							<Dialog.Close>
 								<Button>Cancel</Button>
-							</DialogClose>
-						</DialogActions>
-					</DialogBody>
-				</DialogSurface>
-			</Dialog>
+							</Dialog.Close>
+						</Dialog.Actions>
+					</Dialog.Body>
+				</Dialog.Surface>
+			</Dialog.Root>
 		</div>
 	);
 };
@@ -295,26 +285,28 @@ const RecoverySection = () => {
 					</div>
 
 					{backupCodeCount > 0 ? (
-						<Menu>
-							<MenuTrigger>
+						<Menu.Root>
+							<Menu.Trigger>
 								<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
 									<DotGrid1x3HorizontalOutlined size={16} />
 								</button>
-							</MenuTrigger>
+							</Menu.Trigger>
 
-							<MenuPopover>
-								<MenuList>
-									<MenuItem href={routes.account.security.recovery.show.href()}>View codes</MenuItem>
-									<MenuItem href={routes.account.security.recovery.regenerate.href()}>
+							<Menu.Popover>
+								<Menu.List>
+									<Menu.Item href={routes.account.security.recovery.show.href()}>View codes</Menu.Item>
+									<Menu.Item href={routes.account.security.recovery.regenerate.href()}>
 										Regenerate codes
-									</MenuItem>
+									</Menu.Item>
 
-									<MenuDivider />
+									<Menu.Divider />
 
-									<MenuItem href={routes.account.security.recovery.remove.href()}>Remove all codes</MenuItem>
-								</MenuList>
-							</MenuPopover>
-						</Menu>
+									<Menu.Item href={routes.account.security.recovery.remove.href()}>
+										Remove all codes
+									</Menu.Item>
+								</Menu.List>
+							</Menu.Popover>
+						</Menu.Root>
 					) : (
 						<Button href={routes.account.security.recovery.show.href()}>Generate</Button>
 					)}

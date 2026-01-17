@@ -2,7 +2,7 @@ import type { JSXNode } from '@oomfware/jsx';
 
 import { cva } from 'cva';
 
-import ChevronDownSmallOutlined from '../icons/central/chevron-down-small-outlined.tsx';
+import ChevronDownSmallOutlined from '../../icons/central/chevron-down-small-outlined.tsx';
 
 const root = cva({
 	base: [

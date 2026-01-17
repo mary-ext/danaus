@@ -5,6 +5,7 @@ import type { ActorIdentifier, Did, Handle } from '@atcute/lexicons';
 import { isDid, isHandle } from '@atcute/lexicons/syntax';
 import { InvalidRequestError, UpstreamFailureError } from '@atcute/xrpc-server';
 
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import { and, asc, eq, gt, inArray, isNotNull, isNull, like, lte, or, sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
@@ -14,8 +15,6 @@ import { createWebSessionToken } from '#app/auth/web.ts';
 import { TimeKeyset } from '#app/utils/keyset.ts';
 import { DAY, HOUR } from '#app/utils/times.ts';
 import { generateAppPassword, generateInviteCode } from '#app/utils/token.ts';
-
-import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
 
 import { getAccountDb, t, type AccountDb } from './db';
 import { AppPasswordPrivilege, EmailTokenPurpose, PreferredMfa, WebAuthnCredentialType } from './db/schema';

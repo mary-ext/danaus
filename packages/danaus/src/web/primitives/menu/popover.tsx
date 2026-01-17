@@ -2,7 +2,7 @@ import type { JSXNode } from '@oomfware/jsx';
 
 import { cva } from 'cva';
 
-import { useMenuContext } from './utils/menu-context.tsx';
+import { useMenuContext } from './utils/context.tsx';
 
 const root = cva({
 	base: [

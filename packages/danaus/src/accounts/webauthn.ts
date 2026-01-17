@@ -42,9 +42,7 @@ export interface GenerateRegistrationOptionsParams {
  * @param params registration parameters
  * @returns registration options to send to the client
  */
-export const generateWebAuthnRegistrationOptions = async (
-	params: GenerateRegistrationOptionsParams,
-) => {
+export const generateWebAuthnRegistrationOptions = async (params: GenerateRegistrationOptionsParams) => {
 	const { rpId, rpName, userId, userName, excludeCredentials = [] } = params;
 
 	return await generateRegistrationOptions({
@@ -111,9 +109,7 @@ export interface GenerateAuthenticationOptionsParams {
  * @param params authentication parameters
  * @returns authentication options to send to the client
  */
-export const generateWebAuthnAuthenticationOptions = async (
-	params: GenerateAuthenticationOptionsParams,
-) => {
+export const generateWebAuthnAuthenticationOptions = async (params: GenerateAuthenticationOptionsParams) => {
 	const { rpId, allowCredentials = [] } = params;
 
 	return await generateAuthenticationOptions({

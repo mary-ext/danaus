@@ -2,7 +2,7 @@ import type { JSXNode } from '@oomfware/jsx';
 
 import { cva } from 'cva';
 
-import type { InvokerCommand } from './utils/types.ts';
+import type { InvokerCommand } from '../utils/types.ts';
 
 const root = cva({
 	base: [

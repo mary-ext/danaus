@@ -3,10 +3,7 @@ import { forms } from '@oomfware/forms';
 import { render } from '@oomfware/jsx';
 
 import { BaseLayout } from '#web/layouts/base.tsx';
-import Button from '#web/primitives/button.tsx';
-import Checkbox from '#web/primitives/checkbox.tsx';
-import Field from '#web/primitives/field.tsx';
-import Input from '#web/primitives/input.tsx';
+import { Button, Checkbox, Field, Input } from '#web/primitives/index.ts';
 import { routes } from '#web/routes.ts';
 
 import { loginForm } from './login/lib/forms.ts';

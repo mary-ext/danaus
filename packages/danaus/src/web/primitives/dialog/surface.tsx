@@ -2,7 +2,7 @@ import type { JSXNode } from '@oomfware/jsx';
 
 import { cva, type VariantProps } from 'cva';
 
-import { useDialogContext } from './utils/dialog-context';
+import { useDialogContext } from './utils/context.tsx';
 
 const root = cva({
 	base: [

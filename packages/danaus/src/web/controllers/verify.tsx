@@ -15,14 +15,7 @@ import { generateWebAuthnAuthenticationOptions } from '#app/accounts/webauthn.ts
 import { BaseLayout } from '#web/layouts/base.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { tryGetSession } from '#web/middlewares/session.ts';
-import Button from '#web/primitives/button.tsx';
-import Field from '#web/primitives/field.tsx';
-import Input from '#web/primitives/input.tsx';
-import MenuItem from '#web/primitives/menu-item.tsx';
-import MenuList from '#web/primitives/menu-list.tsx';
-import MenuPopover from '#web/primitives/menu-popover.tsx';
-import MenuTrigger from '#web/primitives/menu-trigger.tsx';
-import Menu from '#web/primitives/menu.tsx';
+import { Button, Field, Input, Menu } from '#web/primitives/index.ts';
 import { routes } from '#web/routes.ts';
 
 import { verifyForm, verifyWebAuthnForm, type AuthFactor } from './login/lib/forms.ts';
@@ -115,9 +108,7 @@ export default {
 			const tokenParam = ctx.isSudo ? undefined : ctx.challenge.token;
 			switch (ctx.mfaStatus.preferred) {
 				case PreferredMfa.WebAuthn: {
-					redirect(
-						routes.verify.webauthn.href(undefined, { token: tokenParam, redirect: ctx.redirectUrl }),
-					);
+					redirect(routes.verify.webauthn.href(undefined, { token: tokenParam, redirect: ctx.redirectUrl }));
 				}
 				case PreferredMfa.Totp: {
 					redirect(routes.verify.totp.href(undefined, { token: tokenParam, redirect: ctx.redirectUrl }));
@@ -402,47 +393,47 @@ const OtherMethodsMenu = (props: {
 	const tokenParam = isSudo ? undefined : challenge;
 
 	return (
-		<Menu>
-			<MenuTrigger>
+		<Menu.Root>
+			<Menu.Trigger>
 				<Button>Show other methods</Button>
-			</MenuTrigger>
+			</Menu.Trigger>
 
-			<MenuPopover>
-				<MenuList>
+			<Menu.Popover>
+				<Menu.List>
 					{props.factor !== 'webauthn' && mfaStatus.hasWebAuthn && (
-						<MenuItem
+						<Menu.Item
 							href={routes.verify.webauthn.href(undefined, {
 								token: tokenParam,
 								redirect: redirectUrl,
 							})}
 						>
 							Use security key
-						</MenuItem>
+						</Menu.Item>
 					)}
 
 					{props.factor !== 'totp' && mfaStatus.hasTotp && (
-						<MenuItem
+						<Menu.Item
 							href={routes.verify.totp.href(undefined, {
 								token: tokenParam,
 								redirect: redirectUrl,
 							})}
 						>
 							Use authenticator app
-						</MenuItem>
+						</Menu.Item>
 					)}
 
 					{props.factor !== 'recovery' && mfaStatus.hasRecoveryCodes && (
-						<MenuItem
+						<Menu.Item
 							href={routes.verify.recovery.href(undefined, {
 								token: tokenParam,
 								redirect: redirectUrl,
 							})}
 						>
 							Use 2FA recovery code
-						</MenuItem>
+						</Menu.Item>
 					)}
-				</MenuList>
-			</MenuPopover>
-		</Menu>
+				</Menu.List>
+			</Menu.Popover>
+		</Menu.Root>
 	);
 };

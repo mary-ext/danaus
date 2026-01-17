@@ -10,39 +10,16 @@ import {
 	deleteAppPasswordForm,
 	refreshHandleForm,
 	updateHandleForm,
-} from '../account/forms.ts';
-import AtOutlined from '../icons/central/at-outlined.tsx';
-import DotGrid1x3HorizontalOutlined from '../icons/central/dot-grid-1x3-horizontal-outlined.tsx';
-import Key2Outlined from '../icons/central/key-2-outlined.tsx';
-import PlusLargeOutlined from '../icons/central/plus-large-outlined.tsx';
-import { AccountLayout } from '../layouts/account.tsx';
-import { getAppContext } from '../middlewares/app-context.ts';
-import { getSession, requireSession } from '../middlewares/session.ts';
-import AccordionHeader from '../primitives/accordion-header.tsx';
-import AccordionItem from '../primitives/accordion-item.tsx';
-import AccordionPanel from '../primitives/accordion-panel.tsx';
-import Accordion from '../primitives/accordion.tsx';
-import Button from '../primitives/button.tsx';
-import DialogActions from '../primitives/dialog-actions.tsx';
-import DialogBody from '../primitives/dialog-body.tsx';
-import DialogClose from '../primitives/dialog-close.tsx';
-import DialogContent from '../primitives/dialog-content.tsx';
-import DialogSurface from '../primitives/dialog-surface.tsx';
-import DialogTitle from '../primitives/dialog-title.tsx';
-import DialogTrigger from '../primitives/dialog-trigger.tsx';
-import Dialog from '../primitives/dialog.tsx';
-import Field from '../primitives/field.tsx';
-import Input from '../primitives/input.tsx';
-import MenuItem from '../primitives/menu-item.tsx';
-import MenuList from '../primitives/menu-list.tsx';
-import MenuPopover from '../primitives/menu-popover.tsx';
-import MenuTrigger from '../primitives/menu-trigger.tsx';
-import Menu from '../primitives/menu.tsx';
-import MessageBarBody from '../primitives/message-bar-body.tsx';
-import MessageBarTitle from '../primitives/message-bar-title.tsx';
-import MessageBar from '../primitives/message-bar.tsx';
-import Select from '../primitives/select.tsx';
-import type { routes } from '../routes.ts';
+} from '#web/account/forms.ts';
+import AtOutlined from '#web/icons/central/at-outlined.tsx';
+import DotGrid1x3HorizontalOutlined from '#web/icons/central/dot-grid-1x3-horizontal-outlined.tsx';
+import Key2Outlined from '#web/icons/central/key-2-outlined.tsx';
+import PlusLargeOutlined from '#web/icons/central/plus-large-outlined.tsx';
+import { AccountLayout } from '#web/layouts/account.tsx';
+import { getAppContext } from '#web/middlewares/app-context.ts';
+import { getSession, requireSession } from '#web/middlewares/session.ts';
+import { Accordion, Button, Dialog, Field, Input, Menu, MessageBar, Select } from '#web/primitives/index.ts';
+import type { routes } from '#web/routes.ts';
 
 import security from './account/security.tsx';
 
@@ -85,15 +62,15 @@ export default {
 						</div>
 
 						{updateHandleError && (
-							<MessageBar intent="error" layout="singleline">
-								<MessageBarBody>{updateHandleError.message}</MessageBarBody>
-							</MessageBar>
+							<MessageBar.Root intent="error" layout="singleline">
+								<MessageBar.Body>{updateHandleError.message}</MessageBar.Body>
+							</MessageBar.Root>
 						)}
 
 						{refreshHandleError && (
-							<MessageBar intent="error" layout="singleline">
-								<MessageBarBody>{refreshHandleError.message}</MessageBarBody>
-							</MessageBar>
+							<MessageBar.Root intent="error" layout="singleline">
+								<MessageBar.Body>{refreshHandleError.message}</MessageBar.Body>
+							</MessageBar.Root>
 						)}
 
 						<div class="flex flex-col gap-8">
@@ -107,25 +84,25 @@ export default {
 											<p class="text-base-300 text-neutral-foreground-3">Your username on the network</p>
 										</div>
 
-										<Menu>
-											<MenuTrigger>
+										<Menu.Root>
+											<Menu.Trigger>
 												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
 													<DotGrid1x3HorizontalOutlined size={16} />
 												</button>
-											</MenuTrigger>
+											</Menu.Trigger>
 
-											<MenuPopover>
-												<MenuList>
-													<MenuItem command="show-modal" commandfor="change-service-handle-dialog">
+											<Menu.Popover>
+												<Menu.List>
+													<Menu.Item command="show-modal" commandfor="change-service-handle-dialog">
 														Change handle
-													</MenuItem>
+													</Menu.Item>
 
-													<MenuItem command="show-modal" commandfor="refresh-handle-dialog">
+													<Menu.Item command="show-modal" commandfor="refresh-handle-dialog">
 														Request refresh
-													</MenuItem>
-												</MenuList>
-											</MenuPopover>
-										</Menu>
+													</Menu.Item>
+												</Menu.List>
+											</Menu.Popover>
+										</Menu.Root>
 									</div>
 								</div>
 							</div>
@@ -167,13 +144,13 @@ export default {
 						</div>
 					</div>
 
-					<Dialog id="change-service-handle-dialog">
-						<DialogSurface>
-							<DialogBody>
-								<DialogTitle>Change handle</DialogTitle>
+					<Dialog.Root id="change-service-handle-dialog">
+						<Dialog.Surface>
+							<Dialog.Body>
+								<Dialog.Title>Change handle</Dialog.Title>
 
 								<form {...updateHandleForm} class="contents">
-									<DialogContent class="flex flex-col gap-4">
+									<Dialog.Content class="flex flex-col gap-4">
 										<p class="text-base-300 text-neutral-foreground-3">
 											Your handle is your unique identity on the AT Protocol network.
 										</p>
@@ -198,62 +175,62 @@ export default {
 												/>
 											</div>
 										</Field>
-									</DialogContent>
+									</Dialog.Content>
 
-									<DialogActions>
+									<Dialog.Actions>
 										<Button command="show-modal" commandfor="change-custom-handle-dialog">
 											Use my own domain
 										</Button>
 
 										<div class="grow"></div>
 
-										<DialogClose>
+										<Dialog.Close>
 											<Button>Cancel</Button>
-										</DialogClose>
+										</Dialog.Close>
 
 										<Button type="submit" variant="primary">
 											Change
 										</Button>
-									</DialogActions>
+									</Dialog.Actions>
 								</form>
-							</DialogBody>
-						</DialogSurface>
-					</Dialog>
+							</Dialog.Body>
+						</Dialog.Surface>
+					</Dialog.Root>
 
-					<Dialog id="refresh-handle-dialog">
-						<DialogSurface>
-							<DialogBody>
-								<DialogTitle>Request handle refresh</DialogTitle>
+					<Dialog.Root id="refresh-handle-dialog">
+						<Dialog.Surface>
+							<Dialog.Body>
+								<Dialog.Title>Request handle refresh</Dialog.Title>
 
 								<form {...refreshHandleForm} class="contents">
-									<DialogContent>
+									<Dialog.Content>
 										<p class="text-base-300">
 											This will notify the network to re-verify your handle. Use this if apps are marking your
 											handle as invalid despite being set up correctly.
 										</p>
-									</DialogContent>
+									</Dialog.Content>
 
-									<DialogActions>
-										<DialogClose>
+									<Dialog.Actions>
+										<Dialog.Close>
 											<Button>Cancel</Button>
-										</DialogClose>
+										</Dialog.Close>
 
 										<Button type="submit" variant="primary">
 											Refresh
 										</Button>
-									</DialogActions>
+									</Dialog.Actions>
 								</form>
-							</DialogBody>
-						</DialogSurface>
-					</Dialog>
+							</Dialog.Body>
+						</Dialog.Surface>
+					</Dialog.Root>
 
-					<Dialog id="change-custom-handle-dialog">
-						<DialogSurface>
-							<DialogBody>
-								<DialogTitle>Change handle</DialogTitle>
+					<Dialog.Root id="change-custom-handle-dialog">
+						<Dialog.Surface>
+							<Dialog.Body>
+								<Dialog.Title>Change handle</Dialog.Title>
 
 								<form {...updateHandleForm} class="contents">
-									<DialogContent class="flex flex-col gap-4">
+									<Dialog.Content class="flex flex-col gap-4">
 										<p class="text-base-300 text-neutral-foreground-3">
 											Your handle is your unique identity on the AT Protocol network.
 										</p>
@@ -268,10 +245,10 @@ export default {
 
 										<input {...updateHandleForm.fields.domain.as('hidden', 'custom')} />
 
-										<Accordion class="flex flex-col gap-2">
-											<AccordionItem name="handle-method" open>
-												<AccordionHeader>DNS record</AccordionHeader>
-												<AccordionPanel>
+										<Accordion.Root class="flex flex-col gap-2">
+											<Accordion.Item name="handle-method" open>
+												<Accordion.Header>DNS record</Accordion.Header>
+												<Accordion.Panel>
 													<div class="flex flex-col gap-3">
 														<p class="text-base-300 text-neutral-foreground-3">
 															Add the following DNS record to your domain:
@@ -307,12 +284,12 @@ export default {
 															</div>
 														</div>
 													</div>
-												</AccordionPanel>
-											</AccordionItem>
+												</Accordion.Panel>
+											</Accordion.Item>
 
-											<AccordionItem name="handle-method">
-												<AccordionHeader>HTTP well-known entry</AccordionHeader>
-												<AccordionPanel>
+											<Accordion.Item name="handle-method">
+												<Accordion.Header>HTTP well-known entry</Accordion.Header>
+												<Accordion.Panel>
 													<div class="flex flex-col gap-3">
 														<p class="text-base-300 text-neutral-foreground-3">
 															Upload a text file to the following URL:
@@ -339,24 +316,24 @@ export default {
 															</div>
 														</div>
 													</div>
-												</AccordionPanel>
-											</AccordionItem>
-										</Accordion>
-									</DialogContent>
+												</Accordion.Panel>
+											</Accordion.Item>
+										</Accordion.Root>
+									</Dialog.Content>
 
-									<DialogActions>
-										<DialogClose>
+									<Dialog.Actions>
+										<Dialog.Close>
 											<Button>Cancel</Button>
-										</DialogClose>
+										</Dialog.Close>
 
 										<Button type="submit" variant="primary">
 											Change
 										</Button>
-									</DialogActions>
+									</Dialog.Actions>
 								</form>
-							</DialogBody>
-						</DialogSurface>
-					</Dialog>
+							</Dialog.Body>
+						</Dialog.Surface>
+					</Dialog.Root>
 				</AccountLayout>,
 			);
 		},
@@ -386,9 +363,9 @@ export default {
 						</div>
 
 						{newPasswordResult && (
-							<MessageBar intent="success" layout="multiline">
-								<MessageBarBody>
-									<MessageBarTitle>App password created</MessageBarTitle>
+							<MessageBar.Root intent="success" layout="multiline">
+								<MessageBar.Body>
+									<MessageBar.Title>App password created</MessageBar.Title>
 
 									<div class="mt-2 flex flex-col gap-2">
 										<code class="rounded-md bg-neutral-background-3 px-2 py-1 font-mono text-base-300">
@@ -398,14 +375,14 @@ export default {
 											Copy this password now. You won't be able to see it again.
 										</p>
 									</div>
-								</MessageBarBody>
-							</MessageBar>
+								</MessageBar.Body>
+							</MessageBar.Root>
 						)}
 
 						{newPasswordError && (
-							<MessageBar intent="error" layout="singleline">
-								<MessageBarBody>{newPasswordError.message}</MessageBarBody>
-							</MessageBar>
+							<MessageBar.Root intent="error" layout="singleline">
+								<MessageBar.Body>{newPasswordError.message}</MessageBar.Body>
+							</MessageBar.Root>
 						)}
 
 						<div class="flex flex-col divide-y divide-neutral-stroke-2 rounded-md bg-neutral-background-1 shadow-4">
@@ -446,62 +423,62 @@ export default {
 											</p>
 										</div>
 
-										<Menu>
-											<MenuTrigger>
+										<Menu.Root>
+											<Menu.Trigger>
 												<button class="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-subtle-background text-neutral-foreground-3 outline-2 -outline-offset-2 outline-transparent transition hover:bg-subtle-background-hover hover:text-neutral-foreground-3-hover focus-visible:outline-stroke-focus-2 active:bg-subtle-background-active active:text-neutral-foreground-3-active">
 													<DotGrid1x3HorizontalOutlined size={16} />
 												</button>
-											</MenuTrigger>
+											</Menu.Trigger>
 
-											<MenuPopover>
-												<MenuList>
-													<Dialog>
-														<DialogTrigger>
-															<MenuItem>Remove</MenuItem>
-														</DialogTrigger>
+											<Menu.Popover>
+												<Menu.List>
+													<Dialog.Root>
+														<Dialog.Trigger>
+															<Menu.Item>Remove</Menu.Item>
+														</Dialog.Trigger>
 
-														<DialogSurface>
-															<DialogBody>
-																<DialogTitle>Remove app password?</DialogTitle>
+														<Dialog.Surface>
+															<Dialog.Body>
+																<Dialog.Title>Remove app password?</Dialog.Title>
 
 																<form {...deleteAppPasswordForm} class="contents">
 																	<input type="hidden" name="name" value={password.name} />
 
-																	<DialogContent>
+																	<Dialog.Content>
 																		<p class="text-base-300">
 																			Any app signed in with "{password.name}" will be signed out immediately.
 																		</p>
-																	</DialogContent>
+																	</Dialog.Content>
 
-																	<DialogActions>
-																		<DialogClose>
+																	<Dialog.Actions>
+																		<Dialog.Close>
 																			<Button>Cancel</Button>
-																		</DialogClose>
+																		</Dialog.Close>
 
 																		<Button type="submit" variant="primary">
 																			Remove
 																		</Button>
-																	</DialogActions>
+																	</Dialog.Actions>
 																</form>
-															</DialogBody>
-														</DialogSurface>
-													</Dialog>
-												</MenuList>
-											</MenuPopover>
-										</Menu>
+															</Dialog.Body>
+														</Dialog.Surface>
+													</Dialog.Root>
+												</Menu.List>
+											</Menu.Popover>
+										</Menu.Root>
 									</div>
 								);
 							})}
 						</div>
 					</div>
 
-					<Dialog id="create-app-password-dialog">
-						<DialogSurface>
-							<DialogBody>
-								<DialogTitle>Create app password</DialogTitle>
+					<Dialog.Root id="create-app-password-dialog">
+						<Dialog.Surface>
+							<Dialog.Body>
+								<Dialog.Title>Create app password</Dialog.Title>
 
 								<form {...createAppPasswordForm} class="contents">
-									<DialogContent class="flex flex-col gap-4">
+									<Dialog.Content class="flex flex-col gap-4">
 										<p class="text-base-300 text-neutral-foreground-3">
 											App passwords let you sign into legacy AT Protocol apps without giving them access to
 											your main password.
@@ -521,21 +498,21 @@ export default {
 												]}
 											/>
 										</Field>
-									</DialogContent>
+									</Dialog.Content>
 
-									<DialogActions>
-										<DialogClose>
+									<Dialog.Actions>
+										<Dialog.Close>
 											<Button>Cancel</Button>
-										</DialogClose>
+										</Dialog.Close>
 
 										<Button type="submit" variant="primary">
 											Create
 										</Button>
-									</DialogActions>
+									</Dialog.Actions>
 								</form>
-							</DialogBody>
-						</DialogSurface>
-					</Dialog>
+							</Dialog.Body>
+						</Dialog.Surface>
+					</Dialog.Root>
 				</AccountLayout>,
 			);
 		},

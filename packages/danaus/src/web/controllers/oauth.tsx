@@ -1,10 +1,10 @@
 import type { Controller } from '@oomfware/fetch-router';
 import { render } from '@oomfware/jsx';
 
-import { BaseLayout } from '../layouts/base.tsx';
-import { requireSession } from '../middlewares/session.ts';
-import Button from '../primitives/button.tsx';
-import { routes } from '../routes.ts';
+import { BaseLayout } from '#web/layouts/base.tsx';
+import { requireSession } from '#web/middlewares/session.ts';
+import { Button } from '#web/primitives/index.ts';
+import { routes } from '#web/routes.ts';
 
 export default {
 	authorize: {

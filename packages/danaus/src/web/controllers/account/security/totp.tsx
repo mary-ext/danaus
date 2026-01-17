@@ -14,13 +14,7 @@ import { coerceToInteger } from '#app/web/lib/coerce.ts';
 import { BaseLayout } from '#web/layouts/base.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { getSession } from '#web/middlewares/session.ts';
-import Button from '#web/primitives/button.tsx';
-import DialogActions from '#web/primitives/dialog-actions.tsx';
-import DialogBody from '#web/primitives/dialog-body.tsx';
-import DialogContent from '#web/primitives/dialog-content.tsx';
-import DialogTitle from '#web/primitives/dialog-title.tsx';
-import Field from '#web/primitives/field.tsx';
-import Input from '#web/primitives/input.tsx';
+import { Button, Dialog, Field, Input } from '#web/primitives/index.ts';
 import { routes } from '#web/routes.ts';
 
 import { removeTotpForm, setupTotpForm } from './totp/lib/forms';
@@ -67,10 +61,10 @@ export default {
 						<div class="flex flex-1 items-center justify-center p-4">
 							<div class="w-full max-w-150 rounded-xl bg-neutral-background-1 shadow-64">
 								<form {...setupTotpForm} class="contents">
-									<DialogBody>
-										<DialogTitle>Set up authenticator app</DialogTitle>
+									<Dialog.Body>
+										<Dialog.Title>Set up authenticator app</Dialog.Title>
 
-										<DialogContent class="flex flex-col gap-4">
+										<Dialog.Content class="flex flex-col gap-4">
 											<p class="text-base-300">
 												Scan this QR code with your authenticator app, or enter the code manually.
 											</p>
@@ -136,9 +130,9 @@ export default {
 													{generalError.message}
 												</p>
 											)}
-										</DialogContent>
+										</Dialog.Content>
 
-										<DialogActions>
+										<Dialog.Actions>
 											<Button type="button" href={routes.account.security.overview.href()}>
 												Cancel
 											</Button>
@@ -146,8 +140,8 @@ export default {
 											<Button type="submit" variant="primary">
 												Save
 											</Button>
-										</DialogActions>
-									</DialogBody>
+										</Dialog.Actions>
+									</Dialog.Body>
 								</form>
 							</div>
 						</div>
@@ -189,10 +183,10 @@ export default {
 								<form {...removeTotpForm} class="contents">
 									<input {...fields.id.as('hidden', params.id)} />
 
-									<DialogBody>
-										<DialogTitle>Remove this authenticator?</DialogTitle>
+									<Dialog.Body>
+										<Dialog.Title>Remove this authenticator?</Dialog.Title>
 
-										<DialogContent>
+										<Dialog.Content>
 											<p class="text-base-300">You'll no longer be able to use "{totp.name}" to sign in.</p>
 
 											{error && (
@@ -200,9 +194,9 @@ export default {
 													{error.message}
 												</p>
 											)}
-										</DialogContent>
+										</Dialog.Content>
 
-										<DialogActions>
+										<Dialog.Actions>
 											<Button type="button" href={routes.account.security.overview.href()}>
 												Cancel
 											</Button>
@@ -210,8 +204,8 @@ export default {
 											<Button type="submit" variant="primary">
 												Remove
 											</Button>
-										</DialogActions>
-									</DialogBody>
+										</Dialog.Actions>
+									</Dialog.Body>
 								</form>
 							</div>
 						</div>

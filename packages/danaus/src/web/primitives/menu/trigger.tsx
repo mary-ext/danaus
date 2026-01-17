@@ -2,7 +2,7 @@ import { cloneElement, type JSXElement } from '@oomfware/jsx';
 
 import { cx } from 'cva';
 
-import { useMenuContext } from './utils/menu-context.tsx';
+import { useMenuContext } from './utils/context.tsx';
 
 export interface MenuTriggerProps {
 	children: JSXElement;

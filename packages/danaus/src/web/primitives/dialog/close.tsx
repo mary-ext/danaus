@@ -1,19 +1,19 @@
 import { cloneElement, type JSXElement } from '@oomfware/jsx';
 
-import { useDialogContext } from './utils/dialog-context.tsx';
+import { useDialogContext } from './utils/context.tsx';
 
-export interface DialogTriggerProps {
+export interface DialogCloseProps {
 	children: JSXElement;
 }
 
-const DialogTrigger = (props: DialogTriggerProps) => {
+const DialogClose = (props: DialogCloseProps) => {
 	const { children } = props;
 	const { dialogId } = useDialogContext();
 
 	return cloneElement(children, {
 		commandfor: dialogId,
-		command: 'show-modal',
+		command: 'close',
 	});
 };
 
-export default DialogTrigger;
+export default DialogClose;

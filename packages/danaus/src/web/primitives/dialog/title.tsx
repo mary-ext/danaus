@@ -2,7 +2,7 @@ import type { JSXNode } from '@oomfware/jsx';
 
 import { cva } from 'cva';
 
-import { useDialogContext } from './utils/dialog-context.tsx';
+import { useDialogContext } from './utils/context.tsx';
 
 const root = cva({
 	base: ['m-0 flex items-start gap-2', 'text-base-500 font-semibold'],

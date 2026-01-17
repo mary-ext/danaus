@@ -1,7 +1,7 @@
 import type { Did, Handle } from '@atcute/lexicons/syntax';
 
-import { sql } from 'drizzle-orm';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
+import { sql } from 'drizzle-orm';
 import {
 	blob,
 	foreignKey,

@@ -5,11 +5,7 @@ import { render } from '@oomfware/jsx';
 import { BaseLayout } from '#web/layouts/base.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { getSession } from '#web/middlewares/session.ts';
-import Button from '#web/primitives/button.tsx';
-import DialogActions from '#web/primitives/dialog-actions.tsx';
-import DialogBody from '#web/primitives/dialog-body.tsx';
-import DialogContent from '#web/primitives/dialog-content.tsx';
-import DialogTitle from '#web/primitives/dialog-title.tsx';
+import { Button, Dialog } from '#web/primitives/index.ts';
 import { routes } from '#web/routes.ts';
 
 import { deleteBackupCodesForm, generateBackupCodesForm } from './recovery/lib/forms';
@@ -43,10 +39,10 @@ export default {
 
 					<div class="flex flex-1 items-center justify-center p-4">
 						<div class="w-full max-w-120 rounded-xl bg-neutral-background-1 shadow-64">
-							<DialogBody>
-								<DialogTitle>Recovery codes</DialogTitle>
+							<Dialog.Body>
+								<Dialog.Title>Recovery codes</Dialog.Title>
 
-								<DialogContent class="flex flex-col gap-4">
+								<Dialog.Content class="flex flex-col gap-4">
 									<p class="text-base-300">
 										Save these codes in a secure place. Each code can only be used once.
 									</p>
@@ -58,12 +54,12 @@ export default {
 											</code>
 										))}
 									</div>
-								</DialogContent>
+								</Dialog.Content>
 
-								<DialogActions>
+								<Dialog.Actions>
 									<Button href={routes.account.security.overview.href()}>Done</Button>
-								</DialogActions>
-							</DialogBody>
+								</Dialog.Actions>
+							</Dialog.Body>
 						</div>
 					</div>
 				</BaseLayout>,
@@ -95,10 +91,10 @@ export default {
 						<div class="flex flex-1 items-center justify-center p-4">
 							<div class="w-full max-w-120 rounded-xl bg-neutral-background-1 shadow-64">
 								<form {...generateBackupCodesForm} class="contents">
-									<DialogBody>
-										<DialogTitle>Regenerate recovery codes?</DialogTitle>
+									<Dialog.Body>
+										<Dialog.Title>Regenerate recovery codes?</Dialog.Title>
 
-										<DialogContent>
+										<Dialog.Content>
 											<p>
 												This will invalidate your existing recovery codes. Make sure to save the new ones.
 											</p>
@@ -108,9 +104,9 @@ export default {
 													{error.message}
 												</p>
 											)}
-										</DialogContent>
+										</Dialog.Content>
 
-										<DialogActions>
+										<Dialog.Actions>
 											<Button type="button" href={routes.account.security.overview.href()}>
 												Cancel
 											</Button>
@@ -118,8 +114,8 @@ export default {
 											<Button type="submit" variant="primary">
 												Regenerate
 											</Button>
-										</DialogActions>
-									</DialogBody>
+										</Dialog.Actions>
+									</Dialog.Body>
 								</form>
 							</div>
 						</div>
@@ -153,10 +149,10 @@ export default {
 						<div class="flex flex-1 items-center justify-center p-4">
 							<div class="w-full max-w-120 rounded-xl bg-neutral-background-1 shadow-64">
 								<form {...deleteBackupCodesForm} class="contents">
-									<DialogBody>
-										<DialogTitle>Delete recovery codes?</DialogTitle>
+									<Dialog.Body>
+										<Dialog.Title>Delete recovery codes?</Dialog.Title>
 
-										<DialogContent>
+										<Dialog.Content>
 											<p class="text-base-300">
 												You won't be able to use recovery codes to sign in until you generate new ones.
 											</p>
@@ -166,9 +162,9 @@ export default {
 													{error.message}
 												</p>
 											)}
-										</DialogContent>
+										</Dialog.Content>
 
-										<DialogActions>
+										<Dialog.Actions>
 											<Button type="button" href={routes.account.security.overview.href()}>
 												Cancel
 											</Button>
@@ -176,8 +172,8 @@ export default {
 											<Button type="submit" variant="primary">
 												Delete
 											</Button>
-										</DialogActions>
-									</DialogBody>
+										</Dialog.Actions>
+									</Dialog.Body>
 								</form>
 							</div>
 						</div>

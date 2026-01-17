@@ -1,17 +1,9 @@
-import type { JSXNode } from '@oomfware/jsx';
+export { default as Root } from './accordion/root.tsx';
+export { default as Item } from './accordion/item.tsx';
+export { default as Header } from './accordion/header.tsx';
+export { default as Panel } from './accordion/panel.tsx';
 
-export interface AccordionProps {
-	class?: string;
-	children?: JSXNode;
-}
-
-/**
- * accordion container component
- */
-const Accordion = (props: AccordionProps) => {
-	const { class: className, children } = props;
-
-	return <div class={className}>{children}</div>;
-};
-
-export default Accordion;
+export type { AccordionProps } from './accordion/root.tsx';
+export type { AccordionItemProps } from './accordion/item.tsx';
+export type { AccordionHeaderProps } from './accordion/header.tsx';
+export type { AccordionPanelProps } from './accordion/panel.tsx';
