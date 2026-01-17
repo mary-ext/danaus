@@ -61,5 +61,5 @@ export const didKey = v.custom<Did<'key'>>(
 );
 
 export const normalizeWhitespace = v.transform<string, string>((input) => {
-	return input.replace(/\s+/, ' ').trim();
+	return input.replace(/\s+/g, ' ').trim();
 });
