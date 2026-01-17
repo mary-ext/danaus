@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "932710cc-55eb-4151-8b21-3135d4bb9a08",
+  "id": "a52583cf-1f20-4ce8-bc86-96528e2d13e1",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -541,6 +541,16 @@
       "default": null,
       "generated": null,
       "name": "session_id",
+      "entityType": "columns",
+      "table": "verify_challenge"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "remember",
       "entityType": "columns",
       "table": "verify_challenge"
     },

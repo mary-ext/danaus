@@ -242,6 +242,9 @@ export const verifyChallenge = sqliteTable(
 		/** session to elevate (null = MFA login, creates new session) */
 		session_id: text().references(() => webSession.id, { onDelete: 'cascade' }),
 
+		/** remember me preference from login form (MFA login only) */
+		remember: integer({ mode: 'boolean' }).notNull().default(false),
+
 		/** WebAuthn challenge (base64url) for authentication */
 		webauthn_challenge: text(),
 

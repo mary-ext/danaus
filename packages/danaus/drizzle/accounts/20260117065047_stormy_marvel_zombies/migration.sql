@@ -85,6 +85,7 @@ CREATE TABLE `verify_challenge` (
 	`token` text PRIMARY KEY,
 	`did` text NOT NULL,
 	`session_id` text,
+	`remember` integer DEFAULT false NOT NULL,
 	`webauthn_challenge` text,
 	`created_at` integer NOT NULL,
 	`expires_at` integer NOT NULL,

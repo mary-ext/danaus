@@ -4,6 +4,7 @@ import { render } from '@oomfware/jsx';
 
 import { BaseLayout } from '#web/layouts/base.tsx';
 import Button from '#web/primitives/button.tsx';
+import Checkbox from '#web/primitives/checkbox.tsx';
 import Field from '#web/primitives/field.tsx';
 import Input from '#web/primitives/input.tsx';
 import { routes } from '#web/routes.ts';
@@ -49,6 +50,10 @@ export default {
 							>
 								<Input {...fields._password.as('password')} autocomplete="current-password" required />
 							</Field>
+
+							<Checkbox name="remember" value="true">
+								Remember this device
+							</Checkbox>
 
 							<Button type="submit" variant="primary">
 								Sign in

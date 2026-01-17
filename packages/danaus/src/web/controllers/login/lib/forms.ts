@@ -130,7 +130,7 @@ export const loginForm = form(
 		// check if MFA is enabled
 		if (accountManager.getMfaStatus(account.did) !== null) {
 			// create verify challenge and redirect
-			const token = accountManager.createVerifyChallenge(account.did);
+			const token = accountManager.createVerifyChallenge(account.did, data.remember ?? false);
 
 			redirect(routes.verify.index.href(undefined, { token, redirect: data.redirect }));
 		}
@@ -161,7 +161,6 @@ export const verifyForm = form(
 		challenge: v.string(),
 		factor: v.picklist<AuthFactor[]>(['totp', 'recovery', 'password']),
 		_code: v.string(),
-		remember: v.optional(v.boolean(), false),
 		redirect: v.string(),
 	}),
 	async (data) => {
@@ -199,10 +198,10 @@ export const verifyForm = form(
 			accountManager.elevateSession(challenge.session_id!);
 			redirect(data.redirect);
 		} else {
-			// MFA login: create new session
+			// MFA login: create new session using remember preference from login
 			const { session, token } = await accountManager.createWebSession({
 				did: challenge.did,
-				remember: data.remember ?? false,
+				remember: challenge.remember,
 				userAgent: request.headers.get('user-agent') ?? undefined,
 			});
 
@@ -218,33 +217,34 @@ export const verifyForm = form(
 	},
 );
 
-const authenticationResponseSchema = v.object({
-	id: v.string(),
-	rawId: v.string(),
-	response: v.object({
-		clientDataJSON: v.string(),
-		authenticatorData: v.string(),
-		signature: v.string(),
-		userHandle: v.optional(v.string()),
-	}),
-	authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
-	clientExtensionResults: v.object({
-		appid: v.optional(v.boolean()),
-		credProps: v.optional(
-			v.object({
-				rk: v.optional(v.boolean()),
-			}),
-		),
-		hmacCreateSecret: v.optional(v.boolean()),
-	}),
-	type: v.literal('public-key'),
-});
-
 export const verifyWebAuthnForm = form(
 	v.object({
 		challenge: v.string(),
-		response: v.pipe(v.string(), v.minLength(1), v.parseJson(), authenticationResponseSchema),
-		remember: v.optional(v.boolean(), false),
+		response: v.pipe(
+			v.string(),
+			v.parseJson(),
+			v.object({
+				id: v.string(),
+				rawId: v.string(),
+				response: v.object({
+					clientDataJSON: v.string(),
+					authenticatorData: v.string(),
+					signature: v.string(),
+					userHandle: v.optional(v.string()),
+				}),
+				authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
+				clientExtensionResults: v.object({
+					appid: v.optional(v.boolean()),
+					credProps: v.optional(
+						v.object({
+							rk: v.optional(v.boolean()),
+						}),
+					),
+					hmacCreateSecret: v.optional(v.boolean()),
+				}),
+				type: v.literal('public-key'),
+			}),
+		),
 		redirect: v.string(),
 	}),
 	async (data) => {
@@ -301,10 +301,10 @@ export const verifyWebAuthnForm = form(
 			accountManager.elevateSession(challenge.session_id!);
 			redirect(data.redirect);
 		} else {
-			// MFA login: create new session
+			// MFA login: create new session using remember preference from login
 			const { session, token } = await accountManager.createWebSession({
 				did: challenge.did,
-				remember: data.remember ?? false,
+				remember: challenge.remember,
 				userAgent: request.headers.get('user-agent') ?? undefined,
 			});
 

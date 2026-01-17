@@ -19,32 +19,6 @@ export interface WebAuthnRegistrationState {
 	options: Awaited<ReturnType<typeof generateWebAuthnRegistrationOptions>>;
 }
 
-// valibot schema for WebAuthn registration response
-const authenticatorTransportSchema = v.picklist([
-	'ble',
-	'cable',
-	'hybrid',
-	'internal',
-	'nfc',
-	'smart-card',
-	'usb',
-]);
-
-const authenticatorAttachmentSchema = v.picklist(['cross-platform', 'platform']);
-
-const registrationResponseSchema = v.object({
-	id: v.string(),
-	rawId: v.string(),
-	type: v.literal('public-key'),
-	response: v.object({
-		clientDataJSON: v.string(),
-		attestationObject: v.string(),
-		transports: v.optional(v.array(authenticatorTransportSchema)),
-	}),
-	clientExtensionResults: v.record(v.string(), v.unknown()),
-	authenticatorAttachment: v.optional(authenticatorAttachmentSchema),
-});
-
 /**
  * initiates WebAuthn registration by generating a challenge.
  * @param did account DID
@@ -80,7 +54,24 @@ export const completeWebAuthnForm = form(
 	v.object({
 		token: v.pipe(v.string(), v.minLength(1)),
 		name: v.optional(v.pipe(v.string(), normalizeWhitespace, v.maxLength(32, `Name is too long`))),
-		response: v.pipe(v.string(), v.minLength(1), v.parseJson(), registrationResponseSchema),
+		response: v.pipe(
+			v.string(),
+			v.parseJson(),
+			v.object({
+				id: v.string(),
+				rawId: v.string(),
+				type: v.literal('public-key'),
+				response: v.object({
+					clientDataJSON: v.string(),
+					attestationObject: v.string(),
+					transports: v.optional(
+						v.array(v.picklist(['ble', 'cable', 'hybrid', 'internal', 'nfc', 'smart-card', 'usb'])),
+					),
+				}),
+				clientExtensionResults: v.record(v.string(), v.unknown()),
+				authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
+			}),
+		),
 	}),
 	async (data, issue) => {
 		const { accountManager, config } = getAppContext();

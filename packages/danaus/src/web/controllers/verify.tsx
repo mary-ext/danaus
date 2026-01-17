@@ -16,7 +16,6 @@ import { BaseLayout } from '#web/layouts/base.tsx';
 import { getAppContext } from '#web/middlewares/app-context.ts';
 import { tryGetSession } from '#web/middlewares/session.ts';
 import Button from '#web/primitives/button.tsx';
-import Checkbox from '#web/primitives/checkbox.tsx';
 import Field from '#web/primitives/field.tsx';
 import Input from '#web/primitives/input.tsx';
 import MenuItem from '#web/primitives/menu-item.tsx';
@@ -361,13 +360,6 @@ const BaseForm = (props: {
 						<input {...fields.factor.as('hidden', props.factor)} />
 
 						{props.children}
-
-						{/* remember checkbox - only for MFA login, not sudo */}
-						{!props.isSudo && (
-							<Checkbox name="remember" value="true">
-								Remember this device for 1 year
-							</Checkbox>
-						)}
 
 						<OtherMethodsMenu
 							factor={props.factor}

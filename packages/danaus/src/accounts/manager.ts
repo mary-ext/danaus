@@ -1374,9 +1374,10 @@ export class AccountManager implements Disposable {
 	/**
 	 * create a verification challenge for MFA login (no session, creates one on success).
 	 * @param did account did
+	 * @param remember whether to create a long-lived session on success
 	 * @returns token for the verify page
 	 */
-	createVerifyChallenge(did: Did): string {
+	createVerifyChallenge(did: Did, remember: boolean): string {
 		const token = nanoid(32);
 		const now = new Date();
 		const expiresAt = new Date(now.getTime() + MFA_CHALLENGE_TTL_MS);
@@ -1387,6 +1388,7 @@ export class AccountManager implements Disposable {
 				token: token,
 				did: did,
 				session_id: null,
+				remember: remember,
 				created_at: now,
 				expires_at: expiresAt,
 			})
