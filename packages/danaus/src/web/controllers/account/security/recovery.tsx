@@ -21,6 +21,10 @@ export default {
 			const { accountManager } = getAppContext();
 			const session = getSession();
 
+			if (!accountManager.isMfaEnabled(session.did)) {
+				redirect(routes.account.security.overview.href());
+			}
+
 			// require sudo mode
 			if (!accountManager.isSessionElevated(session)) {
 				redirect(routes.login.sudo.index.href(undefined, { redirect: url.pathname }));
@@ -70,6 +74,10 @@ export default {
 			action({ url }) {
 				const { accountManager } = getAppContext();
 				const session = getSession();
+
+				if (!accountManager.isMfaEnabled(session.did)) {
+					redirect(routes.account.security.overview.href());
+				}
 
 				// require sudo mode
 				if (!accountManager.isSessionElevated(session)) {
@@ -124,6 +132,10 @@ export default {
 			action({ url }) {
 				const { accountManager } = getAppContext();
 				const session = getSession();
+
+				if (!accountManager.isMfaEnabled(session.did)) {
+					redirect(routes.account.security.overview.href());
+				}
 
 				// require sudo mode
 				if (!accountManager.isSessionElevated(session)) {
