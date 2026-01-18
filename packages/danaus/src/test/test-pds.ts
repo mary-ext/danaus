@@ -80,9 +80,7 @@ export class TestPds implements AsyncDisposable {
 			blobs: {
 				maxUploadSize: 100 * 1024 * 1024,
 			},
-			invites: {
-				required: false,
-			},
+			registration: 'open',
 			branding: {
 				name: `${hostname} PDS`,
 				logoUrl: null,

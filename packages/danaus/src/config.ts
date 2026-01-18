@@ -27,9 +27,7 @@ export interface ServiceConfig {
 		maxUploadSize: number;
 	};
 
-	invites: {
-		required: boolean;
-	};
+	registration: 'open' | 'invite-only' | 'none';
 
 	branding: {
 		name: string;
@@ -157,9 +155,7 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 				maxUploadSize: env.PDS_BLOB_UPLOAD_SIZE_LIMIT ?? 100 * 1024 * 1024,
 			},
 
-			invites: {
-				required: env.PDS_INVITE_REQUIRED ?? true,
-			},
+			registration: env.PDS_REGISTRATION ?? 'invite-only',
 
 			branding: {
 				name: env.PDS_SERVICE_NAME ?? `${hostname} PDS`,

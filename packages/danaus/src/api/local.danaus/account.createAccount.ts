@@ -29,9 +29,18 @@ export const createAccount = (router: XRPCRouter, context: AppContext) => {
 			const auth = await authVerifier.adminOptional(request);
 			const isAdmin = auth.type === AuthCredentialsType.AdminToken;
 
-			// public signup path: check invite code if required
+			// public signup path: check registration mode
 			if (!isAdmin) {
-				if (context.config.service.invites.required) {
+				const registration = context.config.service.registration;
+
+				if (registration === 'none') {
+					throw new InvalidRequestError({
+						error: 'RegistrationDisabled',
+						description: 'public registration is disabled',
+					});
+				}
+
+				if (registration === 'invite-only') {
 					if (!input.inviteCode) {
 						throw new InvalidRequestError({
 							error: 'InvalidInviteCode',

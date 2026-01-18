@@ -12,7 +12,7 @@ export const describeServer = (router: XRPCRouter, context: AppContext) => {
 			return json({
 				did: config.service.did,
 				availableUserDomains: config.identity.serviceHandleDomains,
-				inviteCodeRequired: config.service.invites.required,
+				inviteCodeRequired: config.service.registration !== 'open',
 				contact: {
 					email: config.service.branding.contactEmailAddress ?? undefined,
 				},

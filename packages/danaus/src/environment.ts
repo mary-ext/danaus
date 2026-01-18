@@ -81,7 +81,7 @@ const envSchema = v.object({
 	PDS_JWT_SECRET: v.optional(str),
 	PDS_ADMIN_PASSWORD: v.optional(str),
 
-	PDS_INVITE_REQUIRED: v.optional(strbool),
+	PDS_REGISTRATION: v.optional(v.picklist(['open', 'invite-only', 'none'])),
 
 	PDS_PLC_ROTATION_KEY_K256_PRIVATE_KEY_HEX: v.optional(str),
 
