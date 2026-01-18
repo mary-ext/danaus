@@ -8,6 +8,7 @@ import { comAtproto } from './api/com.atproto/index.ts';
 import { localDanaus } from './api/local.danaus/index.ts';
 import type { AppConfig } from './config.ts';
 import { createAppContext, type AppContext } from './context.ts';
+import { configureLogging, httpLogger } from './logger.ts';
 import { createWebRouter } from './web/router.ts';
 import { runWithServer } from './web/server-context.ts';
 
@@ -40,6 +41,10 @@ export class PdsServer implements AsyncDisposable {
 			return;
 		}
 
+		httpLogger.info('server starting');
+
+		await configureLogging(this.config.logging);
+
 		await using disposables = new AsyncDisposableStack();
 
 		const context = createAppContext(this.config);
@@ -63,6 +68,7 @@ export class PdsServer implements AsyncDisposable {
 			],
 			handleNotFound: context.proxy.handleNotFound,
 			handleException(err, request) {
+				httpLogger.error('xrpc request failed', { err });
 				return defaultExceptionHandler(err, request);
 			},
 		});
@@ -77,9 +83,12 @@ export class PdsServer implements AsyncDisposable {
 
 		const corsHeaders = { 'access-control-allow-origin': '*' };
 
+		const servicePort = this.config.service.port;
+		const serviceHostname = this.config.service.hostname;
+
 		const server: ReturnType<typeof Bun.serve> = Bun.serve({
-			port: this.config.service.port,
-			hostname: this.config.service.hostname,
+			port: servicePort,
+			hostname: serviceHostname,
 			websocket: wrapped.websocket,
 			routes: {
 				'/.well-known/atproto-did'(req: Request) {
@@ -120,7 +129,12 @@ export class PdsServer implements AsyncDisposable {
 				'/*': (request, server) => runWithServer(server, () => web.fetch(request)),
 			},
 		});
-		disposables.defer(() => server.stop());
+		disposables.defer(() => {
+			httpLogger.info('server stopping');
+			server.stop();
+		});
+
+		httpLogger.info('server started', { port: server.port, hostname: serviceHostname });
 
 		this.#instance = {
 			disposables: disposables.move(),

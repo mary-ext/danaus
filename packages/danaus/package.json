@@ -46,6 +46,7 @@
 		"@atcute/xrpc-server": "^0.1.8",
 		"@atcute/xrpc-server-bun": "^0.1.1",
 		"@kelinci/danaus-lexicons": "workspace:*",
+		"@logtape/logtape": "^2.0.0",
 		"@oomfware/fetch-router": "^0.2.1",
 		"@oomfware/forms": "^0.3.0",
 		"@oomfware/jsx": "^0.1.5",

@@ -290,10 +290,7 @@ export const passkeyLoginForm = form(
 			}
 
 			// update counter
-			mfaManager.updateWebAuthnCredentialCounter(
-				credential.id,
-				verification.authenticationInfo.newCounter,
-			);
+			mfaManager.updateWebAuthnCredentialCounter(credential.id, verification.authenticationInfo.newCounter);
 		} catch {
 			invalid(`Passkey verification failed`);
 		}
@@ -356,10 +353,7 @@ export const verifyWebAuthnForm = form(
 			}
 
 			// update counter
-			mfaManager.updateWebAuthnCredentialCounter(
-				credential.id,
-				verification.authenticationInfo.newCounter,
-			);
+			mfaManager.updateWebAuthnCredentialCounter(credential.id, verification.authenticationInfo.newCounter);
 		} catch {
 			invalid(`Security key verification failed`);
 		}

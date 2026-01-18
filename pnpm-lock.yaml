@@ -97,6 +97,9 @@ importers:
       '@kelinci/danaus-lexicons':
         specifier: workspace:*
         version: link:../lexicons
+      '@logtape/logtape':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@oomfware/fetch-router':
         specifier: ^0.2.1
         version: 0.2.1
@@ -890,6 +893,9 @@ packages:
 
   '@levischuck/tiny-cbor@0.2.11':
     resolution: {integrity: sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==}
+
+  '@logtape/logtape@2.0.0':
+    resolution: {integrity: sha512-z9Hp44mIRXAzgxSyQfFQiRuJ78EMnZa6g43UCxyGOO3RgHjn/7q+5OhdbhypkeHjiJRPxv6RmRsyF0S+OOYWnA==}
 
   '@napi-rs/wasm-runtime@1.1.1':
     resolution: {integrity: sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A==}
@@ -4179,6 +4185,8 @@ snapshots:
       jsbi: 4.3.2
 
   '@levischuck/tiny-cbor@0.2.11': {}
+
+  '@logtape/logtape@2.0.0': {}
 
   '@napi-rs/wasm-runtime@1.1.1':
     dependencies:

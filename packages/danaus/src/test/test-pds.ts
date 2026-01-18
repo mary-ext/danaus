@@ -141,6 +141,11 @@ export class TestPds implements AsyncDisposable {
 			},
 			email: cfg.email ?? null,
 			proxy,
+			logging: {
+				level: 'debug',
+				json: false,
+				...cfg.logging,
+			},
 		};
 
 		const server = new PdsServer({ config });

@@ -6,6 +6,7 @@ import type { Did } from '@atcute/lexicons';
 import { nanoid } from 'nanoid';
 
 import type { DiskBlobStoreConfig } from '#app/config.ts';
+import { blobStoreLogger } from '#app/logger.ts';
 import { isErrnoException } from '#app/utils/errors.ts';
 
 import type { BlobStore } from './types';
@@ -75,6 +76,7 @@ export class DiskBlobStore implements BlobStore {
 					return;
 				}
 
+				blobStoreLogger.error('could not delete file from temp storage', { err, tmpPath: tempPath });
 				throw err;
 			}
 
@@ -85,7 +87,8 @@ export class DiskBlobStore implements BlobStore {
 
 		try {
 			await rename(tempPath, path);
-		} catch {
+		} catch (err) {
+			blobStoreLogger.warn('rename failed, falling back to copy', { err, tempPath, path });
 			await copyFile(tempPath, path);
 			await rm(tempPath, { force: true });
 		}

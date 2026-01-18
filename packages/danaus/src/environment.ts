@@ -18,6 +18,9 @@ const envSchema = v.object({
 	PDS_VERSION: v.optional(str),
 	PDS_DEV_MODE: v.optional(strbool),
 
+	PDS_LOG_LEVEL: v.optional(v.picklist(['trace', 'debug', 'info', 'warning', 'error', 'fatal'])),
+	PDS_LOG_JSON: v.optional(strbool),
+
 	PDS_PORT: v.optional(port),
 	PDS_HOSTNAME: v.optional(hostname),
 

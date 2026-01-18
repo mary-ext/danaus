@@ -1,15 +1,22 @@
 import { ComAtprotoSyncRequestCrawl } from '@atcute/atproto';
 import { Client, simpleFetchHandler } from '@atcute/client';
 
+import { crawlerLogger } from '#app/logger.ts';
+
 const MINUTE = 60_000;
 const NOTIFY_THRESHOLD = 20 * MINUTE;
+
+interface CrawlerClient {
+	client: Client;
+	service: string;
+}
 
 /**
  * manages crawler notification for federation.
  * notifies configured relay/crawler services when repo events occur.
  */
 export class Crawlers {
-	readonly clients: Client[];
+	readonly clients: CrawlerClient[];
 	private lastNotified = 0;
 	private pendingTrailing = false;
 
@@ -22,9 +29,10 @@ export class Crawlers {
 		readonly hostname: string,
 		crawlers: string[],
 	) {
-		this.clients = crawlers.map((service) => {
-			return new Client({ handler: simpleFetchHandler({ service }) });
-		});
+		this.clients = crawlers.map((service) => ({
+			client: new Client({ handler: simpleFetchHandler({ service }) }),
+			service,
+		}));
 	}
 
 	/**
@@ -60,13 +68,13 @@ export class Crawlers {
 		this.lastNotified = Date.now();
 
 		// fire-and-forget notifications to all crawlers
-		for (const client of this.clients) {
+		for (const { client, service: crawler } of this.clients) {
 			client
 				.call(ComAtprotoSyncRequestCrawl, {
 					input: { hostname: this.hostname },
 				})
-				.catch(() => {
-					// ignore errors - crawlers may be temporarily unavailable
+				.catch((err) => {
+					crawlerLogger.warn('failed to request crawl', { err, crawler });
 				});
 		}
 	}

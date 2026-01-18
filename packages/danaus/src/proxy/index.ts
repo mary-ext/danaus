@@ -5,6 +5,7 @@ import { createServiceJwt } from '@atcute/xrpc-server/auth';
 import type { ActorManager } from '#app/actors/manager.ts';
 import type { AuthVerifier } from '#app/auth/verifier.ts';
 import type { ProxyTargetConfig } from '#app/config.ts';
+import { proxyLogger } from '#app/logger.ts';
 
 import {
 	buildProxyRequestHeaders,
@@ -117,7 +118,13 @@ export const createServiceProxy = (options: ServiceProxyOptions): ServiceProxy =
 		});
 
 		// forward request
-		const upstreamResponse = await fetch(upstreamRequest);
+		let upstreamResponse: Response;
+		try {
+			upstreamResponse = await fetch(upstreamRequest);
+		} catch (err) {
+			proxyLogger.error('upstream service unreachable', { err, target: target.url });
+			throw err;
+		}
 
 		// build response with filtered headers
 		const responseHeaders = filterResponseHeaders(upstreamResponse.headers);

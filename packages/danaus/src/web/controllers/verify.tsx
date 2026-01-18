@@ -4,13 +4,13 @@ import { render, type JSXNode } from '@oomfware/jsx';
 
 import { PreferredMfa } from '#app/accounts/db/schema.ts';
 import type { MfaStatus } from '#app/accounts/mfa.ts';
-import type { VerifyChallenge } from '#app/accounts/web-sessions.ts';
 import {
 	RECOVERY_CODE_LENGTH,
 	RECOVERY_CODE_RE,
 	TOTP_CODE_LENGTH,
 	TOTP_CODE_RE,
 } from '#app/accounts/totp.ts';
+import type { VerifyChallenge } from '#app/accounts/web-sessions.ts';
 import { generateWebAuthnAuthenticationOptions } from '#app/accounts/webauthn.ts';
 
 import { BaseLayout } from '#web/layouts/base.tsx';

@@ -93,7 +93,10 @@ export const createAppContext = (config: AppConfig): AppContext => {
 		serviceUrl: config.identity.plcDirectoryUrl,
 	});
 
-	const accountDb = getAccountDb(config.database.accountDbLocation, config.database.walAutoCheckpointDisabled);
+	const accountDb = getAccountDb(
+		config.database.accountDbLocation,
+		config.database.walAutoCheckpointDisabled,
+	);
 
 	const accountManager = new AccountManager({
 		db: accountDb,

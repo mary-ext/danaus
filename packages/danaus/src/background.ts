@@ -1,5 +1,7 @@
 import PQueue from 'p-queue';
 
+import { backgroundLogger } from '#app/logger.ts';
+
 export interface BackgroundQueueOptions {
 	/** maximum concurrent tasks (default: 5) */
 	concurrency?: number;
@@ -30,7 +32,7 @@ export class BackgroundQueue implements Disposable {
 		this.#queue
 			.add(() => task())
 			.catch((err) => {
-				console.error('background queue task failed:', err);
+				backgroundLogger.error('background queue task failed', { err });
 			});
 	}
 

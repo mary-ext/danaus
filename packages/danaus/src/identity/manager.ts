@@ -4,6 +4,7 @@ import type { AtprotoDid, Handle } from '@atcute/lexicons/syntax';
 import { eq, lt } from 'drizzle-orm';
 
 import type { BackgroundQueue } from '#app/background.ts';
+import { didCacheLogger } from '#app/logger.ts';
 import { HOUR } from '#app/utils/times.ts';
 
 import { getIdentityCacheDb, t, type IdentityCacheDb } from './db/index.ts';
@@ -108,11 +109,15 @@ export class IdentityCache implements Disposable {
 	 */
 	refreshHandle(handle: Handle, resolve: () => Promise<AtprotoDid | null>): void {
 		this.#backgroundQueue.add(async () => {
-			const did = await resolve();
-			if (did) {
-				this.setHandle(handle, did);
-			} else {
-				this.clearHandle(handle);
+			try {
+				const did = await resolve();
+				if (did) {
+					this.setHandle(handle, did);
+				} else {
+					this.clearHandle(handle);
+				}
+			} catch (err) {
+				didCacheLogger.error('refreshing handle cache failed', { handle, err });
 			}
 		});
 	}
@@ -173,11 +178,15 @@ export class IdentityCache implements Disposable {
 	 */
 	refreshDidDoc(did: AtprotoDid, resolve: () => Promise<DidDocument | null>): void {
 		this.#backgroundQueue.add(async () => {
-			const doc = await resolve();
-			if (doc) {
-				this.setDidDoc(did, doc);
-			} else {
-				this.clearDidDoc(did);
+			try {
+				const doc = await resolve();
+				if (doc) {
+					this.setDidDoc(did, doc);
+				} else {
+					this.clearDidDoc(did);
+				}
+			} catch (err) {
+				didCacheLogger.error('refreshing did cache failed', { did, err });
 			}
 		});
 	}

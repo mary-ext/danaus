@@ -5,6 +5,7 @@ import { Secp256k1PrivateKeyExportable, type PrivateKey } from '@atcute/crypto';
 import type { AtprotoAudience, Did, Nsid } from '@atcute/lexicons/syntax';
 
 import type { AppEnvironment } from './environment';
+import type { LogLevel } from './logger';
 import { DAY, HOUR, SECOND } from './utils/times';
 
 export interface ServiceConfig {
@@ -112,6 +113,11 @@ export interface ProxyConfig {
 	targets: Map<AtprotoAudience, ProxyTargetConfig>;
 }
 
+export interface LoggingConfig {
+	level: LogLevel;
+	json: boolean;
+}
+
 export interface AppConfig {
 	service: ServiceConfig;
 	database: DatabaseConfig;
@@ -122,6 +128,7 @@ export interface AppConfig {
 	subscription: SubscriptionConfig;
 	email: EmailConfig | null;
 	proxy: ProxyConfig;
+	logging: LoggingConfig;
 }
 
 export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
@@ -129,6 +136,7 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 		return env.PDS_DATA_DIRECTORY ? path.join(env.PDS_DATA_DIRECTORY, name) : name;
 	};
 
+	const devMode = env.PDS_DEV_MODE ?? false;
 	const hostname = env.PDS_HOSTNAME ?? 'localhost';
 
 	let service: ServiceConfig;
@@ -137,7 +145,7 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 
 		service = {
 			version: env.PDS_VERSION ?? `unknown`,
-			devMode: env.PDS_DEV_MODE ?? false,
+			devMode: devMode,
 
 			port: port,
 			hostname: hostname,
@@ -328,6 +336,14 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 		};
 	}
 
+	let logging: LoggingConfig;
+	{
+		logging = {
+			level: env.PDS_LOG_LEVEL ?? (devMode ? 'debug' : 'info'),
+			json: env.PDS_LOG_JSON ?? !devMode,
+		};
+	}
+
 	return {
 		service,
 		database,
@@ -340,5 +356,6 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 		proxy: {
 			targets: new Map(),
 		},
+		logging,
 	};
 };
