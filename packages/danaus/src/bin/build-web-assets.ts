@@ -62,7 +62,7 @@ const watch = async () => {
 		}, 50);
 	};
 
-	const watcher = chokidar.watch('src/web/scripts/', { ignoreInitial: true, depth: 1 });
+	const watcher = chokidar.watch('src/web/scripts', { ignoreInitial: true, depth: 1 });
 
 	watcher.on('add', schedule);
 	watcher.on('change', schedule);

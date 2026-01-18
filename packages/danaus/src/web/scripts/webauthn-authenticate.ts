@@ -101,6 +101,7 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			this.formElement?.submit();
 		} catch (err) {
 			console.error('[webauthn-authenticate] error:', err);
+
 			if (startButton) {
 				startButton.disabled = false;
 			}
