@@ -2,6 +2,7 @@
 node_modules/
 dist/
 data/
+packages/danaus/public/
 
 # Deciduous database (local)
 .deciduous/

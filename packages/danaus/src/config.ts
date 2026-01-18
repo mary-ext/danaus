@@ -16,6 +16,7 @@ export interface ServiceConfig {
 
 	did: Did;
 	publicUrl: string;
+	publicAssetsDirectory: string;
 
 	imports: {
 		accepting: boolean;
@@ -145,6 +146,7 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 
 			did: env.PDS_SERVICE_DID ?? `did:web:${hostname}`,
 			publicUrl: hostname === 'localhost' ? `http://localhost:${port}` : `https://${hostname}`,
+			publicAssetsDirectory: path.resolve(env.PDS_PUBLIC_ASSETS_DIRECTORY ?? 'public'),
 
 			imports: {
 				accepting: env.PDS_REPO_IMPORT_ACCEPTING ?? true,

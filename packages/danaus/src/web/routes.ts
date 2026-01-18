@@ -16,6 +16,7 @@ export const routes = route({
 	// login routes
 	login: {
 		index: '/account/login',
+		logout: { method: 'POST', pattern: '/account/logout' },
 		passkey: {
 			challenge: '/account/login/passkey',
 		},

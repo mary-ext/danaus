@@ -196,7 +196,7 @@ export default {
 				<BaseLayout>
 					<title>{ctx.isSudo ? 'Confirm your identity' : 'Two-factor authentication'} - Danaus</title>
 
-					<script src="/assets/webauthn-authenticate.js" type="module" />
+					<script src={routes.assets.href({ path: 'webauthn-authenticate.js' })} type="module" />
 
 					<div class="flex flex-1 flex-col items-center justify-center gap-4 p-4">
 						<noscript>
@@ -208,7 +208,7 @@ export default {
 						<div class="w-full max-w-96 rounded-xl bg-neutral-background-1 p-6 shadow-16">
 							<danaus-webauthn-authenticate class="contents" data-options={JSON.stringify(options)}>
 								<form
-									{...verifyWebAuthnForm}
+									{...verifyWebAuthnForm.with({ preserveParams: true })}
 									class="flex flex-col gap-6"
 									data-target="webauthn-authenticate.form"
 								>
@@ -220,16 +220,21 @@ export default {
 											{ctx.isSudo ? 'Confirm your identity' : 'Two-factor authentication'}
 										</h1>
 										<p class="text-base-300 text-neutral-foreground-3">
-											Insert your security key and touch it
-											{ctx.isSudo ? ' to continue.' : ' to verify your identity.'}
+											Authenticate using your{' '}
+											{ctx.mfaStatus!.webAuthnType === 'security-key' ? `security key` : `passkey`}.
 										</p>
 									</div>
 
-									<input {...fields.response.as('hidden', '')} data-target="webauthn-authenticate.response" />
+									<input
+										{...fields.response.as('hidden', '{}')}
+										data-target="webauthn-authenticate.response"
+									/>
 
-									<Button data-target="webauthn-authenticate.start" variant="primary" disabled>
-										Use security key
-									</Button>
+									<Field validationMessageText={fields.allIssues()?.at(0)?.message}>
+										<Button data-target="webauthn-authenticate.start" variant="primary" disabled>
+											Use {ctx.mfaStatus!.webAuthnType === 'security-key' ? `security key` : `passkey`}
+										</Button>
+									</Field>
 
 									<div
 										data-target="webauthn-authenticate.status"
@@ -355,7 +360,7 @@ const BaseForm = (props: {
 
 			<div class="flex flex-1 items-center justify-center p-4">
 				<div class="w-full max-w-96 rounded-xl bg-neutral-background-1 p-6 shadow-16">
-					<form {...verifyForm} class="flex flex-col gap-6">
+					<form {...verifyForm.with({ preserveParams: true })} class="flex flex-col gap-6">
 						<input {...fields.challenge.as('hidden', props.challenge)} />
 						<input {...fields.redirect.as('hidden', props.redirectUrl)} />
 						<input {...fields.factor.as('hidden', props.factor)} />
@@ -391,7 +396,7 @@ const OtherMethodsMenu = (props: {
 
 	// count how many other methods are available
 	const otherMethodsCount =
-		(props.factor !== 'webauthn' && mfaStatus.hasWebAuthn ? 1 : 0) +
+		(props.factor !== 'webauthn' && mfaStatus.webAuthnType ? 1 : 0) +
 		(props.factor !== 'totp' && mfaStatus.hasTotp ? 1 : 0) +
 		(props.factor !== 'recovery' && mfaStatus.hasRecoveryCodes ? 1 : 0);
 
@@ -403,47 +408,55 @@ const OtherMethodsMenu = (props: {
 	const tokenParam = isSudo ? undefined : challenge;
 
 	return (
-		<Menu.Root>
-			<Menu.Trigger>
-				<Button>Show other methods</Button>
-			</Menu.Trigger>
+		<>
+			<div class="flex items-center gap-4">
+				<div class="h-px grow bg-neutral-stroke-2" />
+				<span class="text-base-200 text-neutral-foreground-3">or</span>
+				<div class="h-px grow bg-neutral-stroke-2" />
+			</div>
 
-			<Menu.Popover>
-				<Menu.List>
-					{props.factor !== 'webauthn' && mfaStatus.hasWebAuthn && (
-						<Menu.Item
-							href={routes.verify.webauthn.href(undefined, {
-								token: tokenParam,
-								redirect: redirectUrl,
-							})}
-						>
-							Use security key
-						</Menu.Item>
-					)}
+			<Menu.Root>
+				<Menu.Trigger>
+					<Button>Show other methods</Button>
+				</Menu.Trigger>
 
-					{props.factor !== 'totp' && mfaStatus.hasTotp && (
-						<Menu.Item
-							href={routes.verify.totp.href(undefined, {
-								token: tokenParam,
-								redirect: redirectUrl,
-							})}
-						>
-							Use authenticator app
-						</Menu.Item>
-					)}
+				<Menu.Popover>
+					<Menu.List>
+						{props.factor !== 'webauthn' && mfaStatus.webAuthnType && (
+							<Menu.Item
+								href={routes.verify.webauthn.href(undefined, {
+									token: tokenParam,
+									redirect: redirectUrl,
+								})}
+							>
+								{mfaStatus.webAuthnType === 'security-key' ? 'Use security key' : 'Use passkey'}
+							</Menu.Item>
+						)}
 
-					{props.factor !== 'recovery' && mfaStatus.hasRecoveryCodes && (
-						<Menu.Item
-							href={routes.verify.recovery.href(undefined, {
-								token: tokenParam,
-								redirect: redirectUrl,
-							})}
-						>
-							Use 2FA recovery code
-						</Menu.Item>
-					)}
-				</Menu.List>
-			</Menu.Popover>
-		</Menu.Root>
+						{props.factor !== 'totp' && mfaStatus.hasTotp && (
+							<Menu.Item
+								href={routes.verify.totp.href(undefined, {
+									token: tokenParam,
+									redirect: redirectUrl,
+								})}
+							>
+								Use authenticator app
+							</Menu.Item>
+						)}
+
+						{props.factor !== 'recovery' && mfaStatus.hasRecoveryCodes && (
+							<Menu.Item
+								href={routes.verify.recovery.href(undefined, {
+									token: tokenParam,
+									redirect: redirectUrl,
+								})}
+							>
+								Use 2FA recovery code
+							</Menu.Item>
+						)}
+					</Menu.List>
+				</Menu.Popover>
+			</Menu.Root>
+		</>
 	);
 };

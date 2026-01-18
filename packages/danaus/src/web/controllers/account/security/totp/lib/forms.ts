@@ -18,7 +18,7 @@ import { routes } from '#web/routes.ts';
 export const setupTotpForm = form(
 	v.object({
 		name: v.optional(v.pipe(v.string(), normalizeWhitespace, v.maxLength(32, `Name is too long`))),
-		secret: v.pipe(v.string(), v.minLength(1)),
+		secret: v.pipe(v.string()),
 		_code: v.pipe(v.string(), v.length(6, `Enter the 6-digit code`)),
 	}),
 	async (data, issue) => {

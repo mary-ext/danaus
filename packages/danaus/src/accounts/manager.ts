@@ -46,13 +46,16 @@ export type WebauthnCredential = typeof t.webauthnCredential.$inferSelect;
 export type WebauthnRegistrationChallenge = typeof t.webauthnRegistrationChallenge.$inferSelect;
 
 /** MFA status for an account */
+/** WebAuthn credential type for MFA status */
+export type WebAuthnType = false | 'security-key' | 'passkey' | 'mixed';
+
 export interface MfaStatus {
 	/** preferred MFA method */
 	preferred: PreferredMfa;
 	/** has TOTP credentials */
 	hasTotp: boolean;
-	/** has WebAuthn security keys */
-	hasWebAuthn: boolean;
+	/** WebAuthn credential type(s) registered */
+	webAuthnType: WebAuthnType;
 	/** has recovery codes */
 	hasRecoveryCodes: boolean;
 }
@@ -1213,7 +1216,7 @@ export class AccountManager implements Disposable {
 		return {
 			preferred: account.preferred_mfa,
 			hasTotp: this.#countTotpCredentials(did) > 0,
-			hasWebAuthn: this.countWebAuthnCredentials(did) > 0,
+			webAuthnType: this.#getWebAuthnType(did),
 			hasRecoveryCodes: this.getRecoveryCodeCount(did) > 0,
 		};
 	}
@@ -1675,6 +1678,31 @@ export class AccountManager implements Disposable {
 				.where(eq(t.webauthnCredential.did, did))
 				.get()?.count ?? 0
 		);
+	}
+
+	/**
+	 * get the WebAuthn credential type(s) for an account.
+	 * @param did account did
+	 * @returns credential type: false if none, 'security-key', 'passkey', or 'mixed'
+	 */
+	#getWebAuthnType(did: Did): WebAuthnType {
+		const credentials = this.db
+			.select({ type: t.webauthnCredential.type })
+			.from(t.webauthnCredential)
+			.where(eq(t.webauthnCredential.did, did))
+			.all();
+
+		if (credentials.length === 0) {
+			return false;
+		}
+
+		const hasSecurityKey = credentials.some((c) => c.type === WebAuthnCredentialType.SecurityKey);
+		const hasPasskey = credentials.some((c) => c.type === WebAuthnCredentialType.Passkey);
+
+		if (hasSecurityKey && hasPasskey) {
+			return 'mixed';
+		}
+		return hasPasskey ? 'passkey' : 'security-key';
 	}
 
 	/**

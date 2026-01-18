@@ -78,6 +78,8 @@ export interface VerifyRegistrationParams {
 	expectedOrigin: string;
 	/** the expected relying party ID */
 	expectedRpId: string;
+	/** whether user verification is required (true for passkeys, false for security keys) */
+	requireUserVerification: boolean;
 }
 
 /**
@@ -88,13 +90,14 @@ export interface VerifyRegistrationParams {
 export const verifyWebAuthnRegistration = async (
 	params: VerifyRegistrationParams,
 ): Promise<VerifiedRegistrationResponse> => {
-	const { response, expectedChallenge, expectedOrigin, expectedRpId } = params;
+	const { response, expectedChallenge, expectedOrigin, expectedRpId, requireUserVerification } = params;
 
 	return await verifyRegistrationResponse({
 		response,
 		expectedChallenge,
 		expectedOrigin,
 		expectedRPID: expectedRpId,
+		requireUserVerification,
 	});
 };
 
@@ -119,9 +122,22 @@ export interface GenerateAuthenticationOptionsParams {
 export const generateWebAuthnAuthenticationOptions = async (params: GenerateAuthenticationOptionsParams) => {
 	const { rpId, allowCredentials, userVerificationRequired = false } = params;
 
+	// determine user verification requirement:
+	// - required: passkey-only flow (passwordless login)
+	// - preferred: mixed credentials or MFA (passkeys will do UV, security keys won't)
+	// - discouraged: security keys only
+	let userVerification: 'required' | 'preferred' | 'discouraged';
+	if (userVerificationRequired) {
+		userVerification = 'required';
+	} else if (allowCredentials?.some((cred) => cred.type === WebAuthnCredentialType.Passkey)) {
+		userVerification = 'preferred';
+	} else {
+		userVerification = 'discouraged';
+	}
+
 	return await generateAuthenticationOptions({
 		rpID: rpId,
-		userVerification: userVerificationRequired ? 'required' : 'discouraged',
+		userVerification,
 		allowCredentials: allowCredentials?.map((cred) => ({
 			id: cred.credential_id,
 			transports: cred.transports ?? undefined,
@@ -152,11 +168,15 @@ export const verifyWebAuthnAuthentication = async (
 ): Promise<VerifiedAuthenticationResponse> => {
 	const { response, expectedChallenge, expectedOrigin, expectedRpId, credential } = params;
 
+	// passkeys require user verification, security keys only need user presence
+	const requireUserVerification = credential.type === WebAuthnCredentialType.Passkey;
+
 	return await verifyAuthenticationResponse({
 		response,
 		expectedChallenge,
 		expectedOrigin,
 		expectedRPID: expectedRpId,
+		requireUserVerification,
 		credential: {
 			id: credential.credential_id,
 			publicKey: new Uint8Array(credential.public_key),

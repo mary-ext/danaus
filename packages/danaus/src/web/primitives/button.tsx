@@ -59,6 +59,7 @@ export interface ButtonProps extends VariantProps<typeof root> {
 	command?: InvokerCommand;
 	class?: string;
 	children?: JSXNode;
+	'data-target'?: string;
 }
 
 const Button = (props: ButtonProps) => {
@@ -70,13 +71,14 @@ const Button = (props: ButtonProps) => {
 		label,
 		commandfor,
 		command,
+		'data-target': targetId,
 		class: className,
 		children,
 	} = props;
 
 	if (href !== undefined) {
 		return (
-			<a href={href} class={root({ variant, className })}>
+			<a href={href} data-target={targetId} class={root({ variant, className })}>
 				{children}
 			</a>
 		);
@@ -89,6 +91,7 @@ const Button = (props: ButtonProps) => {
 			aria-label={label}
 			commandfor={commandfor}
 			command={command}
+			data-target={targetId}
 			class={root({ variant, className })}
 		>
 			{children}

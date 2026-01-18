@@ -9,6 +9,7 @@ import * as v from 'valibot';
 import type { Account } from '#app/accounts/manager.ts';
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '#app/accounts/passwords.ts';
 import { isRecoveryCode, isTotpCode } from '#app/accounts/totp.ts';
+import { verifyWebAuthnAuthentication } from '#app/accounts/webauthn.ts';
 import { setWebSessionToken } from '#app/auth/web.ts';
 
 import { getAppContext } from '#web/middlewares/app-context.ts';
@@ -158,6 +159,36 @@ const VERIFY_ALLOWED_MFA_FACTORS: AuthFactor[] = ['totp', 'recovery'];
 const VERIFY_ALLOWED_SUDO_MFA_FACTORS: AuthFactor[] = ['totp', 'webauthn', 'recovery'];
 const VERIFY_ALLOWED_SUDO_OFA_FACTORS: AuthFactor[] = ['password'];
 
+/** WebAuthn authentication response schema */
+const webauthnResponseSchema = v.pipe(
+	v.string(),
+	v.parseJson(),
+	v.object({
+		id: v.string(),
+		rawId: v.string(),
+		type: v.literal('public-key'),
+		response: v.object({
+			clientDataJSON: v.string(),
+			authenticatorData: v.string(),
+			signature: v.string(),
+			userHandle: v.pipe(
+				v.nullish(v.string()),
+				v.transform((val) => val ?? undefined),
+			),
+		}),
+		authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
+		clientExtensionResults: v.object({
+			appid: v.optional(v.boolean()),
+			credProps: v.optional(
+				v.object({
+					rk: v.optional(v.boolean()),
+				}),
+			),
+			hmacCreateSecret: v.optional(v.boolean()),
+		}),
+	}),
+);
+
 export const verifyForm = form(
 	v.object({
 		challenge: v.string(),
@@ -222,31 +253,7 @@ export const verifyForm = form(
 
 export const passkeyLoginForm = form(
 	v.object({
-		response: v.pipe(
-			v.string(),
-			v.parseJson(),
-			v.object({
-				id: v.string(),
-				rawId: v.string(),
-				response: v.object({
-					clientDataJSON: v.string(),
-					authenticatorData: v.string(),
-					signature: v.string(),
-					userHandle: v.optional(v.string()),
-				}),
-				authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
-				clientExtensionResults: v.object({
-					appid: v.optional(v.boolean()),
-					credProps: v.optional(
-						v.object({
-							rk: v.optional(v.boolean()),
-						}),
-					),
-					hmacCreateSecret: v.optional(v.boolean()),
-				}),
-				type: v.literal('public-key'),
-			}),
-		),
+		response: webauthnResponseSchema,
 		redirect: v.string(),
 	}),
 	async (data) => {
@@ -268,9 +275,6 @@ export const passkeyLoginForm = form(
 		if (!accountManager.consumePasskeyLoginChallenge(challenge)) {
 			invalid(`Invalid or expired challenge`);
 		}
-
-		// verify the authentication response
-		const { verifyWebAuthnAuthentication } = await import('#app/accounts/webauthn.ts');
 
 		try {
 			const verification = await verifyWebAuthnAuthentication({
@@ -316,31 +320,7 @@ export const passkeyLoginForm = form(
 export const verifyWebAuthnForm = form(
 	v.object({
 		challenge: v.string(),
-		response: v.pipe(
-			v.string(),
-			v.parseJson(),
-			v.object({
-				id: v.string(),
-				rawId: v.string(),
-				response: v.object({
-					clientDataJSON: v.string(),
-					authenticatorData: v.string(),
-					signature: v.string(),
-					userHandle: v.optional(v.string()),
-				}),
-				authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
-				clientExtensionResults: v.object({
-					appid: v.optional(v.boolean()),
-					credProps: v.optional(
-						v.object({
-							rk: v.optional(v.boolean()),
-						}),
-					),
-					hmacCreateSecret: v.optional(v.boolean()),
-				}),
-				type: v.literal('public-key'),
-			}),
-		),
+		response: webauthnResponseSchema,
 		redirect: v.string(),
 	}),
 	async (data) => {
@@ -361,9 +341,6 @@ export const verifyWebAuthnForm = form(
 		if (credential === null || credential.did !== challenge.did) {
 			invalid(`Invalid security key`);
 		}
-
-		// verify the authentication response
-		const { verifyWebAuthnAuthentication } = await import('#app/accounts/webauthn.ts');
 
 		try {
 			const verification = await verifyWebAuthnAuthentication({

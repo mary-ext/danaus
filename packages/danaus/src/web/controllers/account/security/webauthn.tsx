@@ -88,15 +88,15 @@ export default {
 
 							<div class="w-full max-w-120 rounded-xl bg-neutral-background-1 shadow-64">
 								<danaus-webauthn-register class="contents" data-options={JSON.stringify(options)}>
-									<form {...completeWebAuthnForm} class="contents">
+									<form {...completeWebAuthnForm.with({ preserveParams: true })} class="contents">
 										<Dialog.Body>
 											<Dialog.Title>Set up {credentialLabel}</Dialog.Title>
 
 											<Dialog.Content class="flex flex-col gap-4">
 												<p class="text-base-300">
 													{isPasskey
-														? "Follow your browser's prompts to register your passkey."
-														: "Insert your security key and follow your browser's prompts to register it."}
+														? 'When prompted, use your fingerprint, face, or device PIN to create your passkey.'
+														: 'When prompted, insert your security key and touch it to confirm.'}
 												</p>
 
 												<input {...fields.token.as('hidden', token!)} />
@@ -104,13 +104,8 @@ export default {
 													{...fields.credentialType.as('hidden', isPasskey ? 'passkey' : 'security-key')}
 												/>
 
-												<p
-													data-target="webauthn-register.status"
-													class="text-base-300 text-neutral-foreground-3 empty:hidden"
-												/>
-
 												<input
-													{...fields.response.as('hidden', '')}
+													{...fields.response.as('hidden', '{}')}
 													data-target="webauthn-register.response"
 												/>
 
@@ -124,6 +119,11 @@ export default {
 														placeholder={accountManager.generateWebAuthnName(session.did, credentialType)}
 													/>
 												</Field>
+
+												<p
+													data-target="webauthn-register.status"
+													class="text-base-300 text-neutral-foreground-3 empty:hidden"
+												/>
 
 												{generalError && (
 													<p role="alert" class="text-base-300 text-status-danger-foreground-1">

@@ -72,6 +72,7 @@ export class TestPds implements AsyncDisposable {
 			hostname: hostname,
 			did: cfg.service?.did ?? `did:web:${hostname}`,
 			publicUrl: publicUrl,
+			publicAssetsDirectory: path.resolve('public'),
 			imports: {
 				accepting: true,
 				maxSize: null,

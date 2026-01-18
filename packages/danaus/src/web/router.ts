@@ -5,9 +5,11 @@ import type { AppContext } from '#app/context.ts';
 
 import accountController from './controllers/account.tsx';
 import adminController from './controllers/admin.tsx';
+import assetsController from './controllers/assets.ts';
 import homeController from './controllers/home.tsx';
 import loginController from './controllers/login.tsx';
 import oauthController from './controllers/oauth.tsx';
+import verifyController from './controllers/verify.tsx';
 import { provideAppContext } from './middlewares/app-context.ts';
 import { routes } from './routes.ts';
 
@@ -22,8 +24,10 @@ export const createWebRouter = (ctx: AppContext) => {
 	});
 
 	router.map(routes.home, homeController);
+	router.map(routes.assets, assetsController);
 	router.map(routes.admin, adminController);
 	router.map(routes.login, loginController);
+	router.map(routes.verify, verifyController);
 	router.map(routes.account, accountController);
 	router.map(routes.oauth, oauthController);
 

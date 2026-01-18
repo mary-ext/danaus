@@ -23,6 +23,7 @@ const envSchema = v.object({
 
 	PDS_SERVICE_DID: v.optional(did),
 	PDS_SERVICE_NAME: v.optional(str),
+	PDS_PUBLIC_ASSETS_DIRECTORY: v.optional(str),
 
 	PDS_HOME_URL: v.optional(url),
 	PDS_LOGO_URL: v.optional(url),

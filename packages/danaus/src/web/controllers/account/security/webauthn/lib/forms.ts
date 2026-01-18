@@ -72,8 +72,8 @@ export const completeWebAuthnForm = form(
 						v.array(v.picklist(['ble', 'cable', 'hybrid', 'internal', 'nfc', 'smart-card', 'usb'])),
 					),
 				}),
-				clientExtensionResults: v.record(v.string(), v.unknown()),
 				authenticatorAttachment: v.optional(v.picklist(['cross-platform', 'platform'])),
+				clientExtensionResults: v.record(v.string(), v.unknown()),
 			}),
 		),
 	}),
@@ -99,9 +99,9 @@ export const completeWebAuthnForm = form(
 				expectedChallenge: challenge.challenge,
 				expectedOrigin: config.service.publicUrl,
 				expectedRpId: config.service.hostname,
+				requireUserVerification: data.credentialType === 'passkey',
 			});
-		} catch (err) {
-			console.error('WebAuthn verification error:', err);
+		} catch {
 			invalid(`Registration failed, please try again`);
 		}
 

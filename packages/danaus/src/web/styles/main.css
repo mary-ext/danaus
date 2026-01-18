@@ -1,5 +1,5 @@
 @import 'tailwindcss' source('../');
-@source not './main.out.css';
+@source not '../../../public/style.css';
 
 @theme {
 	--text-*: initial;
