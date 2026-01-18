@@ -25,7 +25,10 @@ export const configureLogging = async (config: LoggingConfig): Promise<void> => 
 				formatter: config.json ? jsonFormatter : textFormatter,
 			}),
 		},
-		loggers: [{ category: ['danaus'], lowestLevel: config.level, sinks: ['console'] }],
+		loggers: [
+			{ category: ['logtape', 'meta'], lowestLevel: 'warning', sinks: ['console'] },
+			{ category: ['danaus'], lowestLevel: config.level, sinks: ['console'] },
+		],
 	});
 };
 
