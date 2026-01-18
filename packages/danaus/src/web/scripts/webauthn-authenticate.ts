@@ -49,13 +49,6 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 		const responseInput = this.responseInput;
 		const startButton = this.startButton;
 
-		console.log('[webauthn-authenticate] starting', {
-			hasOptions: !!options,
-			hasStatus: !!status,
-			hasResponseInput: !!responseInput,
-			responseInputValue: responseInput?.value,
-		});
-
 		if (!options || !status || !responseInput) {
 			console.error('webauthn authenticate: missing required elements');
 			return;
@@ -104,11 +97,6 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			});
 
 			responseInput.value = serialized;
-			console.log('[webauthn-authenticate] response set', {
-				serialized,
-				inputValue: responseInput.value,
-			});
-			status.textContent = 'Security key verified!';
 
 			this.formElement?.submit();
 		} catch (err) {
