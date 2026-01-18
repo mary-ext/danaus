@@ -16,10 +16,10 @@ export default {
 	middleware: [requireAdmin(), forms({ createAccountForm })],
 	actions: {
 		dashboard() {
-			const ctx = getAppContext();
-			const accountStats = ctx.accountManager.getAccountStats();
-			const inviteCodeStats = ctx.accountManager.getInviteCodeStats();
-			const sequencerStats = ctx.sequencer.getStats();
+			const { accountManager, inviteCodeManager, sequencer } = getAppContext();
+			const accountStats = accountManager.getAccountStats();
+			const inviteCodeStats = inviteCodeManager.getInviteCodeStats();
+			const sequencerStats = sequencer.getStats();
 
 			return render(
 				<AdminLayout>
@@ -66,11 +66,12 @@ export default {
 
 		accounts: {
 			index({ url }) {
-				const ctx = getAppContext();
+				const { accountManager } = getAppContext();
+
 				const query = url.searchParams.get('q') ?? '';
 				const cursor = url.searchParams.get('cursor') ?? undefined;
 
-				const { accounts, cursor: nextCursor } = ctx.accountManager.listAccounts({
+				const { accounts, cursor: nextCursor } = accountManager.listAccounts({
 					query: query || undefined,
 					cursor,
 					limit: 50,
@@ -154,8 +155,9 @@ export default {
 			},
 
 			create() {
-				const ctx = getAppContext();
-				const domains = ctx.config.identity.serviceHandleDomains;
+				const { config } = getAppContext();
+
+				const domains = config.identity.serviceHandleDomains;
 				const domainOptions = domains.map((d) => ({ value: d, label: d }));
 
 				const { fields } = createAccountForm;

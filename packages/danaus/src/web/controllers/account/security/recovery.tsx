@@ -14,23 +14,23 @@ export default {
 	middleware: [],
 	actions: {
 		show({ url }) {
-			const { accountManager } = getAppContext();
+			const { mfaManager, webSessionManager } = getAppContext();
 			const session = getSession();
 
-			if (accountManager.getMfaStatus(session.did) === null) {
+			if (mfaManager.getMfaStatus(session.did) === null) {
 				redirect(routes.account.security.overview.href());
 			}
 
 			// require sudo mode
-			if (!accountManager.isSessionElevated(session)) {
+			if (!webSessionManager.isSessionElevated(session)) {
 				redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 			}
 
 			// generate codes if none exist
-			let codes = accountManager.getRecoveryCodes(session.did);
+			let codes = mfaManager.getRecoveryCodes(session.did);
 			if (codes.length === 0) {
-				accountManager.generateRecoveryCodes(session.did);
-				codes = accountManager.getRecoveryCodes(session.did);
+				mfaManager.generateRecoveryCodes(session.did);
+				codes = mfaManager.getRecoveryCodes(session.did);
 			}
 
 			return render(
@@ -68,15 +68,15 @@ export default {
 		regenerate: {
 			middleware: [forms({ generateBackupCodesForm })],
 			action({ url }) {
-				const { accountManager } = getAppContext();
+				const { mfaManager, webSessionManager } = getAppContext();
 				const session = getSession();
 
-				if (accountManager.getMfaStatus(session.did) === null) {
+				if (mfaManager.getMfaStatus(session.did) === null) {
 					redirect(routes.account.security.overview.href());
 				}
 
 				// require sudo mode
-				if (!accountManager.isSessionElevated(session)) {
+				if (!webSessionManager.isSessionElevated(session)) {
 					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 
@@ -124,15 +124,15 @@ export default {
 		remove: {
 			middleware: [forms({ deleteBackupCodesForm })],
 			action({ url }) {
-				const { accountManager } = getAppContext();
+				const { mfaManager, webSessionManager } = getAppContext();
 				const session = getSession();
 
-				if (accountManager.getMfaStatus(session.did) === null) {
+				if (mfaManager.getMfaStatus(session.did) === null) {
 					redirect(routes.account.security.overview.href());
 				}
 
 				// require sudo mode
-				if (!accountManager.isSessionElevated(session)) {
+				if (!webSessionManager.isSessionElevated(session)) {
 					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 

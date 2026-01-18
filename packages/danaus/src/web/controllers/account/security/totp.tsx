@@ -25,11 +25,11 @@ export default {
 		register: {
 			middleware: [forms({ setupTotpForm })],
 			async action({ url }) {
-				const { accountManager, config } = getAppContext();
+				const { accountManager, mfaManager, webSessionManager, config } = getAppContext();
 				const session = getSession();
 
 				// require sudo mode
-				if (!accountManager.isSessionElevated(session)) {
+				if (!webSessionManager.isSessionElevated(session)) {
 					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 
@@ -104,7 +104,7 @@ export default {
 											>
 												<Input
 													{...fields.name.as('text')}
-													placeholder={accountManager.generateTotpName(session.did)}
+													placeholder={mfaManager.generateTotpName(session.did)}
 												/>
 											</Field>
 
@@ -150,7 +150,7 @@ export default {
 		remove: {
 			middleware: [forms({ removeTotpForm })],
 			action({ url, params }) {
-				const { accountManager } = getAppContext();
+				const { mfaManager, webSessionManager } = getAppContext();
 				const session = getSession();
 
 				const id = coerceToInteger(params.id);
@@ -158,13 +158,13 @@ export default {
 					redirect(routes.account.security.overview.href());
 				}
 
-				const totp = accountManager.getTotpCredential(session.did, id);
+				const totp = mfaManager.getTotpCredential(session.did, id);
 				if (totp === null) {
 					redirect(routes.account.security.overview.href());
 				}
 
 				// require sudo mode
-				if (!accountManager.isSessionElevated(session)) {
+				if (!webSessionManager.isSessionElevated(session)) {
 					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 

@@ -10,7 +10,12 @@ import {
 } from '@atcute/identity-resolver';
 import { NodeDnsHandleResolver } from '@atcute/identity-resolver-node';
 
+import { getAccountDb, type AccountDb } from './accounts/db';
+import { InviteCodeManager } from './accounts/invite-codes';
+import { LegacyAuthManager } from './accounts/legacy-auth';
 import { AccountManager } from './accounts/manager';
+import { MfaManager } from './accounts/mfa';
+import { WebSessionManager } from './accounts/web-sessions';
 import { DiskBlobStore } from './actors/blob-store/disk';
 import { S3BlobStore } from './actors/blob-store/s3';
 import { ActorManager } from './actors/manager';
@@ -34,7 +39,13 @@ export interface AppContext {
 	didDocumentResolver: DidDocumentResolver<'plc' | 'web'>;
 	plcClient: PlcClient;
 
+	accountDb: AccountDb;
 	accountManager: AccountManager;
+	inviteCodeManager: InviteCodeManager;
+	mfaManager: MfaManager;
+	legacyAuthManager: LegacyAuthManager;
+	webSessionManager: WebSessionManager;
+
 	actorManager: ActorManager;
 	authVerifier: AuthVerifier;
 
@@ -82,15 +93,31 @@ export const createAppContext = (config: AppConfig): AppContext => {
 		serviceUrl: config.identity.plcDirectoryUrl,
 	});
 
+	const accountDb = getAccountDb(config.database.accountDbLocation, config.database.walAutoCheckpointDisabled);
+
 	const accountManager = new AccountManager({
-		location: config.database.accountDbLocation,
-		walAutocheckpointDisabled: config.database.walAutoCheckpointDisabled,
-
-		serviceDid: config.service.did,
+		db: accountDb,
 		serviceHandleDomains: config.identity.serviceHandleDomains,
-
 		handleResolver: handleResolver,
+	});
 
+	const inviteCodeManager = new InviteCodeManager({
+		db: accountDb,
+	});
+
+	const mfaManager = new MfaManager({
+		db: accountDb,
+	});
+
+	const legacyAuthManager = new LegacyAuthManager({
+		db: accountDb,
+		jwtKey: config.secrets.jwtKey,
+		serviceDid: config.service.did,
+		accountManager: accountManager,
+	});
+
+	const webSessionManager = new WebSessionManager({
+		db: accountDb,
 		jwtKey: config.secrets.jwtKey,
 	});
 
@@ -137,7 +164,13 @@ export const createAppContext = (config: AppConfig): AppContext => {
 		didDocumentResolver: didDocumentResolver,
 		plcClient: plcClient,
 
+		accountDb: accountDb,
 		accountManager: accountManager,
+		inviteCodeManager: inviteCodeManager,
+		mfaManager: mfaManager,
+		legacyAuthManager: legacyAuthManager,
+		webSessionManager: webSessionManager,
+
 		actorManager: actorManager,
 		authVerifier: authVerifier,
 

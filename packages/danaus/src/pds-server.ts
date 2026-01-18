@@ -49,7 +49,7 @@ export class PdsServer implements AsyncDisposable {
 		// doesn't accept Disposable like the spec allows, so we use defer() instead
 		disposables.defer(() => context.backgroundQueue.dispose());
 		disposables.defer(() => context.identityCache.dispose());
-		disposables.defer(() => context.accountManager.dispose());
+		disposables.defer(() => context.accountDb.$client.close());
 
 		const { wrap, adapter } = createBunWebSocket();
 		const router = new XRPCRouter({

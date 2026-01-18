@@ -2,7 +2,8 @@ import type { BuildAction } from '@oomfware/fetch-router';
 import { render } from '@oomfware/jsx';
 
 import { WebAuthnCredentialType } from '#app/accounts/db/schema.ts';
-import type { Account, TotpCredential, WebauthnCredential } from '#app/accounts/manager.ts';
+import type { Account } from '#app/accounts/manager.ts';
+import type { TotpCredential, WebauthnCredential } from '#app/accounts/mfa.ts';
 
 import DotGrid1x3HorizontalOutlined from '#web/icons/central/dot-grid-1x3-horizontal-outlined.tsx';
 import PasskeysOutlined from '#web/icons/central/passkeys-outlined.tsx';
@@ -19,16 +20,13 @@ import { routes } from '#web/routes.ts';
 export default {
 	middleware: [],
 	action() {
-		const { accountManager } = getAppContext();
+		const { accountManager, mfaManager } = getAppContext();
 		const { did } = getSession();
 		const account = accountManager.getAccount(did)!;
 
-		const totpCredentials = accountManager.listTotpCredentials(did);
-		const securityKeys = accountManager.listWebAuthnCredentialsByType(
-			did,
-			WebAuthnCredentialType.SecurityKey,
-		);
-		const passkeys = accountManager.listWebAuthnCredentialsByType(did, WebAuthnCredentialType.Passkey);
+		const totpCredentials = mfaManager.listTotpCredentials(did);
+		const securityKeys = mfaManager.listWebAuthnCredentialsByType(did, WebAuthnCredentialType.SecurityKey);
+		const passkeys = mfaManager.listWebAuthnCredentialsByType(did, WebAuthnCredentialType.Passkey);
 		const hasMfa = totpCredentials.length > 0 || securityKeys.length > 0;
 
 		return render(
@@ -301,10 +299,10 @@ const AuthenticationSection = ({
 };
 
 const RecoverySection = () => {
-	const ctx = getAppContext();
+	const { mfaManager } = getAppContext();
 	const session = getSession();
 
-	const backupCodeCount = ctx.accountManager.getRecoveryCodeCount(session.did);
+	const backupCodeCount = mfaManager.getRecoveryCodeCount(session.did);
 
 	return (
 		<div class="flex flex-col gap-2">

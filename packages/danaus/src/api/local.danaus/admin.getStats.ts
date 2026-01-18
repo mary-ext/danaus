@@ -9,7 +9,7 @@ import type { AppContext } from '#app/context.ts';
  * @param context app context
  */
 export const getStats = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, authVerifier, sequencer } = context;
+	const { accountManager, inviteCodeManager, authVerifier, sequencer } = context;
 
 	router.addQuery(LocalDanausAdminGetStats, {
 		async handler({ request }) {
@@ -18,7 +18,7 @@ export const getStats = (router: XRPCRouter, context: AppContext) => {
 			return json({
 				accounts: accountManager.getAccountStats(),
 				sequencer: sequencer.getStats(),
-				inviteCodes: accountManager.getInviteCodeStats(),
+				inviteCodes: inviteCodeManager.getInviteCodeStats(),
 			});
 		},
 	});

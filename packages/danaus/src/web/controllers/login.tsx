@@ -108,7 +108,7 @@ export default {
 			},
 		},
 		logout() {
-			const { accountManager, config } = getAppContext();
+			const { webSessionManager, config } = getAppContext();
 			const { request } = getContext();
 
 			// read and verify the session token
@@ -116,7 +116,7 @@ export default {
 			if (token) {
 				const sessionId = verifyWebSessionToken(config.secrets.jwtKey, token);
 				if (sessionId) {
-					accountManager.deleteWebSession(sessionId);
+					webSessionManager.deleteWebSession(sessionId);
 				}
 			}
 
@@ -127,7 +127,7 @@ export default {
 		},
 		passkey: {
 			async challenge() {
-				const { accountManager, config } = getAppContext();
+				const { mfaManager, config } = getAppContext();
 
 				// generate discoverable authentication options (no allowCredentials)
 				const options = await generateWebAuthnAuthenticationOptions({
@@ -137,7 +137,7 @@ export default {
 
 				// store challenge for verification (using null DID since we don't know the user yet)
 				// we'll use the challenge itself as a lookup key
-				accountManager.createPasskeyLoginChallenge(options.challenge);
+				mfaManager.createPasskeyLoginChallenge(options.challenge);
 
 				return Response.json(options);
 			},

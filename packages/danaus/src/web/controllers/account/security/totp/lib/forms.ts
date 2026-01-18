@@ -22,7 +22,7 @@ export const setupTotpForm = form(
 		_code: v.pipe(v.string(), v.length(6, `Enter the 6-digit code`)),
 	}),
 	async (data, issue) => {
-		const { accountManager } = getAppContext();
+		const { mfaManager } = getAppContext();
 		const { did } = getSession();
 
 		// verify the code against the provided secret
@@ -42,7 +42,7 @@ export const setupTotpForm = form(
 
 		// store the credential
 		try {
-			accountManager.createTotpCredential({
+			mfaManager.createTotpCredential({
 				did: did,
 				name: data.name,
 				secret: secretBytes,
@@ -74,11 +74,11 @@ export const removeTotpForm = form(
 		id: v.pipe(v.string(), v.toNumber(), v.safeInteger()),
 	}),
 	async (data) => {
-		const { accountManager } = getAppContext();
+		const { mfaManager } = getAppContext();
 		const { did } = getSession();
 
 		requireSudo();
-		accountManager.deleteTotpCredential(did, data.id);
+		mfaManager.deleteTotpCredential(did, data.id);
 
 		redirect(routes.account.security.overview.href());
 	},

@@ -30,8 +30,10 @@ export const createAccountForm = form(
 	async (data, issue) => {
 		const ctx = getAppContext();
 
+		const { config } = ctx;
+
 		// validate domain against config
-		if (!ctx.config.identity.serviceHandleDomains.includes(data.domain)) {
+		if (!config.identity.serviceHandleDomains.includes(data.domain)) {
 			invalid(issue.domain(`Invalid domain`));
 		}
 

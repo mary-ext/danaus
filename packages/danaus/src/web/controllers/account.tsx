@@ -35,15 +35,16 @@ export default {
 	],
 	actions: {
 		overview() {
-			const ctx = getAppContext();
+			const { accountManager, config } = getAppContext();
 			const session = getSession();
-			const account = ctx.accountManager.getAccount(session.did);
+
+			const account = accountManager.getAccount(session.did)!;
 
 			// determine current handle parts for form prefill
-			const currentHandle = account?.handle ?? '';
-			const isServiceHandle = ctx.config.identity.serviceHandleDomains.some((d) => currentHandle.endsWith(d));
+			const currentHandle = account.handle ?? '';
+			const isServiceHandle = config.identity.serviceHandleDomains.some((d) => currentHandle.endsWith(d));
 			const currentDomain = isServiceHandle
-				? (ctx.config.identity.serviceHandleDomains.find((d) => currentHandle.endsWith(d)) ?? 'custom')
+				? (config.identity.serviceHandleDomains.find((d) => currentHandle.endsWith(d)) ?? 'custom')
 				: 'custom';
 			const currentLocalPart = isServiceHandle
 				? currentHandle.slice(0, -currentDomain.length)
@@ -80,7 +81,7 @@ export default {
 								<div class="flex flex-col divide-y divide-neutral-stroke-2 rounded-md bg-neutral-background-1 shadow-4">
 									<div class="flex items-center gap-4 px-4 py-3">
 										<div class="min-w-0 grow">
-											<p class="text-base-300 font-medium wrap-break-word">@{account?.handle}</p>
+											<p class="text-base-300 font-medium wrap-break-word">@{account.handle}</p>
 											<p class="text-base-300 text-neutral-foreground-3">Your username on the network</p>
 										</div>
 
@@ -168,7 +169,7 @@ export default {
 												<Select
 													{...updateHandleForm.fields.domain.as('select')}
 													value={updateHandleForm.fields.domain.value() || currentDomain}
-													options={ctx.config.identity.serviceHandleDomains.map((d) => ({
+													options={config.identity.serviceHandleDomains.map((d) => ({
 														value: d,
 														label: d,
 													}))}
@@ -339,11 +340,11 @@ export default {
 		},
 
 		appPasswords() {
-			const ctx = getAppContext();
+			const { legacyAuthManager } = getAppContext();
 			const session = getSession();
 			const did = session.did as Did;
 
-			const passwords = ctx.accountManager.listAppPasswords(did);
+			const passwords = legacyAuthManager.listAppPasswords(did);
 
 			const newPasswordResult = createAppPasswordForm.result;
 			const newPasswordError = createAppPasswordForm.fields.allIssues()?.[0];

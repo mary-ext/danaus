@@ -22,13 +22,13 @@ export const createAppPasswordForm = form(
 		privilege: v.picklist(['limited', 'privileged', 'full'], `Invalid privilege`),
 	}),
 	async (data) => {
-		const { accountManager } = getAppContext();
+		const { legacyAuthManager } = getAppContext();
 		const session = getSession();
 
 		const privilege = parseAppPasswordPrivilege(data.privilege);
 
 		try {
-			const { appPassword, secret } = await accountManager.createAppPassword({
+			const { appPassword, secret } = await legacyAuthManager.createAppPassword({
 				did: session.did,
 				name: data.name,
 				privilege,
@@ -60,10 +60,10 @@ export const deleteAppPasswordForm = form(
 		name: v.pipe(v.string(), v.minLength(1)),
 	}),
 	async (data) => {
-		const { accountManager } = getAppContext();
+		const { legacyAuthManager } = getAppContext();
 		const session = getSession();
 
-		accountManager.deleteAppPassword(session.did, data.name);
+		legacyAuthManager.deleteAppPassword(session.did, data.name);
 	},
 );
 
@@ -77,6 +77,8 @@ export const updateHandleForm = form(
 	}),
 	async (data) => {
 		const ctx = getAppContext();
+
+		const { accountManager, sequencer } = ctx;
 		const { did } = getSession();
 
 		let handle: Handle;
@@ -97,7 +99,7 @@ export const updateHandleForm = form(
 
 		// validate the handle (checks TLD, service domain constraints, external domain resolution)
 		try {
-			handle = await ctx.accountManager.validateHandle(handle, { did });
+			handle = await accountManager.validateHandle(handle, { did });
 		} catch (err) {
 			if (err instanceof XRPCError && err.status === 400) {
 				switch (err.error) {
@@ -113,7 +115,7 @@ export const updateHandleForm = form(
 		}
 
 		// check if handle is already taken by another account
-		const existing = ctx.accountManager.getAccount(handle, {
+		const existing = accountManager.getAccount(handle, {
 			includeDeactivated: true,
 			includeTakenDown: true,
 		});
@@ -140,8 +142,8 @@ export const updateHandleForm = form(
 		}
 
 		// update local database and emit identity event
-		ctx.accountManager.updateAccountHandle(did, handle);
-		await ctx.sequencer.emitIdentity(did, handle);
+		accountManager.updateAccountHandle(did, handle);
+		await sequencer.emitIdentity(did, handle);
 	},
 );
 

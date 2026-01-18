@@ -3,7 +3,8 @@ import { forms } from '@oomfware/forms';
 import { render, type JSXNode } from '@oomfware/jsx';
 
 import { PreferredMfa } from '#app/accounts/db/schema.ts';
-import type { MfaStatus, VerifyChallenge } from '#app/accounts/manager.ts';
+import type { MfaStatus } from '#app/accounts/mfa.ts';
+import type { VerifyChallenge } from '#app/accounts/web-sessions.ts';
 import {
 	RECOVERY_CODE_LENGTH,
 	RECOVERY_CODE_RE,
@@ -38,20 +39,20 @@ interface VerifyContext {
  * 3. neither → redirect to login
  */
 const resolveVerifyContext = (url: URL): VerifyContext => {
-	const { accountManager } = getAppContext();
+	const { mfaManager, webSessionManager } = getAppContext();
 
 	const tokenParam = url.searchParams.get('token');
 	const redirectUrl = url.searchParams.get('redirect') ?? routes.account.overview.href();
 
 	// mode 1: MFA login - ?token is present
 	if (tokenParam !== null) {
-		const challenge = accountManager.getVerifyChallenge(tokenParam);
+		const challenge = webSessionManager.getVerifyChallenge(tokenParam);
 		if (challenge === null) {
 			// invalid or expired token → redirect to login (don't fall back to sudo)
 			redirect(routes.login.index.href(undefined, { redirect: redirectUrl }));
 		}
 
-		const mfaStatus = accountManager.getMfaStatus(challenge.did);
+		const mfaStatus = mfaManager.getMfaStatus(challenge.did);
 		if (mfaStatus === null) {
 			// no MFA configured (shouldn't happen, but handle it)
 			redirect(routes.login.index.href(undefined, { redirect: redirectUrl }));
@@ -72,13 +73,13 @@ const resolveVerifyContext = (url: URL): VerifyContext => {
 	}
 
 	// already elevated? redirect directly to target
-	if (accountManager.isSessionElevated(session)) {
+	if (webSessionManager.isSessionElevated(session)) {
 		redirect(redirectUrl);
 	}
 
 	// create or reuse sudo challenge
-	const challenge = accountManager.getOrCreateSudoChallenge(session.id, session.did);
-	const mfaStatus = accountManager.getMfaStatus(session.did);
+	const challenge = webSessionManager.getOrCreateSudoChallenge(session.id, session.did);
+	const mfaStatus = mfaManager.getMfaStatus(session.did);
 
 	return {
 		challenge,
@@ -164,7 +165,7 @@ export default {
 			);
 		},
 		async webauthn({ url }) {
-			const { accountManager, config } = getAppContext();
+			const { mfaManager, webSessionManager, config } = getAppContext();
 
 			const { fields } = verifyWebAuthnForm;
 
@@ -176,7 +177,7 @@ export default {
 			}
 
 			// get user's WebAuthn credentials
-			const webauthnCredentials = accountManager.listWebAuthnCredentials(ctx.challenge.did);
+			const webauthnCredentials = mfaManager.listWebAuthnCredentials(ctx.challenge.did);
 			if (webauthnCredentials.length === 0) {
 				// no WebAuthn credentials → redirect to TOTP
 				const tokenParam = ctx.isSudo ? undefined : ctx.challenge.token;
@@ -190,7 +191,7 @@ export default {
 			});
 
 			// store the challenge for verification
-			accountManager.setVerifyChallengeWebAuthn(ctx.challenge.token, options.challenge);
+			webSessionManager.setVerifyChallengeWebAuthn(ctx.challenge.token, options.challenge);
 
 			return render(
 				<BaseLayout>

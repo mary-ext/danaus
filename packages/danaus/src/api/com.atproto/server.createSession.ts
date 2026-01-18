@@ -11,11 +11,11 @@ import type { AppContext } from '#app/context.ts';
  * @param context app context
  */
 export const createSession = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager } = context;
+	const { legacyAuthManager } = context;
 
 	router.addProcedure(ComAtprotoServerCreateSession, {
 		async handler({ input }) {
-			const auth = await accountManager.verifyLegacyCredentials(input.identifier, input.password);
+			const auth = await legacyAuthManager.verifyLegacyCredentials(input.identifier, input.password);
 			if (!auth) {
 				throw new AuthRequiredError({
 					error: 'InvalidCredentials',
@@ -38,7 +38,7 @@ export const createSession = (router: XRPCRouter, context: AppContext) => {
 				throw new InvalidRequestError({ error: 'HandleNotFound', description: `handle not found` });
 			}
 
-			const { accessJwt, refreshJwt } = await accountManager.createLegacySession({
+			const { accessJwt, refreshJwt } = await legacyAuthManager.createLegacySession({
 				did: account.did,
 				appPassword: appPassword,
 			});

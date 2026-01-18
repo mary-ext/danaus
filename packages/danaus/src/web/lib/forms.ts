@@ -9,13 +9,13 @@ import { getSession } from '../middlewares/session';
  * calls invalid() if not elevated.
  */
 export const requireSudo = (): void => {
-	const { accountManager } = getAppContext();
+	const { webSessionManager } = getAppContext();
 	const session = getSession();
 
-	if (!accountManager.isSessionElevated(session)) {
+	if (!webSessionManager.isSessionElevated(session)) {
 		invalid(`Elevated permission has expired, reauthenticate again.`);
 	}
 
 	// refresh the sudo timeout
-	accountManager.elevateSession(session.id);
+	webSessionManager.elevateSession(session.id);
 };

@@ -129,7 +129,7 @@ export class SeedClient {
 			}),
 		);
 
-		const { secret: appPassword } = await this.network.pds.ctx.accountManager.createAppPassword({
+		const { secret: appPassword } = await this.network.pds.ctx.legacyAuthManager.createAppPassword({
 			did: did,
 			name: params.appPasswordName ?? 'seed password',
 			privilege: params.appPasswordPrivilege ?? AppPasswordPrivilege.Full,

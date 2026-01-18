@@ -31,9 +31,9 @@ export const initiateWebAuthnRegistration = async (
 	userName: string,
 	credentialType: WebAuthnCredentialType,
 ): Promise<WebAuthnRegistrationState> => {
-	const { accountManager, config } = getAppContext();
+	const { mfaManager, config } = getAppContext();
 
-	const existingCredentials = accountManager.listWebAuthnCredentials(did);
+	const existingCredentials = mfaManager.listWebAuthnCredentials(did);
 
 	const options = await generateWebAuthnRegistrationOptions({
 		rpId: config.service.hostname,
@@ -45,7 +45,7 @@ export const initiateWebAuthnRegistration = async (
 	});
 
 	// store the challenge
-	const token = accountManager.createWebAuthnRegistrationChallenge(did, options.challenge);
+	const token = mfaManager.createWebAuthnRegistrationChallenge(did, options.challenge);
 
 	return { token, options };
 };
@@ -78,11 +78,11 @@ export const completeWebAuthnForm = form(
 		),
 	}),
 	async (data, issue) => {
-		const { accountManager, config } = getAppContext();
+		const { mfaManager, config } = getAppContext();
 		const { did } = getSession();
 
 		// get the challenge
-		const challenge = accountManager.getWebAuthnRegistrationChallenge(data.token);
+		const challenge = mfaManager.getWebAuthnRegistrationChallenge(data.token);
 		if (!challenge) {
 			invalid(`Registration expired, please try again`);
 		}
@@ -110,7 +110,7 @@ export const completeWebAuthnForm = form(
 		}
 
 		// delete the challenge
-		accountManager.deleteWebAuthnRegistrationChallenge(data.token);
+		mfaManager.deleteWebAuthnRegistrationChallenge(data.token);
 
 		requireSudo();
 
@@ -120,7 +120,7 @@ export const completeWebAuthnForm = form(
 			data.credentialType === 'passkey' ? WebAuthnCredentialType.Passkey : WebAuthnCredentialType.SecurityKey;
 
 		try {
-			accountManager.createWebAuthnCredential({
+			mfaManager.createWebAuthnCredential({
 				did: did,
 				type: credentialType,
 				name: data.name,
@@ -158,11 +158,11 @@ export const removeWebAuthnForm = form(
 		id: v.pipe(v.string(), v.toNumber(), v.safeInteger()),
 	}),
 	async (data) => {
-		const { accountManager } = getAppContext();
+		const { mfaManager } = getAppContext();
 		const { did } = getSession();
 
 		requireSudo();
-		accountManager.deleteWebAuthnCredential(did, data.id);
+		mfaManager.deleteWebAuthnCredential(did, data.id);
 
 		redirect(routes.account.security.overview.href());
 	},

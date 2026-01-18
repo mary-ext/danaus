@@ -12,8 +12,8 @@ const REALM = 'admin';
  */
 export const requireAdmin = (): Middleware => {
 	return async ({ request }, next) => {
-		const ctx = getAppContext();
-		const adminPassword = ctx.config.secrets.adminPassword;
+		const { config } = getAppContext();
+		const adminPassword = config.secrets.adminPassword;
 
 		if (adminPassword === null) {
 			return new Response('Administration UI is disabled', { status: 403 });

@@ -22,7 +22,7 @@ const emailSchema = v.pipe(v.string(), v.email());
 
 // #region XRPC handler
 export const createAccount = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, authVerifier } = context;
+	const { inviteCodeManager, authVerifier } = context;
 
 	router.addProcedure(LocalDanausAccountCreateAccount, {
 		async handler({ input, request }) {
@@ -39,7 +39,7 @@ export const createAccount = (router: XRPCRouter, context: AppContext) => {
 						});
 					}
 
-					accountManager.ensureInviteIsAvailable(input.inviteCode);
+					inviteCodeManager.ensureInviteIsAvailable(input.inviteCode);
 				}
 			}
 
@@ -52,7 +52,7 @@ export const createAccount = (router: XRPCRouter, context: AppContext) => {
 
 			// record invite code usage for public signups
 			if (!isAdmin && input.inviteCode) {
-				accountManager.recordInviteUse(input.inviteCode, did);
+				inviteCodeManager.recordInviteUse(input.inviteCode, did);
 			}
 
 			return json({ did });

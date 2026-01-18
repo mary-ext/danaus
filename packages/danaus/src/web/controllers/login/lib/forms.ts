@@ -31,7 +31,7 @@ interface VerifyFactorOptions {
  * @param options verification options
  */
 const verifyFactor = async (options: VerifyFactorOptions): Promise<void> => {
-	const { accountManager } = getAppContext();
+	const { accountManager, mfaManager } = getAppContext();
 	const { did, factor, code, allowedFactors } = options;
 
 	if (!allowedFactors.includes(factor)) {
@@ -44,7 +44,7 @@ const verifyFactor = async (options: VerifyFactorOptions): Promise<void> => {
 				invalid(`Invalid verification code`);
 			}
 
-			const valid = await accountManager.verifyAccountTotpCode(did, code);
+			const valid = await mfaManager.verifyAccountTotpCode(did, code);
 			if (!valid) {
 				invalid(`Invalid verification code`);
 			}
@@ -56,7 +56,7 @@ const verifyFactor = async (options: VerifyFactorOptions): Promise<void> => {
 				invalid(`Invalid recovery code`);
 			}
 
-			const valid = accountManager.consumeRecoveryCode(did, code);
+			const valid = mfaManager.consumeRecoveryCode(did, code);
 			if (!valid) {
 				invalid(`Invalid recovery code`);
 			}
@@ -101,7 +101,7 @@ export const loginForm = form(
 		redirect: v.pipe(v.string(), v.minLength(1)),
 	}),
 	async (data, issue) => {
-		const { accountManager } = getAppContext();
+		const { accountManager, mfaManager, webSessionManager } = getAppContext();
 		const { request } = getContext();
 
 		if (data._password.length < MIN_PASSWORD_LENGTH || data._password.length > MAX_PASSWORD_LENGTH) {
@@ -127,17 +127,17 @@ export const loginForm = form(
 		}
 
 		// clean up any expired verify challenges
-		accountManager.cleanupExpiredVerifyChallenges();
+		webSessionManager.cleanupExpiredVerifyChallenges();
 
 		// check if MFA is enabled
-		if (accountManager.getMfaStatus(account.did) !== null) {
+		if (mfaManager.getMfaStatus(account.did) !== null) {
 			// create verify challenge and redirect
-			const token = accountManager.createVerifyChallenge(account.did, data.remember ?? false);
+			const token = webSessionManager.createVerifyChallenge(account.did, data.remember ?? false);
 
 			redirect(routes.verify.index.href(undefined, { token, redirect: data.redirect }));
 		}
 
-		const { session, token } = await accountManager.createWebSession({
+		const { session, token } = await webSessionManager.createWebSession({
 			did: account.did,
 			remember: data.remember ?? false,
 			userAgent: request.headers.get('user-agent') ?? undefined,
@@ -197,10 +197,10 @@ export const verifyForm = form(
 		redirect: v.string(),
 	}),
 	async (data) => {
-		const { accountManager } = getAppContext();
+		const { mfaManager, webSessionManager } = getAppContext();
 		const { request } = getContext();
 
-		const challenge = accountManager.getVerifyChallenge(data.challenge);
+		const challenge = webSessionManager.getVerifyChallenge(data.challenge);
 		if (challenge === null) {
 			redirect(routes.login.index.href(undefined, { redirect: data.redirect }));
 		}
@@ -210,7 +210,7 @@ export const verifyForm = form(
 		// determine allowed factors based on mode and MFA status
 		let allowedFactors: AuthFactor[];
 		if (isSudo) {
-			const hasMfa = accountManager.getMfaStatus(challenge.did) !== null;
+			const hasMfa = mfaManager.getMfaStatus(challenge.did) !== null;
 			allowedFactors = hasMfa ? VERIFY_ALLOWED_SUDO_MFA_FACTORS : VERIFY_ALLOWED_SUDO_OFA_FACTORS;
 		} else {
 			allowedFactors = VERIFY_ALLOWED_MFA_FACTORS;
@@ -224,15 +224,15 @@ export const verifyForm = form(
 		});
 
 		// delete challenge
-		accountManager.deleteVerifyChallenge(data.challenge);
+		webSessionManager.deleteVerifyChallenge(data.challenge);
 
 		if (isSudo) {
 			// elevate session and redirect
-			accountManager.elevateSession(challenge.session_id!);
+			webSessionManager.elevateSession(challenge.session_id!);
 			redirect(data.redirect);
 		} else {
 			// MFA login: create new session using remember preference from login
-			const { session, token } = await accountManager.createWebSession({
+			const { session, token } = await webSessionManager.createWebSession({
 				did: challenge.did,
 				remember: challenge.remember,
 				userAgent: request.headers.get('user-agent') ?? undefined,
@@ -257,11 +257,11 @@ export const passkeyLoginForm = form(
 		redirect: v.string(),
 	}),
 	async (data) => {
-		const { accountManager, config } = getAppContext();
+		const { mfaManager, webSessionManager, config } = getAppContext();
 		const { request } = getContext();
 
 		// find the credential by ID (discoverable flow)
-		const credential = accountManager.getWebAuthnCredentialByCredentialId(data.response.id);
+		const credential = mfaManager.getWebAuthnCredentialByCredentialId(data.response.id);
 		if (credential === null) {
 			invalid(`Passkey not recognized`);
 		}
@@ -272,7 +272,7 @@ export const passkeyLoginForm = form(
 		);
 		const challenge = clientDataJSON.challenge;
 
-		if (!accountManager.consumePasskeyLoginChallenge(challenge)) {
+		if (!mfaManager.consumePasskeyLoginChallenge(challenge)) {
 			invalid(`Invalid or expired challenge`);
 		}
 
@@ -290,7 +290,7 @@ export const passkeyLoginForm = form(
 			}
 
 			// update counter
-			accountManager.updateWebAuthnCredentialCounter(
+			mfaManager.updateWebAuthnCredentialCounter(
 				credential.id,
 				verification.authenticationInfo.newCounter,
 			);
@@ -299,7 +299,7 @@ export const passkeyLoginForm = form(
 		}
 
 		// create session
-		const { session, token } = await accountManager.createWebSession({
+		const { session, token } = await webSessionManager.createWebSession({
 			did: credential.did,
 			remember: true, // passkey login implies trusted device
 			userAgent: request.headers.get('user-agent') ?? undefined,
@@ -324,10 +324,10 @@ export const verifyWebAuthnForm = form(
 		redirect: v.string(),
 	}),
 	async (data) => {
-		const { accountManager, config } = getAppContext();
+		const { mfaManager, webSessionManager, config } = getAppContext();
 		const { request } = getContext();
 
-		const challenge = accountManager.getVerifyChallenge(data.challenge);
+		const challenge = webSessionManager.getVerifyChallenge(data.challenge);
 		if (challenge === null) {
 			redirect(routes.login.index.href(undefined, { redirect: data.redirect }));
 		}
@@ -337,7 +337,7 @@ export const verifyWebAuthnForm = form(
 		}
 
 		// find the credential being used
-		const credential = accountManager.getWebAuthnCredentialByCredentialId(data.response.id);
+		const credential = mfaManager.getWebAuthnCredentialByCredentialId(data.response.id);
 		if (credential === null || credential.did !== challenge.did) {
 			invalid(`Invalid security key`);
 		}
@@ -356,7 +356,7 @@ export const verifyWebAuthnForm = form(
 			}
 
 			// update counter
-			accountManager.updateWebAuthnCredentialCounter(
+			mfaManager.updateWebAuthnCredentialCounter(
 				credential.id,
 				verification.authenticationInfo.newCounter,
 			);
@@ -367,15 +367,15 @@ export const verifyWebAuthnForm = form(
 		const isSudo = challenge.session_id !== null;
 
 		// delete challenge
-		accountManager.deleteVerifyChallenge(data.challenge);
+		webSessionManager.deleteVerifyChallenge(data.challenge);
 
 		if (isSudo) {
 			// elevate session and redirect
-			accountManager.elevateSession(challenge.session_id!);
+			webSessionManager.elevateSession(challenge.session_id!);
 			redirect(data.redirect);
 		} else {
 			// MFA login: create new session using remember preference from login
-			const { session, token } = await accountManager.createWebSession({
+			const { session, token } = await webSessionManager.createWebSession({
 				did: challenge.did,
 				remember: challenge.remember,
 				userAgent: request.headers.get('user-agent') ?? undefined,

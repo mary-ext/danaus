@@ -10,7 +10,7 @@ import type { AppContext } from '#app/context.ts';
  * @param context app context
  */
 export const refreshSession = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, authVerifier } = context;
+	const { accountManager, legacyAuthManager, authVerifier } = context;
 
 	router.addProcedure(ComAtprotoServerRefreshSession, {
 		async handler({ request }) {
@@ -40,7 +40,7 @@ export const refreshSession = (router: XRPCRouter, context: AppContext) => {
 				throw new InvalidRequestError({ error: 'HandleNotFound', description: `handle not found` });
 			}
 
-			const { accessJwt, refreshJwt } = await accountManager.rotateLegacyRefresh(auth.tokenId);
+			const { accessJwt, refreshJwt } = await legacyAuthManager.rotateLegacyRefresh(auth.tokenId);
 
 			return json({
 				did: account.did,

@@ -9,13 +9,13 @@ import type { AppContext } from '#app/context.ts';
  * @param context app context
  */
 export const deleteSession = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, authVerifier } = context;
+	const { legacyAuthManager, authVerifier } = context;
 
 	router.addProcedure(ComAtprotoServerDeleteSession, {
 		async handler({ request }) {
 			const auth = await authVerifier.refresh(request);
 
-			accountManager.deleteLegacySession(auth.tokenId);
+			legacyAuthManager.deleteLegacySession(auth.tokenId);
 		},
 	});
 };

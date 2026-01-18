@@ -1,7 +1,7 @@
 import { createInjectionKey, redirect, type Middleware } from '@oomfware/fetch-router';
 import { getContext } from '@oomfware/fetch-router/middlewares/async-context';
 
-import type { WebSession } from '#app/accounts/manager.ts';
+import type { WebSession } from '#app/accounts/web-sessions.ts';
 import { readWebSessionToken, verifyWebSessionToken } from '#app/auth/web.ts';
 
 import { routes } from '../routes.ts';
@@ -16,7 +16,7 @@ const sessionKey = createInjectionKey<WebSession>();
  */
 export const requireSession = (): Middleware => {
 	return async ({ request, url, store }, next) => {
-		const { accountManager, config } = getAppContext();
+		const { webSessionManager, config } = getAppContext();
 		const path = url.pathname;
 
 		const redirectUrl = routes.login.index.href(undefined, { redirect: path });
@@ -31,7 +31,7 @@ export const requireSession = (): Middleware => {
 			redirect(redirectUrl);
 		}
 
-		const session = accountManager.getWebSession(sessionId);
+		const session = webSessionManager.getWebSession(sessionId);
 		if (!session) {
 			redirect(redirectUrl);
 		}
@@ -61,7 +61,7 @@ export const getSession = (): WebSession => {
  * @returns the web session or null if not found/invalid
  */
 export const tryGetSession = (): WebSession | null => {
-	const { accountManager, config } = getAppContext();
+	const { webSessionManager, config } = getAppContext();
 	const { request } = getContext();
 
 	const token = readWebSessionToken(request);
@@ -74,6 +74,6 @@ export const tryGetSession = (): WebSession | null => {
 		return null;
 	}
 
-	const session = accountManager.getWebSession(sessionId);
+	const session = webSessionManager.getWebSession(sessionId);
 	return session;
 };

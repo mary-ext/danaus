@@ -19,11 +19,11 @@ export default {
 		register: {
 			middleware: [forms({ completeWebAuthnForm })],
 			async action({ url }) {
-				const { accountManager } = getAppContext();
+				const { accountManager, mfaManager, webSessionManager } = getAppContext();
 				const session = getSession();
 
 				// require sudo mode
-				if (!accountManager.isSessionElevated(session)) {
+				if (!webSessionManager.isSessionElevated(session)) {
 					redirect(routes.verify.index.href(undefined, { redirect: url.pathname + url.search }));
 				}
 
@@ -43,7 +43,7 @@ export default {
 
 				if (token) {
 					// try to get existing challenge
-					const existingChallenge = accountManager.getWebAuthnRegistrationChallenge(token);
+					const existingChallenge = mfaManager.getWebAuthnRegistrationChallenge(token);
 					if (existingChallenge) {
 						// regenerate options with the same challenge
 						const state = await initiateWebAuthnRegistration(
@@ -52,7 +52,7 @@ export default {
 							credentialType,
 						);
 						// delete old challenge and use new one
-						accountManager.deleteWebAuthnRegistrationChallenge(token);
+						mfaManager.deleteWebAuthnRegistrationChallenge(token);
 						token = state.token;
 						options = state.options;
 					}
@@ -116,7 +116,7 @@ export default {
 												>
 													<Input
 														{...fields.name.as('text')}
-														placeholder={accountManager.generateWebAuthnName(session.did, credentialType)}
+														placeholder={mfaManager.generateWebAuthnName(session.did, credentialType)}
 													/>
 												</Field>
 
@@ -151,7 +151,7 @@ export default {
 		remove: {
 			middleware: [forms({ removeWebAuthnForm })],
 			action({ url, params }) {
-				const { accountManager } = getAppContext();
+				const { mfaManager, webSessionManager } = getAppContext();
 				const session = getSession();
 
 				const id = coerceToInteger(params.id);
@@ -159,13 +159,13 @@ export default {
 					redirect(routes.account.security.overview.href());
 				}
 
-				const credential = accountManager.getWebAuthnCredential(session.did, id);
+				const credential = mfaManager.getWebAuthnCredential(session.did, id);
 				if (credential === null) {
 					redirect(routes.account.security.overview.href());
 				}
 
 				// require sudo mode
-				if (!accountManager.isSessionElevated(session)) {
+				if (!webSessionManager.isSessionElevated(session)) {
 					redirect(routes.verify.index.href(undefined, { redirect: url.pathname }));
 				}
 

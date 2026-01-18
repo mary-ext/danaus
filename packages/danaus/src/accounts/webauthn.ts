@@ -11,7 +11,7 @@ import {
 } from '@simplewebauthn/server';
 
 import { WebAuthnCredentialType } from './db/schema.ts';
-import type { WebauthnCredential } from './manager';
+import type { WebauthnCredential } from './mfa';
 
 // #region constants
 
