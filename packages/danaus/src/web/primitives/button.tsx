@@ -1,4 +1,4 @@
-import type { ClassValue, JSXNode } from '@oomfware/jsx';
+import { cn, type JSXNode } from '@oomfware/jsx';
 
 import type { InvokerCommand } from './utils/types.ts';
 
@@ -31,7 +31,7 @@ const Button = (props: ButtonProps) => {
 		children,
 	} = props;
 
-	const cn: ClassValue[] = [
+	const classes = cn([
 		'inline-flex appearance-none items-center justify-center gap-2 overflow-hidden align-middle select-none',
 		'text-base-300 font-medium',
 		'rounded-md border',
@@ -70,11 +70,11 @@ const Button = (props: ButtonProps) => {
 		],
 
 		className,
-	];
+	]);
 
 	if (href !== undefined) {
 		return (
-			<a href={href} data-target={targetId} class={cn}>
+			<a href={href} data-target={targetId} class={classes}>
 				{children}
 			</a>
 		);
@@ -88,7 +88,7 @@ const Button = (props: ButtonProps) => {
 			commandfor={commandfor}
 			command={command}
 			data-target={targetId}
-			class={cn}
+			class={classes}
 		>
 			{children}
 		</button>

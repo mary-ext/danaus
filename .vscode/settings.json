@@ -1,5 +1,5 @@
 {
 	"editor.defaultFormatter": "oxc.oxc-vscode",
 	"typescript.tsdk": "node_modules/typescript/lib",
-	"tailwindCSS.classFunctions": ["cva", "cx"]
+	"tailwindCSS.classFunctions": ["cn"]
 }
