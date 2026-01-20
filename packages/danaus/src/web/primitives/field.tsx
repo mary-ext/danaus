@@ -1,7 +1,5 @@
 import type { JSXNode } from '@oomfware/jsx';
 
-import { cva } from 'cva';
-
 import { useId } from '../components/id.tsx';
 import CheckCircle2Solid from '../icons/central/check-circle-2-solid.tsx';
 import ExclamationCircleSolid from '../icons/central/exclamation-circle-solid.tsx';
@@ -9,55 +7,6 @@ import ExclamationTriangleSolid from '../icons/central/exclamation-triangle-soli
 
 import Label from './label.tsx';
 import { FieldContext, type ValidationStatus } from './utils/field-context.tsx';
-
-const root = cva({
-	base: 'block',
-});
-
-const inner = cva({
-	base: 'flex flex-col gap-2',
-});
-
-const header = cva({
-	base: 'flex flex-col gap-1',
-});
-
-const description = cva({
-	base: 'text-base-300 wrap-break-word text-neutral-foreground-3',
-});
-
-const control = cva({
-	base: 'flex flex-col gap-2',
-});
-
-const hint = cva({
-	base: 'text-base-200 text-neutral-foreground-3',
-});
-
-const validationMessage = cva({
-	base: 'flex gap-1 text-base-200',
-	variants: {
-		status: {
-			error: 'text-status-danger-foreground-1',
-			warning: 'text-status-warning-foreground-3',
-			success: 'text-status-success-foreground-1',
-			none: 'text-neutral-foreground-3',
-		},
-	},
-});
-
-const validationMessageIcon = cva({
-	base: 'my-0.5 grid h-3 w-3 place-items-center',
-});
-
-const validationMessageText = cva({
-	base: '',
-	variants: {
-		muted: {
-			true: 'text-neutral-foreground-3',
-		},
-	},
-});
 
 export interface FieldProps {
 	required?: boolean;
@@ -123,25 +72,25 @@ const Field = (props: FieldProps) => {
 
 	return (
 		<FieldContext.Provider value={contextValue}>
-			<div class={root({ className })}>
-				<div class={inner()}>
+			<div class={['block', className]}>
+				<div class="flex flex-col gap-2">
 					{(labelContent || descriptionContent) && (
-						<div class={header()}>
+						<div class="flex flex-col gap-1">
 							{labelContent && <Label required={required}>{labelContent}</Label>}
 
 							{descriptionContent && (
-								<p id={descriptionId} class={description()}>
+								<p id={descriptionId} class="text-base-300 wrap-break-word text-neutral-foreground-3">
 									{descriptionContent}
 								</p>
 							)}
 						</div>
 					)}
 
-					<div class={control()}>
+					<div class="flex flex-col gap-2">
 						{children}
 
 						{hintContent && (
-							<p id={hintId} class={hint()}>
+							<p id={hintId} class="text-base-200 text-neutral-foreground-3">
 								{hintContent}
 							</p>
 						)}
@@ -150,11 +99,18 @@ const Field = (props: FieldProps) => {
 							<p
 								id={validationMessageId}
 								role={effectiveStatus === 'error' ? 'alert' : undefined}
-								class={validationMessage({ status: effectiveStatus })}
-							>
-								<span class={validationMessageIcon()}>{renderValidationIcon()}</span>
+								class={[
+									'flex gap-1 text-base-200',
 
-								<span class={validationMessageText({ muted: effectiveStatus !== 'error' })}>
+									effectiveStatus === 'error' && 'text-status-danger-foreground-1',
+									effectiveStatus === 'warning' && 'text-status-warning-foreground-3',
+									effectiveStatus === 'success' && 'text-status-success-foreground-1',
+									effectiveStatus === 'none' && 'text-neutral-foreground-3',
+								]}
+							>
+								<span class="my-0.5 grid h-3 w-3 place-items-center">{renderValidationIcon()}</span>
+
+								<span class={[effectiveStatus !== 'error' && 'text-neutral-foreground-3']}>
 									{validationMessageContent}
 								</span>
 							</p>

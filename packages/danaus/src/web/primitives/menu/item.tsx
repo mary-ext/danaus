@@ -1,20 +1,6 @@
-import type { JSXNode } from '@oomfware/jsx';
-
-import { cva } from 'cva';
+import type { ClassValue, JSXNode } from '@oomfware/jsx';
 
 import type { InvokerCommand } from '../utils/types.ts';
-
-const root = cva({
-	base: [
-		'flex items-center gap-1 rounded-md px-2 py-1.5 text-left select-none',
-		'text-base-300 text-neutral-foreground-2',
-		'outline-2 -outline-offset-2 outline-transparent',
-		'transition',
-		'hover:bg-neutral-background-1-hover hover:text-neutral-foreground-2-hover',
-		'focus-visible:outline-stroke-focus-2',
-		'active:bg-neutral-background-1-active',
-	],
-});
 
 export interface MenuItemProps {
 	type?: 'submit' | 'button';
@@ -34,22 +20,28 @@ export interface MenuItemProps {
 const MenuItem = (props: MenuItemProps) => {
 	const { type = 'button', href, disabled, commandfor, command, class: className, children } = props;
 
+	const cn: ClassValue = [
+		'flex items-center gap-1 rounded-md px-2 py-1.5 text-left select-none',
+		'text-base-300 text-neutral-foreground-2',
+		'outline-2 -outline-offset-2 outline-transparent',
+		'transition',
+		'hover:bg-neutral-background-1-hover hover:text-neutral-foreground-2-hover',
+		'focus-visible:outline-stroke-focus-2',
+		'active:bg-neutral-background-1-active',
+
+		className,
+	];
+
 	if (href !== undefined) {
 		return (
-			<a href={href} class={root({ className })}>
+			<a href={href} class={cn}>
 				{children}
 			</a>
 		);
 	}
 
 	return (
-		<button
-			type={type}
-			disabled={disabled}
-			commandfor={commandfor}
-			command={command}
-			class={root({ className })}
-		>
+		<button type={type} disabled={disabled} commandfor={commandfor} command={command} class={cn}>
 			{children}
 		</button>
 	);

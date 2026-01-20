@@ -25,6 +25,6 @@
 	},
 	"devDependencies": {
 		"@poppinss/ts-exec": "^1.4.1",
-		"@types/node": "^22.19.3"
+		"@types/node": "^22.19.7"
 	}
 }

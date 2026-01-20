@@ -1,17 +1,3 @@
-import { cva } from 'cva';
-
-const root = cva({
-	base: ['flex flex-col gap-1 rounded-lg border border-neutral-stroke-2 bg-neutral-background-1 p-3'],
-});
-
-const label = cva({
-	base: 'text-base-200 text-neutral-foreground-3',
-});
-
-const value = cva({
-	base: 'text-base-500 font-semibold text-neutral-foreground-1',
-});
-
 export interface StatCardProps {
 	label: string;
 	value: number;
@@ -24,9 +10,11 @@ export interface StatCardProps {
  */
 const StatCard = (props: StatCardProps) => {
 	return (
-		<div class={root()}>
-			<span class={label()}>{props.label}</span>
-			<span class={value()}>{props.value.toLocaleString()}</span>
+		<div class="flex flex-col gap-1 rounded-lg border border-neutral-stroke-2 bg-neutral-background-1 p-3">
+			<span class="text-base-200 text-neutral-foreground-3">{props.label}</span>
+			<span class="text-base-500 font-semibold text-neutral-foreground-1">
+				{props.value.toLocaleString()}
+			</span>
 		</div>
 	);
 };

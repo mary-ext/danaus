@@ -1,23 +1,7 @@
 import type { JSXNode } from '@oomfware/jsx';
 
-import { cva, type VariantProps } from 'cva';
-
-const root = cva({
-	base: [
-		'pt-2',
-		// stacked on small containers, inline row on larger
-		'flex flex-col gap-2',
-		'@sm/dialog-body:flex-row @sm/dialog-body:items-center',
-	],
-	variants: {
-		position: {
-			start: '@sm/dialog-body:justify-start',
-			end: '@sm/dialog-body:justify-end',
-		},
-	},
-});
-
-export interface DialogActionsProps extends VariantProps<typeof root> {
+export interface DialogActionsProps {
+	position?: 'start' | 'end';
 	class?: string;
 	children?: JSXNode;
 }
@@ -30,7 +14,23 @@ export interface DialogActionsProps extends VariantProps<typeof root> {
 const DialogActions = (props: DialogActionsProps) => {
 	const { position = 'end', class: className, children } = props;
 
-	return <div class={root({ position, className })}>{children}</div>;
+	return (
+		<div
+			class={[
+				'pt-2',
+				// stacked on small containers, inline row on larger
+				'flex flex-col gap-2',
+				'@sm/dialog-body:flex-row @sm/dialog-body:items-center',
+
+				position === 'start' && '@sm/dialog-body:justify-start',
+				position === 'end' && '@sm/dialog-body:justify-end',
+
+				className,
+			]}
+		>
+			{children}
+		</div>
+	);
 };
 
 export default DialogActions;

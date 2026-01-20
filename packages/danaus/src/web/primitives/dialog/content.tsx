@@ -1,11 +1,5 @@
 import type { JSXNode } from '@oomfware/jsx';
 
-import { cva } from 'cva';
-
-const root = cva({
-	base: ['min-h-8 overflow-y-auto', 'text-base-300'],
-});
-
 export interface DialogContentProps {
 	class?: string;
 	children?: JSXNode;
@@ -18,7 +12,7 @@ export interface DialogContentProps {
 const DialogContent = (props: DialogContentProps) => {
 	const { class: className, children } = props;
 
-	return <div class={root({ className })}>{children}</div>;
+	return <div class={['min-h-8 overflow-y-auto', 'text-base-300', className]}>{children}</div>;
 };
 
 export default DialogContent;

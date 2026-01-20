@@ -1,9 +1,3 @@
-import { cva } from 'cva';
-
-const root = cva({
-	base: ['-mx-1.25 my-1 w-auto border-b border-neutral-stroke-2'],
-});
-
 export interface MenuDividerProps {
 	class?: string;
 }
@@ -14,7 +8,9 @@ export interface MenuDividerProps {
 const MenuDivider = (props: MenuDividerProps) => {
 	const { class: className } = props;
 
-	return <div role="separator" class={root({ className })} />;
+	return (
+		<div role="separator" class={['-mx-1.25 my-1 w-auto border-b border-neutral-stroke-2', className]} />
+	);
 };
 
 export default MenuDivider;

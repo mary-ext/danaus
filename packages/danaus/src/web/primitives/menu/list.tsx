@@ -1,11 +1,5 @@
 import type { JSXNode } from '@oomfware/jsx';
 
-import { cva } from 'cva';
-
-const root = cva({
-	base: ['flex flex-col gap-0.5'],
-});
-
 export interface MenuListProps {
 	class?: string;
 	children?: JSXNode;
@@ -17,7 +11,7 @@ export interface MenuListProps {
 const MenuList = (props: MenuListProps) => {
 	const { class: className, children } = props;
 
-	return <div class={root({ className })}>{children}</div>;
+	return <div class={['flex flex-col gap-0.5', className]}>{children}</div>;
 };
 
 export default MenuList;

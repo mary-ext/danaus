@@ -1,11 +1,5 @@
 import type { JSXNode } from '@oomfware/jsx';
 
-import { cva } from 'cva';
-
-const root = cva({
-	base: ['grid gap-2 p-6', '@container/dialog-body'],
-});
-
 export interface DialogBodyProps {
 	class?: string;
 	children?: JSXNode;
@@ -18,7 +12,7 @@ export interface DialogBodyProps {
 const DialogBody = (props: DialogBodyProps) => {
 	const { class: className, children } = props;
 
-	return <div class={root({ className })}>{children}</div>;
+	return <div class={['@container/dialog-body', 'grid gap-2 p-6', className]}>{children}</div>;
 };
 
 export default DialogBody;

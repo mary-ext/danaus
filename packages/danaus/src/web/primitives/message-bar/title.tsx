@@ -1,11 +1,5 @@
 import type { JSXNode } from '@oomfware/jsx';
 
-import { cva } from 'cva';
-
-const root = cva({
-	base: ['mr-1', 'text-base-300 font-semibold'],
-});
-
 export interface MessageBarTitleProps {
 	class?: string;
 	children?: JSXNode;
@@ -18,7 +12,7 @@ export interface MessageBarTitleProps {
 const MessageBarTitle = (props: MessageBarTitleProps) => {
 	const { class: className, children } = props;
 
-	return <span class={root({ className })}>{children}</span>;
+	return <span class={['mr-1', 'text-base-300 font-semibold', className]}>{children}</span>;
 };
 
 export default MessageBarTitle;

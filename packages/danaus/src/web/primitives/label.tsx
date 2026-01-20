@@ -1,16 +1,6 @@
 import type { JSXNode } from '@oomfware/jsx';
 
-import { cva } from 'cva';
-
 import { useFieldContext } from './utils/field-context.tsx';
-
-const root = cva({
-	base: 'text-base-300 font-medium text-neutral-foreground-1',
-});
-
-const requiredIndicator = cva({
-	base: 'pl-1 text-status-danger-foreground-1',
-});
 
 export interface LabelProps {
 	for?: string;
@@ -26,12 +16,12 @@ const Label = (props: LabelProps) => {
 	const htmlFor = forProp ?? fieldContext?.inputId;
 
 	return (
-		<label for={htmlFor} class={root({ className })}>
+		<label for={htmlFor} class={['text-base-300 font-medium text-neutral-foreground-1', className]}>
 			{children}
 
 			{required && (
 				<>
-					<span class={requiredIndicator()} aria-hidden="true">
+					<span class="pl-1 text-status-danger-foreground-1" aria-hidden="true">
 						*
 					</span>
 					<span class="sr-only">(required)</span>
