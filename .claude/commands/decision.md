@@ -60,7 +60,8 @@ deciduous link <goal_id> <action_id> -r "Implementation"
 
 ## CRITICAL: Capture VERBATIM User Prompts
 
-**Prompts must be the EXACT user message, not a summary.** When a user request triggers new work, capture their full message word-for-word.
+**Prompts must be the EXACT user message, not a summary.** When a user request triggers new work,
+capture their full message word-for-word.
 
 **BAD - summaries are useless for context recovery:**
 
@@ -102,7 +103,8 @@ Prompts are viewable in the TUI detail panel (`deciduous tui`) and web viewer.
 
 ## Branch-Based Grouping
 
-**Nodes are automatically tagged with the current git branch.** This enables filtering by feature/PR.
+**Nodes are automatically tagged with the current git branch.** This enables filtering by
+feature/PR.
 
 ### How It Works
 
@@ -241,7 +243,8 @@ deciduous link <parent_id> <child_id> -r "Retroactive connection - <why>"
 
 ## Multi-User Sync
 
-**Problem**: Multiple users work on the same codebase, each with a local `.deciduous/deciduous.db` (gitignored). How to share decisions?
+**Problem**: Multiple users work on the same codebase, each with a local `.deciduous/deciduous.db`
+(gitignored). How to share decisions?
 
 **Solution**: jj-inspired dual-ID model. Each node has:
 

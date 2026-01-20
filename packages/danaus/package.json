@@ -1,8 +1,8 @@
 {
 	"name": "@kelinci/danaus-pds",
 	"version": "0.0.0",
-	"type": "module",
 	"private": true,
+	"type": "module",
 	"imports": {
 		"#app/*": "./src/*",
 		"#web/*": "./src/web/*"

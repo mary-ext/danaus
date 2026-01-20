@@ -33,7 +33,8 @@ import type {} from '@kelinci/danaus-lexicons';
 
 ### with @atcute/lex-cli
 
-when building your own lexicons that reference these types, configure lex-cli to import from this package:
+when building your own lexicons that reference these types, configure lex-cli to import from this
+package:
 
 ```ts
 // file: lex.config.js

@@ -1,10 +1,7 @@
-import type {} from '@atcute/lexicons';
-
-import * as v from '@atcute/lexicons/validations';
-
-import type {} from '@atcute/lexicons/ambient';
-
 import * as ComAtprotoRepoStrongRef from '@atcute/atproto/types/repo/strongRef';
+import type {} from '@atcute/lexicons';
+import type {} from '@atcute/lexicons/ambient';
+import * as v from '@atcute/lexicons/validations';
 
 import * as LocalDanausAdminDefs from './defs.js';
 

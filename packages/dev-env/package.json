@@ -1,12 +1,12 @@
 {
 	"name": "@danaus/dev-env",
 	"version": "0.0.0",
-	"type": "module",
 	"private": true,
+	"bin": "./src/bin.ts",
+	"type": "module",
 	"exports": {
 		".": "./src/index.ts"
 	},
-	"bin": "./src/bin.ts",
 	"scripts": {
 		"tsc": "tsc",
 		"infra:up": "docker compose up -d --wait",

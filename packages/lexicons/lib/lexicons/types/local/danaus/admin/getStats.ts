@@ -1,8 +1,6 @@
 import type {} from '@atcute/lexicons';
-
-import * as v from '@atcute/lexicons/validations';
-
 import type {} from '@atcute/lexicons/ambient';
+import * as v from '@atcute/lexicons/validations';
 
 const _accountStatsSchema = /*#__PURE__*/ v.object({
 	$type: /*#__PURE__*/ v.optional(/*#__PURE__*/ v.literal('local.danaus.admin.getStats#accountStats')),

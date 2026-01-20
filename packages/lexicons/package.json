@@ -1,16 +1,16 @@
 {
-	"type": "module",
 	"name": "@kelinci/danaus-lexicons",
 	"version": "0.0.0",
+	"private": true,
 	"description": "danaus schema definitions",
 	"license": "0BSD",
-	"private": true,
 	"files": [
 		"dist/",
 		"lib/",
 		"!lib/**/*.bench.ts",
 		"!lib/**/*.test.ts"
 	],
+	"type": "module",
 	"exports": {
 		".": "./lib/index.ts",
 		"./types/*": "./lib/lexicons/types/local/danaus/*.ts"

@@ -24,7 +24,8 @@ deciduous edges
 deciduous commands
 ```
 
-**Branch-scoped context**: If working on a feature branch, filter nodes to see only decisions relevant to this branch. Main branch nodes are tagged with `[branch: main]`.
+**Branch-scoped context**: If working on a feature branch, filter nodes to see only decisions
+relevant to this branch. Main branch nodes are tagged with `[branch: main]`.
 
 ## Step 1.5: Audit Graph Integrity
 
@@ -115,7 +116,8 @@ deciduous add action "Switching approach" -c 85 -p "User said: use X instead"
 deciduous sync  # Do this frequently!
 ```
 
-**When to use `--prompt`:** On root goals (always) and when user gives new direction mid-stream. Downstream nodes inherit context via edges.
+**When to use `--prompt`:** On root goals (always) and when user gives new direction mid-stream.
+Downstream nodes inherit context via edges.
 
 ---
 

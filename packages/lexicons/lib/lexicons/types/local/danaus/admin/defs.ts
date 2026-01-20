@@ -1,5 +1,4 @@
 import type {} from '@atcute/lexicons';
-
 import * as v from '@atcute/lexicons/validations';
 
 const _repoBlobRefSchema = /*#__PURE__*/ v.object({
