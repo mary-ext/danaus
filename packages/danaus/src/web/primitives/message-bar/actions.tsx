@@ -21,6 +21,8 @@ const MessageBarActions = (props: MessageBarActionsProps) => {
 				'flex items-center gap-3 pr-3',
 				'[grid-area:secondaryActions]',
 				layout === 'multiline' && 'mt-2 mb-1.5 justify-end',
+
+				className,
 			]}
 		>
 			{children}
