@@ -1,16 +1,10 @@
 import { ComAtprotoRepoApplyWrites } from '@atcute/atproto';
-import type { CanonicalResourceUri, Nsid, RecordKey } from '@atcute/lexicons';
+import type { CanonicalResourceUri } from '@atcute/lexicons';
 import { AuthRequiredError, InvalidRequestError, json, type XRPCRouter } from '@atcute/xrpc-server';
 
 import type { RepoWriteOp } from '#app/actors/repo/types.ts';
 import type { AppContext } from '#app/context.ts';
-
-type WriteInput = {
-	$type?: string;
-	collection: Nsid;
-	rkey?: RecordKey;
-	value?: unknown;
-};
+import { validateRecordWrites } from '#app/lexicon/validate-writes.ts';
 
 type WriteResult =
 	| { $type: 'com.atproto.repo.applyWrites#deleteResult' }
@@ -23,7 +17,7 @@ type WriteResult =
  * @param context app context
  */
 export const applyWrites = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, actorManager, authVerifier } = context;
+	const { accountManager, actorManager, authVerifier, lexiconCache } = context;
 
 	router.addProcedure(ComAtprotoRepoApplyWrites, {
 		async handler({ input, request }) {
@@ -45,32 +39,9 @@ export const applyWrites = (router: XRPCRouter, context: AppContext) => {
 				throw new AuthRequiredError({ error: 'InvalidToken', description: `invalid repository credentials` });
 			}
 
-			const writes = (input.writes as WriteInput[]).map((write): RepoWriteOp => {
+			const writes = input.writes.map((write): RepoWriteOp => {
 				switch (write.$type) {
-					case 'com.atproto.repo.applyWrites#create':
-						return {
-							action: 'create',
-							collection: write.collection,
-							rkey: write.rkey,
-							record: write.value,
-						};
-					case 'com.atproto.repo.applyWrites#update':
-						return {
-							action: 'update',
-							collection: write.collection,
-							rkey: write.rkey,
-							record: write.value,
-						};
-					case 'com.atproto.repo.applyWrites#delete':
-						return {
-							action: 'delete',
-							collection: write.collection,
-							rkey: write.rkey,
-						};
-				}
-
-				if ('value' in write && write.value !== undefined) {
-					if (write.rkey === undefined) {
+					case 'com.atproto.repo.applyWrites#create': {
 						return {
 							action: 'create',
 							collection: write.collection,
@@ -78,19 +49,25 @@ export const applyWrites = (router: XRPCRouter, context: AppContext) => {
 							record: write.value,
 						};
 					}
-
-					throw new InvalidRequestError({
-						error: 'InvalidWrite',
-						description: `ambiguous write action without $type`,
-					});
+					case 'com.atproto.repo.applyWrites#update': {
+						return {
+							action: 'update',
+							collection: write.collection,
+							rkey: write.rkey,
+							record: write.value,
+						};
+					}
+					case 'com.atproto.repo.applyWrites#delete': {
+						return {
+							action: 'delete',
+							collection: write.collection,
+							rkey: write.rkey,
+						};
+					}
 				}
-
-				return {
-					action: 'delete',
-					collection: write.collection,
-					rkey: write.rkey,
-				};
 			});
+
+			await validateRecordWrites(lexiconCache, writes, input.validate);
 
 			const result = await actorManager.transact(account.did, (store) => {
 				return store.repo.applyWrites(writes, {

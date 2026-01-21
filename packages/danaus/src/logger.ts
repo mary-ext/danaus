@@ -68,6 +68,9 @@ export const blobStoreLogger = getLogger(['danaus', 'blob-store']);
 /** DID/identity cache operations */
 export const didCacheLogger = getLogger(['danaus', 'did-cache']);
 
+/** lexicon cache operations */
+export const lexiconCacheLogger = getLogger(['danaus', 'lexicon-cache']);
+
 /** event sequencer */
 export const seqLogger = getLogger(['danaus', 'sequencer']);
 

@@ -83,6 +83,14 @@ export interface IdentityConfig {
 	serviceHandleDomains: string[];
 }
 
+export interface LexiconConfig {
+	enabled: boolean;
+	cacheDbLocation: string;
+	nameservers: string[] | null;
+	cacheStaleTtlMs: number;
+	cacheMaxTtlMs: number;
+}
+
 export interface SecretsConfig {
 	adminPassword: string | null;
 	dpopSecret: string | null;
@@ -124,6 +132,7 @@ export interface AppConfig {
 	actorStore: ActorStoreConfig;
 	blobStore: BlobStoreConfig;
 	identity: IdentityConfig;
+	lexicon: LexiconConfig;
 	secrets: SecretsConfig;
 	subscription: SubscriptionConfig;
 	email: EmailConfig | null;
@@ -285,6 +294,17 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 		};
 	}
 
+	let lexicon: LexiconConfig;
+	{
+		lexicon = {
+			enabled: env.PDS_LEXICON_VALIDATION_ENABLED ?? true,
+			cacheDbLocation: env.PDS_LEXICON_CACHE_DB_LOCATION ?? locate('lexicon-cache.db'),
+			nameservers: env.PDS_LEXICON_NAMESERVERS ?? null,
+			cacheMaxTtlMs: env.PDS_LEXICON_CACHE_MAX_TTL ?? DAY,
+			cacheStaleTtlMs: env.PDS_LEXICON_CACHE_STALE_TTL ?? HOUR,
+		};
+	}
+
 	let secrets: SecretsConfig;
 	{
 		let jwtKey: KeyObject;
@@ -350,6 +370,7 @@ export const toAppConfig = async (env: AppEnvironment): Promise<AppConfig> => {
 		actorStore,
 		blobStore,
 		identity,
+		lexicon,
 		secrets,
 		subscription,
 		email,

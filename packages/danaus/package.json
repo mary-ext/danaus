@@ -22,6 +22,7 @@
 		"db:generate:account": "drizzle-kit generate --dialect=sqlite --schema=src/accounts/db/schema.ts --out=drizzle/accounts",
 		"db:generate:actor": "drizzle-kit generate --dialect=sqlite --schema=src/actors/db/schema.ts --out=drizzle/actors",
 		"db:generate:identity": "drizzle-kit generate --dialect=sqlite --schema=src/identity/db/schema.ts --out=drizzle/identity",
+		"db:generate:lexicon": "drizzle-kit generate --dialect=sqlite --schema=src/lexicon/db/schema.ts --out=drizzle/lexicon",
 		"db:generate:sequencer": "drizzle-kit generate --dialect=sqlite --schema=src/sequencer/db/schema.ts --out=drizzle/sequencer"
 	},
 	"dependencies": {
@@ -36,6 +37,9 @@
 		"@atcute/identity": "^1.1.3",
 		"@atcute/identity-resolver": "^1.2.2",
 		"@atcute/identity-resolver-node": "^1.0.3",
+		"@atcute/lexicon-doc": "^2.0.6",
+		"@atcute/lexicon-resolver": "^0.1.6",
+		"@atcute/lexicon-resolver-node": "^0.1.0",
 		"@atcute/lexicons": "^1.2.6",
 		"@atcute/mst": "^0.1.2",
 		"@atcute/multibase": "^1.1.6",

@@ -70,6 +70,12 @@ const envSchema = v.object({
 		),
 	),
 
+	PDS_LEXICON_VALIDATION_ENABLED: v.optional(strbool),
+	PDS_LEXICON_CACHE_DB_LOCATION: v.optional(str),
+	PDS_LEXICON_NAMESERVERS: v.optional(strlist),
+	PDS_LEXICON_CACHE_STALE_TTL: v.optional(strint),
+	PDS_LEXICON_CACHE_MAX_TTL: v.optional(strint),
+
 	PDS_SUBSCRIPTION_BUFFER_LIMIT: v.optional(strint),
 	PDS_REPO_BACKFILL_LIMIT_MS: v.optional(strint),
 

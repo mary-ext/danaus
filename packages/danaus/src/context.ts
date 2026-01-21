@@ -9,6 +9,7 @@ import {
 	type HandleResolver,
 } from '@atcute/identity-resolver';
 import { NodeDnsHandleResolver } from '@atcute/identity-resolver-node';
+import { NodeDnsLexiconAuthorityResolver } from '@atcute/lexicon-resolver-node';
 
 import { getAccountDb, type AccountDb } from './accounts/db';
 import { InviteCodeManager } from './accounts/invite-codes';
@@ -26,6 +27,7 @@ import { Crawlers } from './crawlers';
 import { CachedDidDocumentResolver } from './identity/cached-did-document-resolver';
 import { CachedHandleResolver } from './identity/cached-handle-resolver';
 import { IdentityCache } from './identity/manager';
+import { LexiconCache } from './lexicon/cache';
 import { createServiceProxy, type ServiceProxy } from './proxy/index';
 import { Sequencer } from './sequencer/sequencer';
 
@@ -34,6 +36,7 @@ export interface AppContext {
 
 	backgroundQueue: BackgroundQueue;
 	identityCache: IdentityCache;
+	lexiconCache: LexiconCache;
 
 	handleResolver: HandleResolver;
 	didDocumentResolver: DidDocumentResolver<'plc' | 'web'>;
@@ -87,6 +90,21 @@ export const createAppContext = (config: AppConfig): AppContext => {
 	const didDocumentResolver = new CachedDidDocumentResolver({
 		cache: identityCache,
 		resolver: baseDidDocumentResolver,
+	});
+
+	const lexiconAuthorityResolver = new NodeDnsLexiconAuthorityResolver({
+		nameservers: config.lexicon.nameservers ?? undefined,
+	});
+
+	const lexiconCache = new LexiconCache({
+		location: config.lexicon.cacheDbLocation,
+		walAutoCheckpointDisabled: config.database.walAutoCheckpointDisabled,
+		backgroundQueue: backgroundQueue,
+		authorityResolver: lexiconAuthorityResolver,
+		didDocumentResolver: didDocumentResolver,
+		staleTtl: config.lexicon.cacheStaleTtlMs,
+		maxTtl: config.lexicon.cacheMaxTtlMs,
+		enabled: config.lexicon.enabled,
 	});
 
 	const plcClient = new PlcClient({
@@ -162,6 +180,7 @@ export const createAppContext = (config: AppConfig): AppContext => {
 
 		backgroundQueue: backgroundQueue,
 		identityCache: identityCache,
+		lexiconCache: lexiconCache,
 
 		handleResolver: handleResolver,
 		didDocumentResolver: didDocumentResolver,

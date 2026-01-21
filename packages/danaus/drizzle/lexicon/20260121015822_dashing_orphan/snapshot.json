@@ -1,0 +1,145 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "7018e308-5b71-44e2-b9b8-862d395b9d97",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "authority",
+      "entityType": "tables"
+    },
+    {
+      "name": "schema",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "domain",
+      "entityType": "columns",
+      "table": "authority"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "did",
+      "entityType": "columns",
+      "table": "authority"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "authority"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "nsid",
+      "entityType": "columns",
+      "table": "schema"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "authority_did",
+      "entityType": "columns",
+      "table": "schema"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cid",
+      "entityType": "columns",
+      "table": "schema"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "doc",
+      "entityType": "columns",
+      "table": "schema"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "schema"
+    },
+    {
+      "columns": [
+        "domain"
+      ],
+      "nameExplicit": false,
+      "name": "authority_pk",
+      "table": "authority",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "nsid"
+      ],
+      "nameExplicit": false,
+      "name": "schema_pk",
+      "table": "schema",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "authority_updated_at_idx",
+      "entityType": "indexes",
+      "table": "authority"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "schema_updated_at_idx",
+      "entityType": "indexes",
+      "table": "schema"
+    }
+  ],
+  "renames": []
+}

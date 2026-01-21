@@ -8,7 +8,7 @@ import { Secp256k1PrivateKeyExportable } from '@atcute/crypto';
 
 import getPort from 'get-port';
 
-import type { AppConfig, ProxyConfig, ServiceConfig } from '#app/config.ts';
+import type { AppConfig, LexiconConfig, ProxyConfig, ServiceConfig } from '#app/config.ts';
 import { PdsServer } from '#app/pds-server.ts';
 
 import { ADMIN_PASSWORD, JWT_SECRET } from './const.ts';
@@ -19,13 +19,15 @@ const DEFAULT_HANDLE_DOMAINS = ['.test', '.example'];
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
-export interface TestPdsConfig extends Partial<AppConfig> {
+export interface TestPdsConfig extends Partial<Omit<AppConfig, 'lexicon'>> {
 	plcUrl: string;
 	port?: number;
 	/** persistent data directory; uses temp directory if not provided */
 	dataDirectory?: string;
 	/** hex-encoded secp256k1 private key for PLC rotation */
 	plcRotationKey?: string;
+	/** lexicon config overrides */
+	lexicon?: Partial<LexiconConfig>;
 }
 
 /**
@@ -125,6 +127,15 @@ export class TestPds implements AsyncDisposable {
 				plcRecoveryKey: null,
 				serviceHandleDomains: DEFAULT_HANDLE_DOMAINS,
 				...cfg.identity,
+			},
+			lexicon: {
+				// disabled by default in tests to avoid network access
+				enabled: false,
+				cacheDbLocation: path.join(rootDir, 'lexicon-cache.db'),
+				nameservers: null,
+				cacheStaleTtlMs: HOUR,
+				cacheMaxTtlMs: DAY,
+				...cfg.lexicon,
 			},
 			secrets: {
 				adminPassword: ADMIN_PASSWORD,

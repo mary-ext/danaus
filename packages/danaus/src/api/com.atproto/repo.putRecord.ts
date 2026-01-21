@@ -1,7 +1,10 @@
 import { ComAtprotoRepoPutRecord } from '@atcute/atproto';
+import type { CanonicalResourceUri } from '@atcute/lexicons';
 import { AuthRequiredError, InvalidRequestError, json, type XRPCRouter } from '@atcute/xrpc-server';
 
+import type { RepoWriteOp } from '#app/actors/repo/types.ts';
 import type { AppContext } from '#app/context.ts';
+import { validateRecordWrites } from '#app/lexicon/validate-writes.ts';
 
 /**
  * register the `com.atproto.repo.putRecord` endpoint.
@@ -9,7 +12,7 @@ import type { AppContext } from '#app/context.ts';
  * @param context app context
  */
 export const putRecord = (router: XRPCRouter, context: AppContext) => {
-	const { accountManager, actorManager, authVerifier } = context;
+	const { accountManager, actorManager, authVerifier, lexiconCache } = context;
 
 	router.addProcedure(ComAtprotoRepoPutRecord, {
 		async handler({ input, request }) {
@@ -31,11 +34,30 @@ export const putRecord = (router: XRPCRouter, context: AppContext) => {
 				throw new AuthRequiredError({ error: 'InvalidToken', description: `invalid repository credentials` });
 			}
 
+			const uri = `at://${account.did}/${input.collection}/${input.rkey}` as CanonicalResourceUri;
+
+			// validate before transaction (validation doesn't depend on create vs update)
+			const writes: RepoWriteOp[] = [
+				{
+					action: 'create', // placeholder - actual action determined in transaction
+					collection: input.collection,
+					rkey: input.rkey,
+					swapRecord: input.swapRecord,
+					record: input.record,
+				},
+			];
+
+			await validateRecordWrites(lexiconCache, writes, input.validate);
+
+			// check if record exists and write in same transaction (upsert behavior)
 			const result = await actorManager.transact(account.did, (store) => {
+				const exists = store.record.getRecord(uri) !== null;
+				const action = exists ? 'update' : 'create';
+
 				return store.repo.applyWrites(
 					[
 						{
-							action: 'update',
+							action,
 							collection: input.collection,
 							rkey: input.rkey,
 							swapRecord: input.swapRecord,
