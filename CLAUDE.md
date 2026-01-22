@@ -71,6 +71,33 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
 - Task tool (subagents for exploration, planning, etc.) may not always be accurate; verify subagent
   findings when needed
 
+### cgr
+
+use `@oomfware/cgr` to ask questions about external repositories.
+
+```
+npx @oomfware/cgr ask [options] <repo>[#branch] <question>
+
+options:
+  -m, --model <model>   model to use: opus, sonnet, haiku (default: haiku)
+  -w, --with <repo>     additional repository to include, supports #branch (repeatable)
+```
+
+useful repositories:
+
+- `github.com/bluesky-social/atproto` for AT Protocol reference implementation, lexicons, XRPC
+- `github.com/ascorbic/cirrus` for TypeScript PDS on Cloudflare Workers, @atcute usage patterns
+- `github.com/haileyok/cocoon` for Go PDS implementation
+- `github.com/davidbuchanan314/millipds` for Python PDS implementation
+- `github.com/davidbuchanan314/atmst` for MST internals (Python)
+- `tangled.org/futur.blue/pegasus` for OCaml PDS + atproto libraries
+- `tangled.org/tranquil.farm/tranquil-pds` for Rust PDS implementation
+
+cgr works best with detailed questions. include file/folder paths when you know them, and reference
+details from previous answers in follow-ups.
+
+run `npx @oomfware/cgr --help` for more options.
+
 ## Decision Graph Workflow
 
 **THIS IS MANDATORY. Log decisions IN REAL-TIME, not retroactively.**

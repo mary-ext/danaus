@@ -13,6 +13,9 @@ importers:
 
   .:
     devDependencies:
+      '@oomfware/cgr':
+        specifier: ^0.1.2
+        version: 0.1.2
       oxfmt:
         specifier: ^0.26.0
         version: 0.26.0
@@ -862,6 +865,10 @@ packages:
   '@noble/secp256k1@3.0.0':
     resolution: {integrity: sha512-NJBaR352KyIvj3t6sgT/+7xrNyF9Xk9QlLSIqUGVUYlsnDTAUqY8LOmwpcgEx4AMJXRITQ5XEVHD+mMaPfr3mg==}
 
+  '@oomfware/cgr@0.1.2':
+    resolution: {integrity: sha512-dhTtK9p0ebeeXAHl6EnH5hG/TtT2kHZT+ap/babDP5n8mrjXNxlnzVTJgeEn39VhJX6Fs5+FJkJfajFMOPQokA==}
+    hasBin: true
+
   '@oomfware/fetch-router@0.2.1':
     resolution: {integrity: sha512-WV0cSeKjyTmM2pXYlRzv1md3Dym1vMR8PnJ/GfZUg8i1GS7RIDezmMkqVaWI/9IpeOHhs+QeDO41q1u+z1EzSg==}
 
@@ -877,8 +884,16 @@ packages:
     resolution: {integrity: sha512-GVLFihzBA1j78NFlkU5N1Lu0jRqET0k6Z66WK8VQKG/a3cxmCInVGSKMIdQG8i6pgC8wD5OizF6Y3QMztmhAxg==}
     engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
 
+  '@optique/core@0.9.1':
+    resolution: {integrity: sha512-RcQOKF+2CCdpS4ypDVsi2FhdOc/FYCB6wWr1joX7W5U5vzjzJHDEEt5FFfpIV/glEIPIiMvWulUDJwbHbE1sUg==}
+    engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
+
   '@optique/run@0.6.11':
     resolution: {integrity: sha512-tsXBEygGSzNpFK2gjsRlXBn7FiScUeLFWIZNpoAZ8iG85Km0/3K9xgqlQAXoQ+uEZBe4XplnzyCDvmEgbyNT8w==}
+    engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
+
+  '@optique/run@0.9.1':
+    resolution: {integrity: sha512-G0CA1hNWdXBcpHvuscfwEJVww8izJcb9yOlInSYfSn6ROekjaH6sli9ThmMR/vo1Avw+f2kMj8g/wdl7Ji4phg==}
     engines: {bun: '>=1.2.0', deno: '>=2.3.0', node: '>=20.0.0'}
 
   '@oxc-project/types@0.108.0':
@@ -3921,6 +3936,11 @@ snapshots:
 
   '@noble/secp256k1@3.0.0': {}
 
+  '@oomfware/cgr@0.1.2':
+    dependencies:
+      '@optique/core': 0.9.1
+      '@optique/run': 0.9.1
+
   '@oomfware/fetch-router@0.2.1':
     dependencies:
       '@remix-run/route-pattern': 0.16.0
@@ -3937,9 +3957,15 @@ snapshots:
 
   '@optique/core@0.6.11': {}
 
+  '@optique/core@0.9.1': {}
+
   '@optique/run@0.6.11':
     dependencies:
       '@optique/core': 0.6.11
+
+  '@optique/run@0.9.1':
+    dependencies:
+      '@optique/core': 0.9.1
 
   '@oxc-project/types@0.108.0': {}
 

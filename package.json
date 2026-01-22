@@ -9,6 +9,7 @@
 		"lint": "oxlint"
 	},
 	"devDependencies": {
+		"@oomfware/cgr": "^0.1.2",
 		"oxfmt": "^0.26.0",
 		"oxlint": "^1.41.0",
 		"typescript": "^5.9.3"
