@@ -34,8 +34,6 @@ export const putRecord = (router: XRPCRouter, context: AppContext) => {
 				throw new AuthRequiredError({ error: 'InvalidToken', description: `invalid repository credentials` });
 			}
 
-			const uri = `at://${account.did}/${input.collection}/${input.rkey}` as CanonicalResourceUri;
-
 			// validate before transaction (validation doesn't depend on create vs update)
 			const writes: RepoWriteOp[] = [
 				{
@@ -51,6 +49,8 @@ export const putRecord = (router: XRPCRouter, context: AppContext) => {
 
 			// check if record exists and write in same transaction (upsert behavior)
 			const result = await actorManager.transact(account.did, (store) => {
+				const uri: CanonicalResourceUri = `at://${account.did}/${input.collection}/${input.rkey}`;
+
 				const exists = store.record.getRecord(uri) !== null;
 				const action = exists ? 'update' : 'create';
 
