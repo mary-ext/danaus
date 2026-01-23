@@ -81,6 +81,7 @@ npx @oomfware/cgr ask [options] <repo>[#branch] <question>
 
 options:
   -m, --model <model>   model to use: opus, sonnet, haiku (default: haiku)
+  -s, --shallow         use shallow clone (depth 1) for faster cloning
   -w, --with <repo>     additional repository to include, supports #branch (repeatable)
 ```
 
@@ -94,8 +95,8 @@ useful repositories:
 - `tangled.org/futur.blue/pegasus` for OCaml PDS + atproto libraries
 - `tangled.org/tranquil.farm/tranquil-pds` for Rust PDS implementation
 
-cgr works best with detailed questions. include file/folder paths when you know them, and reference
-details from previous answers in follow-ups.
+broad questions work for getting oriented; detailed questions get precise answers. include
+file/folder paths when you know them, and reference details from previous answers in follow-ups.
 
 run `npx @oomfware/cgr --help` for more options.
 
