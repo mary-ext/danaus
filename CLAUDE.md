@@ -28,11 +28,12 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
 - avoid barrel exports (index files that re-export from other modules); import directly from source
 - use `// #region <name>` and `// #endregion` to denote regions when a file needs to contain a lot
   of code
-- prefer required parameters over optional ones; optional parameters are acceptable when:
-  - the default is obvious and used by the vast majority of callers (e.g., `encoding = 'utf-8'`)
-  - it's a configuration value with a sensible default (e.g., `timeout = 5000`)
-- avoid optional parameters that change behavioral modes or make the function do different things
-  based on presence/absence; prefer separate functions instead
+- optional parameters should only exist when callers actually vary in what they pass:
+  - if all callers use the default, hardcode it instead of making it a parameter
+  - if all callers must pass a value (e.g. forwarding), make it required
+  - good optional parameters: config values with sensible defaults that some callers override (e.g.,
+    `timeout = 5000` where most use the default but some need custom values)
+- avoid optional parameters that change behavioral modes; prefer separate functions instead
 - when adding optional parameters for backwards compatibility, consider whether a new function with
   a clearer name would be better
 
