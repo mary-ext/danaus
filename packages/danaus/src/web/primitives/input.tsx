@@ -95,7 +95,6 @@ const Input = (props: InputProps) => {
 					required={required ?? fieldContext?.required}
 					aria-describedby={ariaDescribedBy}
 					aria-invalid={fieldContext?.validationStatus === 'error' ? true : undefined}
-					// class={input({ hasContentBefore, hasContentAfter })}
 					class={[
 						'h-full grow',
 						'box-border',
