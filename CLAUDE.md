@@ -81,7 +81,7 @@ npx @oomfware/cgr ask [options] <repo>[#branch] <question>
 
 options:
   -m, --model <model>   model to use: opus, sonnet, haiku (default: haiku)
-  -s, --shallow         use shallow clone (depth 1) for faster cloning
+  -d, --deep            clone full history (enables git log/blame/show)
   -w, --with <repo>     additional repository to include, supports #branch (repeatable)
 ```
 
