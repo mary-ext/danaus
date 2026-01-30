@@ -1,0 +1,20 @@
+{
+	"name": "@kelinci/chrysalis",
+	"version": "0.0.0",
+	"private": true,
+	"description": "color token generation library",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"tsc": "tsc -b"
+	},
+	"dependencies": {
+		"culori": "^4.0.2"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.3.6",
+		"@types/culori": "^4.0.1"
+	}
+}
