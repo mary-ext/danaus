@@ -47,7 +47,7 @@ const MessageBar = (props: MessageBarProps) => {
 	const renderedIcon = icon ?? getIntentIcon(intent);
 
 	return (
-		<MessageBarContext.Provider value={{ intent, layout }}>
+		<MessageBarContext value={{ intent, layout }}>
 			<div
 				role="group"
 				aria-live="polite"
@@ -96,7 +96,7 @@ const MessageBar = (props: MessageBarProps) => {
 
 				{children}
 			</div>
-		</MessageBarContext.Provider>
+		</MessageBarContext>
 	);
 };
 

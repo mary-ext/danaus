@@ -51,9 +51,9 @@ const RadioGroup = (props: RadioGroupProps) => {
 	};
 
 	return (
-		<RadioGroupContext.Provider value={contextValue}>
+		<RadioGroupContext value={contextValue}>
 			<fieldset class={`flex flex-col items-start ${className ?? ''}`}>{children}</fieldset>
-		</RadioGroupContext.Provider>
+		</RadioGroupContext>
 	);
 };
 

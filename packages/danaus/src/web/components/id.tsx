@@ -20,5 +20,5 @@ export interface IdProviderProps {
 }
 
 export const IdProvider = (props: IdProviderProps) => {
-	return <IdContext.Provider value={{ count: 0 }}>{props.children}</IdContext.Provider>;
+	return <IdContext value={{ count: 0 }}>{props.children}</IdContext>;
 };

@@ -22,11 +22,11 @@ const Menu = (props: MenuProps) => {
 	};
 
 	return (
-		<MenuContext.Provider value={contextValue}>
+		<MenuContext value={contextValue}>
 			<div class="contents" style={{ '--anchor': `--menu-${id}` }}>
 				{children}
 			</div>
-		</MenuContext.Provider>
+		</MenuContext>
 	);
 };
 

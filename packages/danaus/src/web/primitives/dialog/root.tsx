@@ -22,7 +22,7 @@ const Dialog = (props: DialogProps) => {
 		titleId: useId(),
 	};
 
-	return <DialogContext.Provider value={contextValue}>{children}</DialogContext.Provider>;
+	return <DialogContext value={contextValue}>{children}</DialogContext>;
 };
 
 export default Dialog;

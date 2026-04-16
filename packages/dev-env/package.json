@@ -14,17 +14,17 @@
 	},
 	"dependencies": {
 		"@atcute/client": "^4.2.1",
-		"@atcute/crypto": "^2.3.0",
-		"@atproto/bsky": "^0.0.203",
+		"@atcute/crypto": "^2.4.1",
+		"@atproto/bsky": "^0.0.226",
 		"@atproto/crypto": "^0.4.5",
-		"@atproto/identity": "^0.4.10",
+		"@atproto/identity": "^0.4.12",
 		"@did-plc/lib": "^0.0.4",
 		"@did-plc/server": "^0.0.1",
 		"@swc-node/register": "^1.11.1",
-		"get-port": "^7.1.0"
+		"get-port": "^7.2.0"
 	},
 	"devDependencies": {
-		"@poppinss/ts-exec": "^1.4.1",
-		"@types/node": "^22.19.7"
+		"@poppinss/ts-exec": "^1.4.4",
+		"@types/node": "^22.19.17"
 	}
 }

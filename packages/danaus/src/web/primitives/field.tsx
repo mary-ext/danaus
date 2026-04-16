@@ -71,7 +71,7 @@ const Field = (props: FieldProps) => {
 	};
 
 	return (
-		<FieldContext.Provider value={contextValue}>
+		<FieldContext value={contextValue}>
 			<div class={['block', className]}>
 				<div class="flex flex-col gap-2">
 					{(labelContent || descriptionContent) && (
@@ -118,7 +118,7 @@ const Field = (props: FieldProps) => {
 					</div>
 				</div>
 			</div>
-		</FieldContext.Provider>
+		</FieldContext>
 	);
 };
 

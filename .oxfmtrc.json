@@ -22,19 +22,19 @@
 		"customGroups": [
 			{
 				"groupName": "bun",
-				"elementNamePattern": ["bun", "bun:"]
+				"elementNamePattern": ["bun", "bun:**"]
 			},
 			{
 				"groupName": "oomfs",
-				"elementNamePattern": ["@atcute/", "@danaus/", "@kelinci/", "@oomfware/"]
+				"elementNamePattern": ["@atcute/**", "@danaus/**", "@kelinci/**", "@oomfware/**"]
 			},
 			{
 				"groupName": "server",
-				"elementNamePattern": ["#app/"]
+				"elementNamePattern": ["#app/**"]
 			},
 			{
 				"groupName": "client",
-				"elementNamePattern": ["#web/"]
+				"elementNamePattern": ["#web/**"]
 			}
 		]
 	},

@@ -9,8 +9,8 @@
 		"lint": "oxlint"
 	},
 	"devDependencies": {
-		"oxfmt": "^0.26.0",
-		"oxlint": "^1.41.0",
-		"typescript": "^5.9.3"
+		"oxfmt": "^0.45.0",
+		"oxlint": "^1.60.0",
+		"typescript": "^6.0.2"
 	}
 }
