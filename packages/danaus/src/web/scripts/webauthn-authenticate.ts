@@ -30,6 +30,7 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			return;
 		}
 
+		// oxlint-disable-next-line no-unsafe-type-assertion -- trusted dataset JSON
 		this.#options = JSON.parse(optionsJson) as PublicKeyCredentialRequestOptionsJson;
 
 		const startButton = this.startButton;
@@ -38,7 +39,7 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			startButton.disabled = false;
 			startButton.addEventListener('click', (event) => {
 				event.preventDefault();
-				this.#handleAuthentication();
+				void this.#handleAuthentication();
 			});
 		}
 	}
@@ -63,12 +64,14 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 			const publicKeyOptions: PublicKeyCredentialRequestOptions = {
 				...options,
 				challenge: fromBase64Url(options.challenge),
+				// oxlint-disable-next-line no-map-spread -- immutable credential transform
 				allowCredentials: options.allowCredentials?.map((credential) => ({
 					...credential,
 					id: fromBase64Url(credential.id),
 				})),
 			};
 
+			// oxlint-disable-next-line no-unsafe-type-assertion -- WebAuthn API returns PublicKeyCredential
 			const credential = (await navigator.credentials.get({
 				publicKey: publicKeyOptions,
 			})) as PublicKeyCredential | null;
@@ -81,6 +84,7 @@ class WebAuthnAuthenticateElement extends HTMLElement {
 				return;
 			}
 
+			// oxlint-disable-next-line no-unsafe-type-assertion -- WebAuthn get response type
 			const response = credential.response as AuthenticatorAssertionResponse;
 
 			const serialized = JSON.stringify({

@@ -17,7 +17,9 @@ export const describeServer = (router: XRPCRouter, context: AppContext) => {
 					email: config.service.branding.contactEmailAddress ?? undefined,
 				},
 				links: {
+					// oxlint-disable-next-line no-unsafe-type-assertion -- config URL string to branded URI
 					privacyPolicy: (config.service.branding.privacyPolicyUrl as GenericUri | null) ?? undefined,
+					// oxlint-disable-next-line no-unsafe-type-assertion
 					termsOfService: (config.service.branding.termsOfServiceUrl as GenericUri | null) ?? undefined,
 				},
 			});

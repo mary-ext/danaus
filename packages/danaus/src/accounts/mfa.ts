@@ -161,6 +161,7 @@ export class MfaManager {
 		const credentials = this.listTotpCredentials(did);
 
 		for (const credential of credentials) {
+			// oxlint-disable-next-line no-await-in-loop -- sequential credential check, short-circuits on match
 			const counter = await verifyTotpCode(credential.secret, code, credential.last_used_counter);
 
 			if (counter !== null) {

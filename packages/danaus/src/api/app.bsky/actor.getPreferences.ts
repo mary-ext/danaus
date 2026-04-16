@@ -18,6 +18,7 @@ export const getPreferences = (router: XRPCRouter, context: AppContext) => {
 			const auth = await authVerifier.authorization(request);
 
 			let preferences = await actorManager.read(auth.did, (store) => {
+				// oxlint-disable-next-line no-unsafe-type-assertion -- legacy pref shape matches schema
 				return store.pref.getLegacyPreferences() as v.InferOutput<AppBskyActorDefs.preferencesSchema>;
 			});
 

@@ -191,9 +191,7 @@ export class RepoTransactor extends RepoReader {
 		const commitOps: RepoCommitOp[] = [];
 
 		for (const write of writes) {
-			const rkey = (write.rkey ?? (write.action === 'create' ? TID.now() : undefined)) as
-				| RecordKey
-				| undefined;
+			const rkey = write.rkey ?? (write.action === 'create' ? TID.now() : undefined);
 			if (!rkey) {
 				throw new InvalidRequestError({
 					error: 'InvalidRequest',
@@ -202,7 +200,9 @@ export class RepoTransactor extends RepoReader {
 			}
 
 			const path: `${Nsid}/${RecordKey}` = `${write.collection}/${rkey}`;
+			// oxlint-disable-next-line no-await-in-loop -- sequential repo writes, each depends on prior rootCid
 			const walker = await NodeWalker.create(nodeStore, rootCid);
+			// oxlint-disable-next-line no-await-in-loop
 			const prevValue = await walker.findRpath(path);
 			const prevCid = prevValue ? prevValue.$link : null;
 
@@ -228,6 +228,7 @@ export class RepoTransactor extends RepoReader {
 			}
 
 			if (write.action === 'delete') {
+				// oxlint-disable-next-line no-await-in-loop
 				rootCid = await wrangler.deleteRecord(rootCid, path);
 				results.push({
 					action: 'delete',
@@ -249,9 +250,11 @@ export class RepoTransactor extends RepoReader {
 			}
 
 			const recordBytes = CBOR.encode(write.record);
+			// oxlint-disable-next-line no-await-in-loop
 			const recordCid = await CID.create(0x71, recordBytes);
 			const recordLink = CID.toCidLink(recordCid);
 
+			// oxlint-disable-next-line no-await-in-loop
 			rootCid = await wrangler.putRecord(rootCid, path, recordLink);
 
 			const recordCidStr = CID.toString(recordCid);
@@ -450,7 +453,9 @@ export class RepoTransactor extends RepoReader {
 				continue;
 			}
 
+			// oxlint-disable-next-line no-await-in-loop -- sequential node fetching
 			const node = await nodeStore.get(cid);
+			// oxlint-disable-next-line no-await-in-loop
 			blocks.set(cid, await node.serialize());
 		}
 
@@ -466,6 +471,7 @@ export class RepoTransactor extends RepoReader {
 
 		for (const record of recordDeletes) {
 			const path: `${Nsid}/${RecordKey}` = `${record.collection}/${record.rkey}`;
+			// oxlint-disable-next-line no-await-in-loop -- sequential proof building
 			const proof = await buildExclusionProof(nodeStore, rootCid, path);
 			for (const cid of proof) {
 				proofCids.add(cid);

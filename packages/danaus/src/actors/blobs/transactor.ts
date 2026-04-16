@@ -5,8 +5,6 @@ import { eq, inArray } from 'drizzle-orm';
 
 import { chunked } from '#app/utils/misc.ts';
 
-import type { ActorDbConnection } from '../actor-store-types';
-import type { BlobStore } from '../blob-store/types';
 import { t } from '../db';
 import type { RepoBlobHandler, RepoBlobWriteOptions, RepoRecordWrite } from '../repo/side-effects';
 
@@ -17,15 +15,6 @@ import { findBlobReferences, type BlobReference } from './utils';
  * blob metadata writer.
  */
 export class BlobTransactor extends BlobReader implements RepoBlobHandler {
-	/**
-	 * create a blob writer.
-	 * @param db actor database handle
-	 * @param blobStore actor blob store
-	 */
-	constructor(db: ActorDbConnection, blobStore: BlobStore) {
-		super(db, blobStore);
-	}
-
 	/**
 	 * apply blob updates after persisting the commit.
 	 * @param options blob update options
@@ -154,6 +143,7 @@ export class BlobTransactor extends BlobReader implements RepoBlobHandler {
 				continue;
 			}
 
+			// oxlint-disable-next-line no-await-in-loop -- sequential blob promotion
 			await this.blobStore.makePermanent(row.tempKey, row.cid);
 			this.db.update(t.blob).set({ temp_key: null }).where(eq(t.blob.cid, row.cid)).run();
 		}

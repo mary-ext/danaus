@@ -19,11 +19,15 @@ if (typeof AsyncDisposableStack === 'undefined') {
 				throw new ReferenceError('AsyncDisposableStack already disposed');
 			}
 			if (value != null) {
+				// oxlint-disable-next-line no-unsafe-type-assertion -- null-checked above
 				if (Symbol.asyncDispose in (value as object)) {
 					this.#stack.push(async () => {
+						// oxlint-disable-next-line no-unsafe-type-assertion -- guarded by Symbol.asyncDispose in check
 						await (value as AsyncDisposable)[Symbol.asyncDispose]();
 					});
+					// oxlint-disable-next-line no-unsafe-type-assertion -- null-checked above
 				} else if (Symbol.dispose in (value as object)) {
+					// oxlint-disable-next-line no-unsafe-type-assertion -- guarded by Symbol.dispose in check
 					this.#stack.push(async () => (value as Disposable)[Symbol.dispose]());
 				}
 			}
@@ -69,6 +73,7 @@ if (typeof AsyncDisposableStack === 'undefined') {
 			while (this.#stack.length > 0) {
 				const dispose = this.#stack.pop()!;
 				try {
+					// oxlint-disable-next-line no-await-in-loop -- sequential disposal
 					await dispose();
 				} catch (e) {
 					error ??= e;

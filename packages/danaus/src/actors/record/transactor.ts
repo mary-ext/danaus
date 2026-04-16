@@ -2,7 +2,6 @@ import type { CanonicalResourceUri } from '@atcute/lexicons';
 
 import { eq, inArray, sql } from 'drizzle-orm';
 
-import type { ActorDbConnection } from '../actor-store-types';
 import { t } from '../db';
 import type { RepoRecordIndexer } from '../repo/side-effects';
 
@@ -13,14 +12,6 @@ import type { RecordIndexUpsert } from './types';
  * record index writer.
  */
 export class RecordTransactor extends RecordReader implements RepoRecordIndexer {
-	/**
-	 * create a record writer.
-	 * @param db actor database handle
-	 */
-	constructor(db: ActorDbConnection) {
-		super(db);
-	}
-
 	/**
 	 * upsert record index entries.
 	 * @param records record index entries

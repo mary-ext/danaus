@@ -17,5 +17,6 @@ export const ACCESS_STANDARD = [...ACCESS_PRIVILEGED, AuthScope.AppPass] as cons
 const authScopesValues = new Set(Object.values(AuthScope));
 
 export const isAuthScope = (value: unknown): value is AuthScope => {
+	// oxlint-disable-next-line no-unsafe-type-assertion -- type guard implementation
 	return authScopesValues.has(value as AuthScope);
 };

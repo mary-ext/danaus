@@ -36,7 +36,7 @@ export interface ServiceProxyOptions {
 	targets: Map<string, ProxyTargetConfig>;
 	authVerifier: AuthVerifier;
 	actorManager: ActorManager;
-	didDocumentResolver: DidDocumentResolver<string>;
+	didDocumentResolver: DidDocumentResolver;
 }
 
 /**

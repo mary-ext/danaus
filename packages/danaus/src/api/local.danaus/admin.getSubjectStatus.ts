@@ -45,8 +45,7 @@ export const getSubjectStatus = (router: XRPCRouter, context: AppContext) => {
 					throw new InvalidRequestError({ error: 'InvalidRequest', description: parsed.error });
 				}
 
-				const recordUri =
-					`at://${parsed.value.repo}/${parsed.value.collection}/${parsed.value.rkey}` as CanonicalResourceUri;
+				const recordUri: CanonicalResourceUri = `at://${parsed.value.repo}/${parsed.value.collection}/${parsed.value.rkey}`;
 				const { takedown, cid } = await actorManager.read(parsed.value.repo, (store) => {
 					return {
 						takedown: store.record.getRecordTakedownStatus(recordUri),

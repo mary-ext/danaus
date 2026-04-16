@@ -37,6 +37,7 @@ export const createAccountForm = form(
 			invalid(issue.domain(`Invalid domain`));
 		}
 
+		// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from validated form input
 		const handle = `${data.handle}${data.domain}` as Handle;
 
 		try {

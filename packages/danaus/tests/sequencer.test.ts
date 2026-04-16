@@ -46,6 +46,7 @@ const normalizeRow = (row: {
 
 const toStoredMessage = (evt: SeqEvt): SeqEvt['evt'] | (SeqEvt['evt'] & { blocks: null }) => {
 	if (evt.type === 'commit' || evt.type === 'sync') {
+		// oxlint-disable-next-line no-unsafe-type-assertion -- discriminated union narrowing
 		return { ...evt.evt, blocks: null } as SeqEvt['evt'] & { blocks: null };
 	}
 
@@ -54,6 +55,7 @@ const toStoredMessage = (evt: SeqEvt): SeqEvt['evt'] | (SeqEvt['evt'] & { blocks
 
 const evtToDbRow = (evt: SeqEvt) => {
 	const did = evt.type === 'commit' ? evt.evt.repo : evt.evt.did;
+	// oxlint-disable-next-line no-unsafe-type-assertion -- JSON round-trip preserves shape
 	const event = JSON.parse(JSON.stringify(toStoredMessage(evt))) as typeof evt.evt;
 	return {
 		seq: evt.seq,
@@ -120,12 +122,13 @@ const readFromGenerator = async <T>(
 	try {
 		const iterator = generator[Symbol.asyncIterator]();
 		while (events.length < limit) {
+			// oxlint-disable-next-line no-await-in-loop -- sequential event consumption
 			const maybeEvent = await Promise.race([iterator.next(), breakOn]);
 			if (!maybeEvent) {
 				break;
 			}
 
-			const event = maybeEvent as IteratorResult<T>;
+			const event = maybeEvent;
 			if (event.done) {
 				break;
 			}
@@ -176,8 +179,10 @@ describe('sequencer', () => {
 	const createPosts = async (count: number): Promise<void> => {
 		for (let i = 0; i < count; i++) {
 			if (i % 2 === 0) {
+				// oxlint-disable-next-line no-await-in-loop -- sequential post creation
 				await randomPost(alice);
 			} else {
+				// oxlint-disable-next-line no-await-in-loop
 				await randomPost(bob);
 			}
 		}
@@ -309,7 +314,7 @@ describe('sequencer', () => {
 			await readFromGenerator(generator, caughtUp(), createPromise);
 		};
 
-		await expect(overloadBuffer()).rejects.toThrow('stream consumer too slow');
+		expect(overloadBuffer()).rejects.toThrow('stream consumer too slow');
 
 		await createPromise;
 		controller.abort();

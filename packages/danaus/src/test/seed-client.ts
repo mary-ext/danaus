@@ -236,7 +236,8 @@ export class SeedClient {
 			}),
 		);
 
-		const ref: RecordRef = { uri: data.uri as CanonicalResourceUri, cid: data.cid as Cid };
+		// oxlint-disable-next-line no-unsafe-type-assertion -- API response URI
+		const ref: RecordRef = { uri: data.uri as CanonicalResourceUri, cid: data.cid };
 
 		this.profiles[by] = { ref, record };
 
@@ -498,6 +499,7 @@ export class SeedClient {
 	async createStarterPack(by: Did, name: string, actors: Did[], feeds?: ResourceUri[]): Promise<RecordRef> {
 		const list = await this.createList(by, 'n/a', 'reference');
 		for (const did of actors) {
+			// oxlint-disable-next-line no-await-in-loop -- sequential list mutations
 			await this.addToList(by, did, list);
 		}
 
@@ -556,7 +558,7 @@ export class SeedClient {
 	 * @param record record value
 	 * @param rkey optional record key
 	 */
-	async createRecord<TCollection extends keyof Records & string>(
+	async createRecord<TCollection extends keyof Records>(
 		did: Did,
 		collection: TCollection,
 		record: InferInput<Records[TCollection]>,
@@ -575,8 +577,9 @@ export class SeedClient {
 		);
 
 		return {
+			// oxlint-disable-next-line no-unsafe-type-assertion -- API response URI
 			uri: data.uri as CanonicalResourceUri,
-			cid: data.cid as Cid,
+			cid: data.cid,
 		};
 	}
 

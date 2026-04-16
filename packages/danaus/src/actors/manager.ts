@@ -138,6 +138,7 @@ export class ActorManager {
 					const result = store.blob.listBlobs({ limit: 250, cursor });
 					cursor = result.at(-1);
 
+					// oxlint-disable-next-line no-await-in-loop -- paginated deletion
 					await blobStore.deleteMany(result);
 				} while (cursor !== undefined);
 			});

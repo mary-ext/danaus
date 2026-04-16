@@ -49,6 +49,7 @@ export class AsyncBuffer<T> {
 
 	async *events(): AsyncGenerator<T> {
 		while (true) {
+			// oxlint-disable-next-line no-await-in-loop -- event loop by design
 			await this.deferred.promise;
 
 			if (this.queue.size > this.maxSize) {

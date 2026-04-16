@@ -1,4 +1,3 @@
-import type { Did } from '@atcute/lexicons';
 import type { Controller } from '@oomfware/fetch-router';
 import { forms } from '@oomfware/forms';
 import { render } from '@oomfware/jsx';
@@ -342,7 +341,7 @@ export default {
 		appPasswords() {
 			const { legacyAuthManager } = getAppContext();
 			const session = getSession();
-			const did = session.did as Did;
+			const did = session.did;
 
 			const passwords = legacyAuthManager.listAppPasswords(did);
 

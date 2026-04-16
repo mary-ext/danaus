@@ -31,14 +31,17 @@ export const listRecords = (router: XRPCRouter, context: AppContext) => {
 			});
 
 			const output = records.map((record) => {
+				// oxlint-disable-next-line no-unsafe-type-assertion -- includeRecords guarantees RepoRecordEntry
 				const entry = record as RepoRecordEntry;
 				return {
 					uri: entry.uri,
 					cid: entry.cid,
+					// oxlint-disable-next-line no-unsafe-type-assertion -- CBOR-decoded record
 					value: entry.record as Record<string, unknown>,
 				};
 			});
 
+			// oxlint-disable-next-line no-unsafe-type-assertion -- same as above
 			const last = records.at(-1) as RepoRecordEntry | undefined;
 			const nextCursor = last ? last.uri.split('/').pop() : undefined;
 

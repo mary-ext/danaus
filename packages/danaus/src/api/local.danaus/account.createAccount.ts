@@ -192,6 +192,7 @@ const createGenesisOp = async (
 	}
 
 	if (params.recoveryKey !== undefined) {
+		// oxlint-disable-next-line no-unsafe-type-assertion -- branded DID type
 		rotationKeys.unshift(params.recoveryKey as Did<'key'>);
 	}
 

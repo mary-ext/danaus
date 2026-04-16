@@ -179,6 +179,7 @@ export const toSeqEvt = (
 	const time = toIsoTime(sequencedAt);
 
 	if (eventType === 'commit') {
+		// oxlint-disable-next-line no-unsafe-type-assertion -- discriminated by eventType
 		const payload = event as StoredCommit;
 		return {
 			type: 'commit',
@@ -192,6 +193,7 @@ export const toSeqEvt = (
 	}
 
 	if (eventType === 'sync') {
+		// oxlint-disable-next-line no-unsafe-type-assertion -- discriminated by eventType
 		const payload = event as StoredSync;
 		return {
 			type: 'sync',
@@ -209,6 +211,7 @@ export const toSeqEvt = (
 			type: 'identity',
 			seq: seq,
 			time: time,
+			// oxlint-disable-next-line no-unsafe-type-assertion -- discriminated by eventType
 			evt: event as IdentityEvt,
 		};
 	}
@@ -217,6 +220,7 @@ export const toSeqEvt = (
 		type: 'account',
 		seq: seq,
 		time: time,
+		// oxlint-disable-next-line no-unsafe-type-assertion -- discriminated by eventType
 		evt: event as AccountEvt,
 	};
 };

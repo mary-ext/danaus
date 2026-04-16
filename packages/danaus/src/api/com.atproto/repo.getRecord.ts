@@ -34,6 +34,7 @@ export const getRecord = (router: XRPCRouter, context: AppContext) => {
 			return json({
 				uri: record.uri,
 				cid: record.cid,
+				// oxlint-disable-next-line no-unsafe-type-assertion -- CBOR-decoded record
 				value: record.record as Record<string, unknown>,
 			});
 		},

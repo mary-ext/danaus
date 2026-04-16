@@ -34,7 +34,7 @@ class PasskeyLoginElement extends HTMLElement {
 			startButton.disabled = false;
 			startButton.addEventListener('click', (event) => {
 				event.preventDefault();
-				this.#handlePasskeyLogin(challengeUrl);
+				void this.#handlePasskeyLogin(challengeUrl);
 			});
 		}
 	}
@@ -59,6 +59,7 @@ class PasskeyLoginElement extends HTMLElement {
 				throw new Error('Failed to fetch challenge');
 			}
 
+			// oxlint-disable-next-line no-unsafe-type-assertion -- trusted API JSON response
 			const options = (await challengeResponse.json()) as PublicKeyCredentialRequestOptionsJson;
 
 			status.textContent = '';
@@ -69,6 +70,7 @@ class PasskeyLoginElement extends HTMLElement {
 				allowCredentials: undefined,
 			};
 
+			// oxlint-disable-next-line no-unsafe-type-assertion -- WebAuthn API returns PublicKeyCredential
 			const credential = (await navigator.credentials.get({
 				publicKey: publicKeyOptions,
 			})) as PublicKeyCredential | null;
@@ -81,6 +83,7 @@ class PasskeyLoginElement extends HTMLElement {
 				return;
 			}
 
+			// oxlint-disable-next-line no-unsafe-type-assertion -- WebAuthn get response type
 			const response = credential.response as AuthenticatorAssertionResponse;
 
 			const serialized = JSON.stringify({

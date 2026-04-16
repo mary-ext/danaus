@@ -28,8 +28,7 @@ export const updateSubjectStatus = (router: XRPCRouter, context: AppContext) => 
 						throw new InvalidRequestError({ error: 'InvalidRequest', description: parsed.error });
 					}
 
-					const recordUri =
-						`at://${parsed.value.repo}/${parsed.value.collection}/${parsed.value.rkey}` as CanonicalResourceUri;
+					const recordUri: CanonicalResourceUri = `at://${parsed.value.repo}/${parsed.value.collection}/${parsed.value.rkey}`;
 					await actorManager.transact(parsed.value.repo, async (store) => {
 						const existing = store.record.getRecord(recordUri);
 						if (!existing) {

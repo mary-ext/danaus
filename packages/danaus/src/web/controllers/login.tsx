@@ -121,6 +121,7 @@ export default {
 			}
 
 			// clear the session cookie
+			// oxlint-disable-next-line no-unsafe-type-assertion -- Bun-specific API access
 			(request as BunRequest).cookies.delete(WEB_SESSION_COOKIE, { path: '/' });
 
 			redirect(routes.login.index.href());

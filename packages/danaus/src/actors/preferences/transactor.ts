@@ -1,4 +1,3 @@
-import type { ActorDbConnection } from '../actor-store-types';
 import { t } from '../db';
 
 import { PreferenceReader, type LegacyPreferences } from './reader';
@@ -7,14 +6,6 @@ import { PreferenceReader, type LegacyPreferences } from './reader';
  * preference writer.
  */
 export class PreferenceTransactor extends PreferenceReader {
-	/**
-	 * create a preference writer.
-	 * @param db actor database handle
-	 */
-	constructor(db: ActorDbConnection) {
-		super(db);
-	}
-
 	/**
 	 * replace legacy preferences.
 	 * @param preferences legacy preferences

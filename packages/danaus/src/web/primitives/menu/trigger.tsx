@@ -16,11 +16,13 @@ const MenuTrigger = (props: MenuTriggerProps) => {
 	const { children } = props;
 	const { menuId } = useMenuContext();
 
+	// oxlint-disable-next-line no-unsafe-type-assertion -- JSX element props access
 	const childProps = children.props as Record<string, unknown>;
 
 	return cloneElement(children, {
 		commandfor: menuId,
 		command: 'toggle-popover',
+		// oxlint-disable-next-line no-unsafe-type-assertion
 		class: cx('anchor', childProps?.class as string | undefined),
 	});
 };

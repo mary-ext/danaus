@@ -171,6 +171,7 @@ export const verifyTotpCode = async (
 			continue;
 		}
 
+		// oxlint-disable-next-line no-await-in-loop -- sequential TOTP verification over time window
 		const expectedCode = await generateHotp(secret, counter);
 
 		if (timingSafeEqual(codeBytes, Buffer.from(expectedCode))) {

@@ -48,7 +48,7 @@ export class DiskBlobStore implements BlobStore {
 		const writer = file.writer();
 
 		for await (const chunk of stream) {
-			writer.write(chunk);
+			void writer.write(chunk);
 		}
 
 		await writer.end();
@@ -63,10 +63,10 @@ export class DiskBlobStore implements BlobStore {
 
 	async makePermanent(tempKey: string, cid: string): Promise<void> {
 		const tempPath = this.getTempPath(tempKey);
-		const path = this.getStoredPath(cid);
+		const storedPath = this.getStoredPath(cid);
 
 		const temp = Bun.file(tempPath);
-		const stored = Bun.file(path);
+		const stored = Bun.file(storedPath);
 
 		if (await stored.exists()) {
 			try {
@@ -86,10 +86,10 @@ export class DiskBlobStore implements BlobStore {
 		await mkdir(this.directory, { recursive: true });
 
 		try {
-			await rename(tempPath, path);
+			await rename(tempPath, storedPath);
 		} catch (err) {
-			blobStoreLogger.warn('rename failed, falling back to copy', { err, tempPath, path });
-			await copyFile(tempPath, path);
+			blobStoreLogger.warn('rename failed, falling back to copy', { err, tempPath, storedPath });
+			await copyFile(tempPath, storedPath);
 			await rm(tempPath, { force: true });
 		}
 	}
@@ -119,7 +119,7 @@ export class DiskBlobStore implements BlobStore {
 	async deleteMany(cid: string[]): Promise<void> {
 		const set = new Set(cid);
 
-		await Promise.all(Array.from(set, (cid) => this.delete(cid)));
+		await Promise.all(Array.from(set, (c) => this.delete(c)));
 	}
 
 	async deleteAll(): Promise<void> {

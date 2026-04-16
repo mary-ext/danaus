@@ -82,6 +82,7 @@ describe('core sync and repo', () => {
 		);
 
 		const { record: found, cid } = await verifyRecord({
+			// oxlint-disable-next-line no-unsafe-type-assertion -- branded DID type
 			did: did as AtprotoDid,
 			collection: recordCollection,
 			rkey: recordRkey,
@@ -89,6 +90,7 @@ describe('core sync and repo', () => {
 		});
 
 		expect(cid).toBe(recordCid);
+		// oxlint-disable-next-line no-unsafe-type-assertion -- narrowing verified record
 		expect((found as AppBskyFeedPost.Main).text).toBe(record.text);
 	});
 
@@ -103,6 +105,7 @@ describe('core sync and repo', () => {
 		);
 
 		const { record: found, cid } = await verifyRecord({
+			// oxlint-disable-next-line no-unsafe-type-assertion -- branded DID type
 			did: did as AtprotoDid,
 			collection: recordCollection,
 			rkey: recordRkey,
@@ -110,6 +113,7 @@ describe('core sync and repo', () => {
 		});
 
 		expect(cid).toBe(recordCid);
+		// oxlint-disable-next-line no-unsafe-type-assertion -- narrowing verified record
 		expect((found as AppBskyFeedPost.Main).text).toBe(record.text);
 	});
 
@@ -193,6 +197,7 @@ describe('core sync and repo', () => {
 		);
 
 		const { record: found, cid } = await verifyRecord({
+			// oxlint-disable-next-line no-unsafe-type-assertion -- branded DID type
 			did: did as AtprotoDid,
 			collection: recordCollection,
 			rkey: recordRkey,
@@ -200,6 +205,7 @@ describe('core sync and repo', () => {
 		});
 
 		expect(cid).toBe(putRes.cid);
+		// oxlint-disable-next-line no-unsafe-type-assertion -- narrowing verified record
 		expect((found as AppBskyFeedPost.Main).text).toBe(updated.text);
 
 		recordCid = putRes.cid;
@@ -229,7 +235,7 @@ describe('core sync and repo', () => {
 			}),
 		);
 
-		await expect(attempt).rejects.toThrow('RecordNotFound');
+		expect(attempt).rejects.toThrow('RecordNotFound');
 	});
 
 	it('repo.uploadBlob stores data for sync.getBlob', async () => {
@@ -243,6 +249,7 @@ describe('core sync and repo', () => {
 				as: 'bytes',
 				params: {
 					did,
+					// oxlint-disable-next-line no-unsafe-type-assertion -- narrowing upload response
 					cid: (blob as Blob).ref.$link,
 				},
 			}),

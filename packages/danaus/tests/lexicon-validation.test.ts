@@ -512,10 +512,12 @@ describe('lexicon validation', () => {
 			const lexiconCache = network.pds.ctx.lexiconCache;
 
 			// first lookup - should trigger DNS resolution and cache negative result
+			// oxlint-disable-next-line no-unsafe-type-assertion -- test-only: forcing invalid NSID
 			const result1 = await lexiconCache.resolveAuthority('com.notfound.test' as never);
 			expect(result1).toBe(null);
 
 			// second lookup - should hit cache, not trigger another DNS lookup
+			// oxlint-disable-next-line no-unsafe-type-assertion -- test-only: forcing invalid NSID
 			const result2 = await lexiconCache.resolveAuthority('com.notfound.other' as never);
 			expect(result2).toBe(null);
 
@@ -523,6 +525,7 @@ describe('lexicon validation', () => {
 			// if the authority was cached, repeated calls should be instant
 			const start = performance.now();
 			for (let i = 0; i < 100; i++) {
+				// oxlint-disable-next-line no-await-in-loop, no-unsafe-type-assertion -- intentional sequential cache check
 				await lexiconCache.resolveAuthority(`com.notfound.item${i}` as never);
 			}
 			const elapsed = performance.now() - start;

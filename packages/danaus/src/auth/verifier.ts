@@ -478,6 +478,7 @@ const parseRequestNsid = (request: Request): Nsid | null => {
 		return null;
 	}
 
+	// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from URL path
 	return url.pathname.slice('/xrpc/'.length) as Nsid;
 };
 

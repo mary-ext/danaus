@@ -446,6 +446,7 @@ export class LexiconCache implements Disposable {
 
 		// parse the reference
 		const hashIndex = ref.indexOf('#');
+		// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from parsed reference
 		const nsid = ref.slice(0, hashIndex) as Nsid;
 		const defId = ref.slice(hashIndex + 1);
 

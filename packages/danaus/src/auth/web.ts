@@ -12,6 +12,7 @@ export const WEB_SESSION_COOKIE = 'danaus_session';
  * @returns token or null
  */
 export const readWebSessionToken = (request: Request): string | null => {
+	// oxlint-disable-next-line no-unsafe-type-assertion -- Bun-specific API access
 	const cookies = (request as BunRequest).cookies;
 
 	return cookies.get(WEB_SESSION_COOKIE) ?? null;
@@ -24,6 +25,7 @@ export const readWebSessionToken = (request: Request): string | null => {
  * @param options cookie options
  */
 export const setWebSessionToken = (request: Request, token: string, options: CookieInit = {}): void => {
+	// oxlint-disable-next-line no-unsafe-type-assertion -- Bun-specific API access
 	const cookies = (request as BunRequest).cookies;
 
 	cookies.set(WEB_SESSION_COOKIE, token, options);

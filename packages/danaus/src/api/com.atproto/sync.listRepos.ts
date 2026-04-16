@@ -33,6 +33,7 @@ export const listRepos = (router: XRPCRouter, context: AppContext) => {
 			}> = [];
 
 			for (const account of accounts) {
+				// oxlint-disable-next-line no-await-in-loop -- sequential per-account reads
 				const root = await actorManager.read(account.did, (store) => store.repo.getRoot());
 				if (!root) {
 					continue;

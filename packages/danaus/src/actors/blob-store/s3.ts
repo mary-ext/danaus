@@ -46,7 +46,7 @@ export class S3BlobStore implements BlobStore {
 		const writer = temp.writer();
 
 		for await (const chunk of stream) {
-			writer.write(chunk);
+			void writer.write(chunk);
 		}
 
 		await writer.end();
@@ -99,6 +99,6 @@ export class S3BlobStore implements BlobStore {
 	async deleteMany(cid: string[]): Promise<void> {
 		const set = new Set(cid);
 
-		await Promise.all(Array.from(set, (cid) => this.delete(cid)));
+		await Promise.all(Array.from(set, (c) => this.delete(c)));
 	}
 }

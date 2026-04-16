@@ -17,7 +17,7 @@ import {
 	toSeqEvt,
 	type SequencerInsert,
 } from './events';
-import type { RepoSeqEventType, SeqEvt } from './types';
+import type { SeqEvt } from './types';
 
 type RepoSeqRow = typeof t.repoSeq.$inferSelect;
 
@@ -270,7 +270,7 @@ export class Sequencer implements RepoSequencer {
 
 const rowToSeqEvt = (row: RepoSeqRow): SeqEvt => {
 	return toSeqEvt(
-		row.event_type as RepoSeqEventType,
+		row.event_type,
 		row.seq,
 		row.sequenced_at,
 		row.event,

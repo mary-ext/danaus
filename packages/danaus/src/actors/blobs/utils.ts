@@ -38,6 +38,7 @@ export const findBlobReferences = (
 	}
 
 	for (const key in record) {
+		// oxlint-disable-next-line no-unsafe-type-assertion -- recursive record traversal
 		const value = (record as any)[key];
 		findBlobReferences(value, map, layer + 1);
 	}

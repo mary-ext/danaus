@@ -77,10 +77,10 @@ export default {
 					limit: 50,
 				});
 
-				const buildHref = (nextCursor: string) => {
+				const buildHref = (pageCursor: string) => {
 					return routes.admin.accounts.index.href(undefined, {
 						q: query || undefined,
-						cursor: nextCursor,
+						cursor: pageCursor,
 					});
 				};
 

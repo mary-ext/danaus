@@ -43,6 +43,7 @@ export const describeRepo = (router: XRPCRouter, context: AppContext) => {
 
 			let didDoc: unknown;
 			try {
+				// oxlint-disable-next-line no-unsafe-type-assertion -- DID is known to be atproto
 				didDoc = await didDocumentResolver.resolve(account.did as AtprotoDid);
 			} catch {
 				throw new InvalidRequestError({
@@ -67,6 +68,7 @@ export const describeRepo = (router: XRPCRouter, context: AppContext) => {
 			return json({
 				handle: handle,
 				did: account.did,
+				// oxlint-disable-next-line no-unsafe-type-assertion -- DID document from resolver
 				didDoc: didDoc as Record<string, unknown>,
 				collections: collections,
 				handleIsCorrect: handleIsCorrect,

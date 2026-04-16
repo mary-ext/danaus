@@ -131,6 +131,7 @@ export const updateHandleForm = form(
 		// update PLC document for did:plc accounts
 		if (did.startsWith('did:plc:')) {
 			try {
+				// oxlint-disable-next-line no-unsafe-type-assertion -- narrowed by startsWith check
 				await updatePlcHandle(ctx, did as Did<'plc'>, handle);
 			} catch (err) {
 				if (err instanceof PlcClientError) {

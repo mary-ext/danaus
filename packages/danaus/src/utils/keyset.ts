@@ -12,6 +12,7 @@ export class TimeKeyset<K extends string = string> {
 	private readonly validateKey: (key: string) => key is K;
 
 	constructor(validateKey?: (key: string) => key is K) {
+		// oxlint-disable-next-line no-unsafe-type-assertion -- generic default fallback
 		this.validateKey = validateKey ?? (defaultValidator as (key: string) => key is K);
 	}
 

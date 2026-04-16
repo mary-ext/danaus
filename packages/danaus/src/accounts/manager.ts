@@ -48,6 +48,7 @@ export class AccountManager {
 			.from(t.account)
 			.where((f) => {
 				return and(
+					// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from toLowerCase
 					isDid(actor) ? eq(f.did, actor) : eq(sql`lower(${f.handle})`, actor.toLowerCase() as Handle),
 					!includeDeactivated ? isNull(f.deactivated_at) : undefined,
 					!includeTakenDown ? isNull(f.takedown_ref) : undefined,
@@ -292,6 +293,7 @@ export class AccountManager {
 		const { did } = options;
 
 		// normalize to lowercase
+		// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from toLowerCase
 		handle = handle.toLowerCase() as Handle;
 
 		if (!isValidTld(handle)) {
@@ -394,6 +396,7 @@ export class AccountManager {
 	 * @returns created account
 	 */
 	async createAccount(options: CreateAccountOptions): Promise<Account> {
+		// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from toLowerCase
 		const handle = options.handle.toLowerCase() as Handle;
 		const email = options.email.toLowerCase();
 
@@ -457,6 +460,7 @@ export class AccountManager {
 	updateAccountHandle(did: Did, handle: Handle): void {
 		this.#db
 			.update(t.account)
+			// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from toLowerCase
 			.set({ handle: handle.toLowerCase() as Handle })
 			.where(eq(t.account.did, did))
 			.run();

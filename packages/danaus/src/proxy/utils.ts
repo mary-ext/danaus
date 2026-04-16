@@ -21,7 +21,7 @@ export interface ProxyTarget {
  */
 export const parseProxyHeader = async (
 	targets: Map<string, ProxyTargetConfig>,
-	didDocumentResolver: DidDocumentResolver<string>,
+	didDocumentResolver: DidDocumentResolver,
 	header: string,
 	nsid: Nsid,
 ): Promise<ProxyTarget | null> => {
@@ -40,7 +40,9 @@ export const parseProxyHeader = async (
 	const audience = targetConfig?.to ?? header;
 
 	const hashIndex = audience.indexOf('#');
+	// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from validated proxy header
 	const did = audience.slice(0, hashIndex) as AtprotoDid;
+	// oxlint-disable-next-line no-unsafe-type-assertion
 	const serviceId = audience.slice(hashIndex) as `#${string}`;
 
 	const didDoc = await didDocumentResolver.resolve(did);

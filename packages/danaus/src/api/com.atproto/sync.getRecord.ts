@@ -45,7 +45,9 @@ export const getRecord = (router: XRPCRouter, context: AppContext) => {
 						continue;
 					}
 
+					// oxlint-disable-next-line no-await-in-loop -- sequential node fetching
 					const node = await nodeStore.get(cid);
+					// oxlint-disable-next-line no-await-in-loop
 					blocks.set(cid, await node.serialize());
 				}
 

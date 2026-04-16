@@ -28,7 +28,7 @@ export const uploadBlob = (router: XRPCRouter, context: AppContext) => {
 
 			const blobStore = actorManager.resources.createBlobStore(auth.did);
 
-			const { stream, result } = hashingStream(request.body!, config.service.blobs.maxUploadSize);
+			const { stream, result } = hashingStream(request.body, config.service.blobs.maxUploadSize);
 
 			const tempKey = await blobStore.putTemp(stream);
 
@@ -105,6 +105,7 @@ const hashingStream = (input: ReadableStream<Uint8Array>, maxSize: number): Hash
 
 	const stream = new ReadableStream<Uint8Array>({
 		start() {
+			// oxlint-disable-next-line no-unsafe-type-assertion -- ReadableStream reader type mismatch
 			reader = input.getReader() as any;
 		},
 		async pull(controller) {
@@ -126,7 +127,7 @@ const hashingStream = (input: ReadableStream<Uint8Array>, maxSize: number): Hash
 					});
 					reject(err);
 					controller.error(new Error('blob too large'));
-					reader.cancel();
+					void reader.cancel();
 					return;
 				}
 
@@ -138,7 +139,7 @@ const hashingStream = (input: ReadableStream<Uint8Array>, maxSize: number): Hash
 			}
 		},
 		cancel() {
-			reader.cancel();
+			void reader.cancel();
 		},
 	});
 

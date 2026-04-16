@@ -7,7 +7,7 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
 - Bun and pnpm is managed by mise, to run commands, use `mise exec -- bun ...`
 - install dependencies with `pnpm install`
 - format via `bun run fmt` (prettier, in root directory)
-- lint via `bun run lint` (oxlint, in root directory)
+- lint and typecheck via `bun run lint` (oxlint, in root directory)
 - run tests via `bun test` (bun, in package)
 - build via `bun run build` (tsgo + assets, in package)
 - check `pnpm view <package>` before adding a new dependency

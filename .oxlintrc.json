@@ -1,0 +1,24 @@
+{
+	"$schema": "https://unpkg.com/oxlint/configuration_schema.json",
+	"ignorePatterns": ["packages/lexicons/lib/**"],
+	"options": {
+		"typeAware": true,
+		"typeCheck": true
+	},
+	"categories": {
+		"correctness": "warn",
+		"suspicious": "warn",
+		"perf": "warn"
+	},
+	"rules": {
+		"typescript/consistent-return": "off"
+	},
+	"overrides": [
+		{
+			"files": ["*.test.ts"],
+			"rules": {
+				"typescript/no-floating-promises": "off"
+			}
+		}
+	]
+}

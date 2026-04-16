@@ -160,6 +160,7 @@ export class LegacyAuthManager {
 		const rows = this.#db.select().from(t.appPassword).where(eq(t.appPassword.did, did)).all();
 
 		for (const row of rows) {
+			// oxlint-disable-next-line no-await-in-loop -- sequential password check, short-circuits on match
 			const valid = await verifyPassword(password, row.password_hash);
 			if (valid) {
 				return row;

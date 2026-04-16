@@ -56,6 +56,7 @@ export class PdsServer implements AsyncDisposable {
 		disposables.defer(() => context.identityCache.dispose());
 		disposables.defer(() => context.accountDb.$client.close());
 
+		// oxlint-disable-next-line unbound-method -- factory return, not a class method
 		const { wrap, adapter } = createBunWebSocket();
 		const router = new XRPCRouter({
 			websocket: adapter,
@@ -124,14 +125,15 @@ export class PdsServer implements AsyncDisposable {
 					{ version: `danaus-${context.config.service.version}` },
 					{ headers: corsHeaders },
 				),
+				// oxlint-disable-next-line unbound-method -- factory return, not a class method
 				'/xrpc/*': wrapped.fetch,
 
-				'/*': (request, server) => runWithServer(server, () => web.fetch(request)),
+				'/*': (request, bunServer) => runWithServer(bunServer, () => web.fetch(request)),
 			},
 		});
 		disposables.defer(() => {
 			httpLogger.info('server stopping');
-			server.stop();
+			void server.stop();
 		});
 
 		httpLogger.info('server started', { port: server.port, hostname: serviceHostname });

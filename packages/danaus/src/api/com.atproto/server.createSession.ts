@@ -1,5 +1,4 @@
 import { ComAtprotoServerCreateSession } from '@atcute/atproto';
-import type { Handle } from '@atcute/lexicons';
 import { AuthRequiredError, InvalidRequestError, json, type XRPCRouter } from '@atcute/xrpc-server';
 
 import { AccountStatus, formatAccountStatus } from '#app/accounts/types.ts';
@@ -45,7 +44,7 @@ export const createSession = (router: XRPCRouter, context: AppContext) => {
 
 			return json({
 				did: account.did,
-				handle: handle as Handle,
+				handle: handle,
 				email: account.email ?? undefined,
 				emailConfirmed: account.email_confirmed_at !== null,
 				accessJwt: accessJwt,
