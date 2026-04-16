@@ -11,9 +11,8 @@
 		".": "./src/index.ts"
 	},
 	"scripts": {
-		"build": "bun run css:build && bun run js:build",
+		"build": "tsgo -b && bun run css:build && bun run js:build",
 		"test": "bun test",
-		"tsc": "tsc -b",
 		"app:watch": "bun run --watch src/bin/pds.ts",
 		"css:build": "tailwindcss -i src/web/styles/main.css -o public/style.css",
 		"css:watch": "tailwindcss -i src/web/styles/main.css -o public/style.css -w",

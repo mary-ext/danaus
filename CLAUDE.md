@@ -9,7 +9,7 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
 - format via `bun run fmt` (prettier, in root directory)
 - lint via `bun run lint` (oxlint, in root directory)
 - run tests via `bun test` (bun, in package)
-- typecheck via `bun run tsc` (tsc, in package)
+- build via `bun run build` (tsgo + assets, in package)
 - check `pnpm view <package>` before adding a new dependency
 - pnpm doesn't hoist packages by default; check the package's own `node_modules/` directory when
   inspecting dependencies (e.g., `packages/danaus/node_modules/@atcute/crypto` not root
