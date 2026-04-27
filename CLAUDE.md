@@ -26,6 +26,7 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
   (e.g., when passing the method as a callback that needs `this` binding)
 - use braces for control statements, even single-line bodies
 - use bare blocks `{ }` to group related code and limit variable scope
+- prefer `switch` over `if`/`else if` chains when branching on a single discriminant value
 - avoid barrel exports (index files that re-export from other modules); import directly from source
 - use `// #region <name>` and `// #endregion` to denote regions when a file needs to contain a lot
   of code
@@ -37,6 +38,26 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
 - avoid type assertions (`as Type`, `as const`) unless TypeScript actually errors without them; when
   it does error, prefer finding a solution that satisfies the type system naturally before resorting
   to an assertion
+
+### commit workflow
+
+we use conventional commits with these rules:
+
+- accepted types: `feat`, `fix`, `refactor`, `docs`, `chore`
+  - docs
+    - Markdown document changes (README.md and similar)
+  - chore
+    - build/tooling/dependency changes
+    - test-only changes
+    - mass-autofixes from linters and formatters
+- no scopes; write `feat: ...` / `refactor: ...`, never `feat(runtime): ...`
+- append `!` after the type to mark breaking changes, e.g. `feat!:` or `refactor!:`
+
+granularity — each commit should represent one logical change:
+
+- split distinct changes into separate commits rather than bundling them
+- pair each README update with the commit it documents, rather than batching doc updates across
+  multiple changes
 
 ### documentation
 
@@ -63,13 +84,7 @@ danaus is an AT Protocol PDS (Personal Data Server) written in Bun.
   pause and ask for clarification when you're still unsure after looking into it
 - in plan mode, present the plan for review before exiting to allow for feedback or follow-up
   questions
-- when debugging problems, isolate the root cause first before attempting fixes; suggest adding
-  logging and let the user reproduce and share the output, unless you can verify directly (e.g., by
-  running tests or reading existing error output)
-
-### Claude Code-specific
-
-- Explore subagent may not be accurate; verify findings as needed
-- only spawn subagents when there is genuine independent work to parallelize (e.g. searching across
-  many files, answering a question requiring broad exploration.) never use them as file I/O proxies
-  — read files directly in the main context, and prefer direct tool calls when they suffice.
+- when debugging problems, isolate the root cause first before attempting fixes: add logging,
+  reproduce the issue, narrow down the scope, and confirm the exact source of the problem
+- exploration results done by subagents/subtasks may not be accurate; verify findings as needed
+- do not use subagents/subtasks as file I/O proxies ("read and return the file contents")
