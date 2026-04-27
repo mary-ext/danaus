@@ -15,7 +15,7 @@
 	"dependencies": {
 		"@atcute/client": "^4.2.1",
 		"@atcute/crypto": "^2.4.1",
-		"@atproto/bsky": "^0.0.226",
+		"@atproto/bsky": "^0.0.227",
 		"@atproto/crypto": "^0.4.5",
 		"@atproto/identity": "^0.4.12",
 		"@did-plc/lib": "^0.0.4",
