@@ -3,6 +3,3 @@ packages:
 
 onlyBuiltDependencies:
   - '@atcute/time-ms'
-
-patchedDependencies:
-  '@atproto/bsky': patches/@atproto__bsky.patch
