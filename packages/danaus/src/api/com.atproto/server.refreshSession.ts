@@ -23,7 +23,7 @@ export const refreshSession = (router: XRPCRouter, context: AppContext) => {
 			if (!account) {
 				throw new InvalidRequestError({
 					error: 'AccountNotFound',
-					description: `could not find user info for account: ${auth.did}`,
+					message: `could not find user info for account: ${auth.did}`,
 				});
 			}
 
@@ -31,13 +31,13 @@ export const refreshSession = (router: XRPCRouter, context: AppContext) => {
 			if (status.status === AccountStatus.Takendown) {
 				throw new AuthRequiredError({
 					error: 'AccountTakedown',
-					description: `account has been taken down`,
+					message: `account has been taken down`,
 				});
 			}
 
 			const handle = account.handle;
 			if (!handle) {
-				throw new InvalidRequestError({ error: 'HandleNotFound', description: `handle not found` });
+				throw new InvalidRequestError({ error: 'HandleNotFound', message: `handle not found` });
 			}
 
 			const { accessJwt, refreshJwt } = await legacyAuthManager.rotateLegacyRefresh(auth.tokenId);

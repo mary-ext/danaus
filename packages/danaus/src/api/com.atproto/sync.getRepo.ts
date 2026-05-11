@@ -29,7 +29,7 @@ export const getRepo = (router: XRPCRouter, context: AppContext) => {
 			});
 
 			if (!root) {
-				throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+				throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 			}
 
 			blocks.set(root.cid, root.bytes);

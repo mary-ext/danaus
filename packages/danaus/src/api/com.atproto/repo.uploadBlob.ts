@@ -42,7 +42,7 @@ export const uploadBlob = (router: XRPCRouter, context: AppContext) => {
 				if (found !== null && found.takedownRef !== null) {
 					throw new InvalidRequestError({
 						error: 'BlobTakedown',
-						description: `blob has been taken down, cannot reupload`,
+						message: `blob has been taken down, cannot reupload`,
 					});
 				}
 
@@ -123,7 +123,7 @@ const hashingStream = (input: ReadableStream<Uint8Array>, maxSize: number): Hash
 				if (size > maxSize) {
 					const err = new InvalidRequestError({
 						error: 'BlobTooLarge',
-						description: `blob exceeds upload size limit`,
+						message: `blob exceeds upload size limit`,
 					});
 					reject(err);
 					controller.error(new Error('blob too large'));

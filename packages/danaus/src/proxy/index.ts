@@ -53,12 +53,12 @@ export const createServiceProxy = (options: ServiceProxyOptions): ServiceProxy =
 	const proxyRequest = async (request: Request, input?: unknown): Promise<Response> => {
 		const proxyHeader = request.headers.get('atproto-proxy');
 		if (!proxyHeader) {
-			throw new InvalidRequestError({ description: `missing atproto-proxy header` });
+			throw new InvalidRequestError({ message: `missing atproto-proxy header` });
 		}
 
 		// only allow GET, HEAD, POST
 		if (request.method !== 'GET' && request.method !== 'HEAD' && request.method !== 'POST') {
-			throw new InvalidRequestError({ description: `XRPC requests only support GET, HEAD, and POST` });
+			throw new InvalidRequestError({ message: `XRPC requests only support GET, HEAD, and POST` });
 		}
 
 		// dev-only check: input should not be provided for GET requests
@@ -73,7 +73,7 @@ export const createServiceProxy = (options: ServiceProxyOptions): ServiceProxy =
 		const target = await parseProxyHeader(targets, didDocumentResolver, proxyHeader, lxm);
 		if (target === null) {
 			// NSID is excluded from proxying for this target
-			throw new InvalidRequestError({ description: `method not found` });
+			throw new InvalidRequestError({ message: `method not found` });
 		}
 
 		// verify authorization and get user DID

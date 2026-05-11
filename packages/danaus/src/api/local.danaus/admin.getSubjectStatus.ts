@@ -1,4 +1,8 @@
-import { parseCanonicalResourceUri, type CanonicalResourceUri } from '@atcute/lexicons';
+import {
+	parseCanonicalResourceUri,
+	type CanonicalResourceUri,
+	type ParsedCanonicalResourceUri,
+} from '@atcute/lexicons';
 import { InvalidRequestError, json, type XRPCRouter } from '@atcute/xrpc-server';
 import { LocalDanausAdminGetSubjectStatus } from '@kelinci/danaus-lexicons';
 
@@ -23,7 +27,7 @@ export const getSubjectStatus = (router: XRPCRouter, context: AppContext) => {
 				if (!did) {
 					throw new InvalidRequestError({
 						error: 'InvalidRequest',
-						description: `did is required when requesting blob status`,
+						message: `did is required when requesting blob status`,
 					});
 				}
 
@@ -40,13 +44,18 @@ export const getSubjectStatus = (router: XRPCRouter, context: AppContext) => {
 					};
 				}
 			} else if (uri) {
-				const parsed = parseCanonicalResourceUri(uri);
-				if (!parsed.ok) {
-					throw new InvalidRequestError({ error: 'InvalidRequest', description: parsed.error });
+				let parsed: ParsedCanonicalResourceUri;
+				try {
+					parsed = parseCanonicalResourceUri(uri);
+				} catch (err) {
+					throw new InvalidRequestError({
+						error: 'InvalidRequest',
+						message: err instanceof Error ? err.message : `invalid at-uri`,
+					});
 				}
 
-				const recordUri: CanonicalResourceUri = `at://${parsed.value.repo}/${parsed.value.collection}/${parsed.value.rkey}`;
-				const { takedown, cid } = await actorManager.read(parsed.value.repo, (store) => {
+				const recordUri: CanonicalResourceUri = `at://${parsed.repo}/${parsed.collection}/${parsed.rkey}`;
+				const { takedown, cid } = await actorManager.read(parsed.repo, (store) => {
 					return {
 						takedown: store.record.getRecordTakedownStatus(recordUri),
 						cid: store.record.getCurrentRecordCid(recordUri),
@@ -78,12 +87,12 @@ export const getSubjectStatus = (router: XRPCRouter, context: AppContext) => {
 			} else {
 				throw new InvalidRequestError({
 					error: 'InvalidRequest',
-					description: `no subject provided`,
+					message: `no subject provided`,
 				});
 			}
 
 			if (!body) {
-				throw new InvalidRequestError({ error: 'NotFound', description: `subject not found` });
+				throw new InvalidRequestError({ error: 'NotFound', message: `subject not found` });
 			}
 
 			return json(body);

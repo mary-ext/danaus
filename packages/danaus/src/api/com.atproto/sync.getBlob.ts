@@ -26,7 +26,7 @@ export const getBlob = (router: XRPCRouter, context: AppContext) => {
 
 			const result = await actorManager.read(did, (store) => store.blob.getBlob(cid));
 			if (!result) {
-				throw new InvalidRequestError({ error: 'BlobNotFound', description: `blob not found` });
+				throw new InvalidRequestError({ error: 'BlobNotFound', message: `blob not found` });
 			}
 
 			const blob = result.blob;

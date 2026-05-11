@@ -24,11 +24,11 @@ export const deleteRecord = (router: XRPCRouter, context: AppContext) => {
 				includeTakenDown: true,
 			});
 			if (!account) {
-				throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+				throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 			}
 
 			if (account.did !== auth.did) {
-				throw new AuthRequiredError({ error: 'InvalidToken', description: `invalid repository credentials` });
+				throw new AuthRequiredError({ error: 'InvalidToken', message: `invalid repository credentials` });
 			}
 
 			const result = await actorManager.transact(account.did, (store) => {

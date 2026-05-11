@@ -149,24 +149,24 @@ export class RepoTransactor extends RepoReader {
 		options: ApplyWritesOptions & { create?: boolean; validateBlobs?: boolean; emitSequencer?: boolean },
 	): Promise<ApplyWritesResult> {
 		if (writes.length === 0 && !options.create) {
-			throw new InvalidRequestError({ error: 'InvalidRequest', description: `no writes provided` });
+			throw new InvalidRequestError({ error: 'InvalidRequest', message: `no writes provided` });
 		}
 		if (writes.length > 200) {
-			throw new InvalidRequestError({ error: 'TooManyWrites', description: `too many writes` });
+			throw new InvalidRequestError({ error: 'TooManyWrites', message: `too many writes` });
 		}
 
 		const existingRoot = this.getRoot();
 		if (!existingRoot && !options.create) {
-			throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+			throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 		}
 		if (existingRoot && options.create) {
-			throw new InvalidRequestError({ error: 'RepoAlreadyExists', description: `repository already exists` });
+			throw new InvalidRequestError({ error: 'RepoAlreadyExists', message: `repository already exists` });
 		}
 
 		if (options.swapCommit && existingRoot && existingRoot.cid !== options.swapCommit) {
 			throw new InvalidRequestError({
 				error: 'InvalidSwap',
-				description: `swapCommit did not match current head`,
+				message: `swapCommit did not match current head`,
 			});
 		}
 
@@ -195,7 +195,7 @@ export class RepoTransactor extends RepoReader {
 			if (!rkey) {
 				throw new InvalidRequestError({
 					error: 'InvalidRequest',
-					description: `record key is required for update or delete`,
+					message: `record key is required for update or delete`,
 				});
 			}
 
@@ -207,23 +207,23 @@ export class RepoTransactor extends RepoReader {
 			const prevCid = prevValue ? prevValue.$link : null;
 
 			if (write.swapRecord !== undefined && write.swapRecord !== prevCid) {
-				throw new InvalidRequestError({ error: 'InvalidSwap', description: `swapRecord did not match` });
+				throw new InvalidRequestError({ error: 'InvalidSwap', message: `swapRecord did not match` });
 			}
 
 			if (write.action === 'create') {
 				if (prevCid !== null) {
 					throw new InvalidRequestError({
 						error: 'RecordAlreadyExists',
-						description: `record already exists`,
+						message: `record already exists`,
 					});
 				}
 			} else if (write.action === 'update') {
 				if (prevCid === null) {
-					throw new InvalidRequestError({ error: 'RecordNotFound', description: `record not found` });
+					throw new InvalidRequestError({ error: 'RecordNotFound', message: `record not found` });
 				}
 			} else if (write.action === 'delete') {
 				if (prevCid === null) {
-					throw new InvalidRequestError({ error: 'RecordNotFound', description: `record not found` });
+					throw new InvalidRequestError({ error: 'RecordNotFound', message: `record not found` });
 				}
 			}
 

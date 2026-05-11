@@ -19,7 +19,7 @@ export const resolveHandle = (router: XRPCRouter, context: AppContext) => {
 			const handle = params.handle.toLowerCase();
 
 			if (!isHandle(handle)) {
-				throw new InvalidRequestError({ error: 'InvalidHandle', description: `invalid handle` });
+				throw new InvalidRequestError({ error: 'InvalidHandle', message: `invalid handle` });
 			}
 
 			// check local accounts first
@@ -34,13 +34,13 @@ export const resolveHandle = (router: XRPCRouter, context: AppContext) => {
 			);
 			if (isServiceHandle) {
 				// handle should be in our DB but wasn't found
-				throw new InvalidRequestError({ error: 'HandleNotFound', description: `unable to resolve handle` });
+				throw new InvalidRequestError({ error: 'HandleNotFound', message: `unable to resolve handle` });
 			}
 
 			// resolve external handles
 			const did = await handleResolver.resolve(handle).catch(() => undefined);
 			if (!did) {
-				throw new InvalidRequestError({ error: 'HandleNotFound', description: `unable to resolve handle` });
+				throw new InvalidRequestError({ error: 'HandleNotFound', message: `unable to resolve handle` });
 			}
 
 			return json({ did });

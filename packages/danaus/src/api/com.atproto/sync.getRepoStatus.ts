@@ -21,7 +21,7 @@ export const getRepoStatus = (router: XRPCRouter, context: AppContext) => {
 				includeTakenDown: true,
 			});
 			if (!account) {
-				throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+				throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 			}
 
 			const { active, status } = formatAccountStatus(account);
@@ -30,7 +30,7 @@ export const getRepoStatus = (router: XRPCRouter, context: AppContext) => {
 			if (active) {
 				const root = await actorManager.read(did, (store) => store.repo.getRoot());
 				if (!root) {
-					throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+					throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 				}
 
 				rev = root.rev;

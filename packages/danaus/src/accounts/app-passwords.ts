@@ -28,7 +28,7 @@ export const parseAppPasswordPrivilege = (privilege: string): AppPasswordPrivile
 
 	throw new InvalidRequestError({
 		error: 'InvalidAppPasswordPrivilege',
-		description: `invalid app password privilege`,
+		message: `invalid app password privilege`,
 	});
 };
 
@@ -42,7 +42,7 @@ export const formatAppPasswordPrivilege = (privilege: AppPasswordPrivilege): App
 	if (!value) {
 		throw new InvalidRequestError({
 			error: 'InvalidAppPasswordPrivilege',
-			description: `invalid app password privilege`,
+			message: `invalid app password privilege`,
 		});
 	}
 

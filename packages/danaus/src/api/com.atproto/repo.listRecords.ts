@@ -18,7 +18,7 @@ export const listRecords = (router: XRPCRouter, context: AppContext) => {
 
 			const did = accountManager.getAccountDid(repo);
 			if (!did) {
-				throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+				throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 			}
 
 			const records = await actorManager.read(did, (store) => {

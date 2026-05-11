@@ -73,14 +73,14 @@ export class LegacyAuthManager {
 		if (existing.length >= MAX_APP_PASSWORDS) {
 			throw new InvalidRequestError({
 				error: 'TooManyAppPasswords',
-				description: `cannot have more than ${MAX_APP_PASSWORDS} app passwords`,
+				message: `cannot have more than ${MAX_APP_PASSWORDS} app passwords`,
 			});
 		}
 
 		if (existing.some((row) => row.name === options.name)) {
 			throw new InvalidRequestError({
 				error: 'DuplicateAppPassword',
-				description: `app password already exists`,
+				message: `app password already exists`,
 			});
 		}
 
@@ -260,7 +260,7 @@ export class LegacyAuthManager {
 		if (row === undefined) {
 			throw new InvalidRequestError({
 				error: 'InvalidToken',
-				description: `refresh token is invalid`,
+				message: `refresh token is invalid`,
 			});
 		}
 
@@ -275,7 +275,7 @@ export class LegacyAuthManager {
 		if (row.expiresAt <= now) {
 			throw new InvalidRequestError({
 				error: 'ExpiredToken',
-				description: `refresh token has expired`,
+				message: `refresh token has expired`,
 			});
 		}
 
@@ -341,7 +341,7 @@ export class LegacyAuthManager {
 
 		throw new InvalidRequestError({
 			error: 'InvalidAppPasswordPrivilege',
-			description: `invalid app password privilege`,
+			message: `invalid app password privilege`,
 		});
 	}
 

@@ -30,17 +30,17 @@ export class TimeKeyset<K extends string = string> {
 	unpack(cursor: string): { time: Date; key: K } {
 		const idx = cursor.indexOf(SEPARATOR);
 		if (idx === -1) {
-			throw new InvalidRequestError({ error: 'InvalidCursor', description: 'malformed cursor' });
+			throw new InvalidRequestError({ error: 'InvalidCursor', message: 'malformed cursor' });
 		}
 
 		const timestamp = +cursor.slice(0, idx);
 		if (!Number.isSafeInteger(timestamp)) {
-			throw new InvalidRequestError({ error: 'InvalidCursor', description: 'malformed cursor' });
+			throw new InvalidRequestError({ error: 'InvalidCursor', message: 'malformed cursor' });
 		}
 
 		const key = cursor.slice(idx + SEPARATOR.length);
 		if (!this.validateKey(key)) {
-			throw new InvalidRequestError({ error: 'InvalidCursor', description: 'malformed cursor' });
+			throw new InvalidRequestError({ error: 'InvalidCursor', message: 'malformed cursor' });
 		}
 
 		return { time: new Date(timestamp), key };

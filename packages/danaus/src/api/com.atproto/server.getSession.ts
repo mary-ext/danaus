@@ -23,7 +23,7 @@ export const getSession = (router: XRPCRouter, context: AppContext) => {
 			if (!account) {
 				throw new InvalidRequestError({
 					error: 'AccountNotFound',
-					description: `could not find user info for account: ${auth.did}`,
+					message: `could not find user info for account: ${auth.did}`,
 				});
 			}
 
@@ -31,7 +31,7 @@ export const getSession = (router: XRPCRouter, context: AppContext) => {
 
 			const handle = account.handle;
 			if (!handle) {
-				throw new InvalidRequestError({ error: 'HandleNotFound', description: `handle not found` });
+				throw new InvalidRequestError({ error: 'HandleNotFound', message: `handle not found` });
 			}
 
 			return json({

@@ -25,7 +25,7 @@ export const getRecord = (router: XRPCRouter, context: AppContext) => {
 			const result = await actorManager.read(did, async (store) => {
 				const root = store.repo.getRoot();
 				if (!root) {
-					throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+					throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 				}
 
 				const nodeStore = new NodeStore(
@@ -34,7 +34,7 @@ export const getRecord = (router: XRPCRouter, context: AppContext) => {
 				const path = `${collection}/${rkey}`;
 				const [recordLink, proofCids] = await findRpathAndBuildProof(nodeStore, root.commit.data.$link, path);
 				if (!recordLink) {
-					throw new InvalidRequestError({ error: 'RecordNotFound', description: `record not found` });
+					throw new InvalidRequestError({ error: 'RecordNotFound', message: `record not found` });
 				}
 
 				const blocks = new Map<string, Uint8Array>();
@@ -54,7 +54,7 @@ export const getRecord = (router: XRPCRouter, context: AppContext) => {
 				const recordCid = recordLink.$link;
 				const recordBytes = store.repo.getBlocksByCid([recordCid]).get(recordCid);
 				if (!recordBytes) {
-					throw new InvalidRequestError({ error: 'RecordNotFound', description: `record not found` });
+					throw new InvalidRequestError({ error: 'RecordNotFound', message: `record not found` });
 				}
 
 				blocks.set(recordCid, recordBytes);

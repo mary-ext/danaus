@@ -25,7 +25,7 @@ export const getBlocks = (router: XRPCRouter, context: AppContext) => {
 			if (missing.length > 0) {
 				throw new InvalidRequestError({
 					error: 'BlockNotFound',
-					description: `blocks not found: ${missing.join(', ')}`,
+					message: `blocks not found: ${missing.join(', ')}`,
 				});
 			}
 

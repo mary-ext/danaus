@@ -77,7 +77,7 @@ export class InviteCodeManager {
 		if (!invite || invite.disabled) {
 			throw new InvalidRequestError({
 				error: 'InvalidInviteCode',
-				description: 'provided invite code not available',
+				message: 'provided invite code not available',
 			});
 		}
 
@@ -93,7 +93,7 @@ export class InviteCodeManager {
 			if (uses >= invite.available_uses) {
 				throw new InvalidRequestError({
 					error: 'InvalidInviteCode',
-					description: 'provided invite code not available',
+					message: 'provided invite code not available',
 				});
 			}
 		}

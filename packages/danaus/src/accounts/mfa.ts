@@ -70,7 +70,7 @@ export class MfaManager {
 		if (count >= MAX_TOTP_CREDENTIALS) {
 			throw new InvalidRequestError({
 				error: 'TooManyTotpCredentials',
-				description: `cannot have more than ${MAX_TOTP_CREDENTIALS} authenticators`,
+				message: `cannot have more than ${MAX_TOTP_CREDENTIALS} authenticators`,
 			});
 		}
 
@@ -86,7 +86,7 @@ export class MfaManager {
 		if (existing) {
 			throw new InvalidRequestError({
 				error: 'DuplicateTotpName',
-				description: `an authenticator with this name already exists`,
+				message: `an authenticator with this name already exists`,
 			});
 		}
 
@@ -308,7 +308,7 @@ export class MfaManager {
 		if (count >= MAX_WEBAUTHN_CREDENTIALS) {
 			throw new InvalidRequestError({
 				error: 'TooManyWebAuthnCredentials',
-				description: `cannot have more than ${MAX_WEBAUTHN_CREDENTIALS} security keys`,
+				message: `cannot have more than ${MAX_WEBAUTHN_CREDENTIALS} security keys`,
 			});
 		}
 
@@ -324,7 +324,7 @@ export class MfaManager {
 		if (existing) {
 			throw new InvalidRequestError({
 				error: 'DuplicateWebAuthnName',
-				description: `a credential with this name already exists`,
+				message: `a credential with this name already exists`,
 			});
 		}
 
@@ -338,7 +338,7 @@ export class MfaManager {
 		if (existingCredId) {
 			throw new InvalidRequestError({
 				error: 'DuplicateCredentialId',
-				description: `this security key is already registered`,
+				message: `this security key is already registered`,
 			});
 		}
 

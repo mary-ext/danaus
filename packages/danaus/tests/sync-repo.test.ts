@@ -19,12 +19,11 @@ import { verifyRecord } from '@atcute/repo';
 import { SeedClient, TestNetworkNoAppView } from '#app/test/index.ts';
 
 const parseCanonicalUri = (uri: string) => {
-	const result = parseCanonicalResourceUri(uri);
-	if (!result.ok) {
+	try {
+		return parseCanonicalResourceUri(uri);
+	} catch {
 		throw new Error(`invalid at-uri: ${uri}`);
 	}
-
-	return result.value;
 };
 
 describe('core sync and repo', () => {

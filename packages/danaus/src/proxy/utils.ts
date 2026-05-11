@@ -26,7 +26,7 @@ export const parseProxyHeader = async (
 	nsid: Nsid,
 ): Promise<ProxyTarget | null> => {
 	if (!isAtprotoAudience(header)) {
-		throw new InvalidRequestError({ description: `invalid atproto-proxy header` });
+		throw new InvalidRequestError({ message: `invalid atproto-proxy header` });
 	}
 
 	const targetConfig = targets.get(header);
@@ -47,12 +47,12 @@ export const parseProxyHeader = async (
 
 	const didDoc = await didDocumentResolver.resolve(did);
 	if (!didDoc) {
-		throw new InvalidRequestError({ description: `could not resolve proxy did` });
+		throw new InvalidRequestError({ message: `could not resolve proxy did` });
 	}
 
 	const url = getAtprotoServiceEndpoint(didDoc, { id: serviceId });
 	if (!url) {
-		throw new InvalidRequestError({ description: `could not resolve proxy service url` });
+		throw new InvalidRequestError({ message: `could not resolve proxy service url` });
 	}
 
 	return { did, url };
@@ -191,17 +191,18 @@ export const filterResponseHeaders = (upstreamHeaders: Headers): Headers => {
 /**
  * parse NSID from request path.
  * @param req request
- * @returns NSID or null if not an XRPC request
+ * @returns NSID
+ * @throws {InvalidRequestError} if the path is not a valid XRPC request
  */
 export const parseRequestNsid = (req: Request): Nsid => {
 	const url = new URL(req.url);
 	if (!url.pathname.startsWith('/xrpc/')) {
-		throw new InvalidRequestError({ description: `invalid XRPC request path` });
+		throw new InvalidRequestError({ message: `invalid XRPC request path` });
 	}
 
 	const nsid = url.pathname.slice('/xrpc/'.length);
 	if (!isNsid(nsid)) {
-		throw new InvalidRequestError({ description: `invalid XRPC request path` });
+		throw new InvalidRequestError({ message: `invalid XRPC request path` });
 	}
 
 	return nsid;

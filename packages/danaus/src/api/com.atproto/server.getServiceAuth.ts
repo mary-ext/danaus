@@ -25,6 +25,13 @@ export const getServiceAuth = (router: XRPCRouter, context: AppContext) => {
 			const did = auth.did;
 			const { aud, exp, lxm } = params;
 
+			if (!lxm) {
+				throw new InvalidRequestError({
+					error: 'InvalidRequest',
+					message: `lxm is required`,
+				});
+			}
+
 			// validate expiration
 			if (exp !== undefined) {
 				const now = Math.floor(Date.now() / 1000);
@@ -33,21 +40,14 @@ export const getServiceAuth = (router: XRPCRouter, context: AppContext) => {
 				if (diff < 0) {
 					throw new InvalidRequestError({
 						error: 'BadExpiration',
-						description: `expiration is in past`,
+						message: `expiration is in past`,
 					});
 				}
 
 				if (diff > HOUR) {
 					throw new InvalidRequestError({
 						error: 'BadExpiration',
-						description: `cannot request a token with an expiration more than an hour in the future`,
-					});
-				}
-
-				if (!lxm && diff > MINUTE) {
-					throw new InvalidRequestError({
-						error: 'BadExpiration',
-						description: `cannot request a method-less token with an expiration more than a minute in the future`,
+						message: `cannot request a token with an expiration more than an hour in the future`,
 					});
 				}
 			}
@@ -62,7 +62,7 @@ export const getServiceAuth = (router: XRPCRouter, context: AppContext) => {
 				keypair: keypair,
 				issuer: did,
 				audience: aud,
-				lxm: lxm ?? null,
+				lxm: lxm,
 				expiresIn: expiresIn,
 			});
 

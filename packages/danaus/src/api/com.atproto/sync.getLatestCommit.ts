@@ -22,7 +22,7 @@ export const getLatestCommit = (router: XRPCRouter, context: AppContext) => {
 
 			const root = await actorManager.read(did, (store) => store.repo.getRoot());
 			if (!root) {
-				throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+				throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 			}
 
 			return json({

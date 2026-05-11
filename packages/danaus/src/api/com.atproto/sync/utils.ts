@@ -53,21 +53,21 @@ export const assertRepoAvailability = (
 	});
 
 	if (!account) {
-		throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+		throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 	}
 
 	if (!isAdminOrSelf) {
 		if (account.takedown_ref) {
 			throw new InvalidRequestError({
 				error: 'RepoTakendown',
-				description: `repository has been taken down`,
+				message: `repository has been taken down`,
 			});
 		}
 
 		if (account.deactivated_at) {
 			throw new InvalidRequestError({
 				error: 'RepoDeactivated',
-				description: `repository has been deactivated`,
+				message: `repository has been deactivated`,
 			});
 		}
 	}

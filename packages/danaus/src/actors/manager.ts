@@ -90,7 +90,7 @@ export class ActorManager {
 
 		const exists = await Bun.file(dbLocation).exists();
 		if (!exists) {
-			throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+			throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 		}
 
 		const db = getActorDb(dbLocation, this.config.walAutoCheckpointDisabled);
@@ -115,7 +115,7 @@ export class ActorManager {
 
 		const dbExists = await Bun.file(dbLocation).exists();
 		if (dbExists) {
-			throw new InvalidRequestError({ error: 'RepoAlreadyExists', description: `repository already exists` });
+			throw new InvalidRequestError({ error: 'RepoAlreadyExists', message: `repository already exists` });
 		}
 
 		const rawKey = await keypair.exportPrivateKey('raw');

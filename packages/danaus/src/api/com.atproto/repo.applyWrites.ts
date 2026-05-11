@@ -32,11 +32,11 @@ export const applyWrites = (router: XRPCRouter, context: AppContext) => {
 				includeTakenDown: true,
 			});
 			if (!account) {
-				throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+				throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 			}
 
 			if (account.did !== auth.did) {
-				throw new AuthRequiredError({ error: 'InvalidToken', description: `invalid repository credentials` });
+				throw new AuthRequiredError({ error: 'InvalidToken', message: `invalid repository credentials` });
 			}
 
 			const writes = input.writes.map((write): RepoWriteOp => {
@@ -84,7 +84,7 @@ export const applyWrites = (router: XRPCRouter, context: AppContext) => {
 				}
 
 				if (!write.cid) {
-					throw new InvalidRequestError({ error: 'InvalidRecord', description: `record write failed` });
+					throw new InvalidRequestError({ error: 'InvalidRecord', message: `record write failed` });
 				}
 
 				return {

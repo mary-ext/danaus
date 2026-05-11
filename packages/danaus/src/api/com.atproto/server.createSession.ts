@@ -18,7 +18,7 @@ export const createSession = (router: XRPCRouter, context: AppContext) => {
 			if (!auth) {
 				throw new AuthRequiredError({
 					error: 'InvalidCredentials',
-					description: `invalid identifier or password`,
+					message: `invalid identifier or password`,
 				});
 			}
 
@@ -28,13 +28,13 @@ export const createSession = (router: XRPCRouter, context: AppContext) => {
 			if (!input.allowTakendown && status.status === AccountStatus.Takendown) {
 				throw new AuthRequiredError({
 					error: 'AccountTakedown',
-					description: `account has been taken down`,
+					message: `account has been taken down`,
 				});
 			}
 
 			const handle = account.handle;
 			if (!handle) {
-				throw new InvalidRequestError({ error: 'HandleNotFound', description: `handle not found` });
+				throw new InvalidRequestError({ error: 'HandleNotFound', message: `handle not found` });
 			}
 
 			const { accessJwt, refreshJwt } = await legacyAuthManager.createLegacySession({

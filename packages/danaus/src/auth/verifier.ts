@@ -1,7 +1,7 @@
 import type { KeyObject } from 'node:crypto';
 
 import type { DidDocumentResolver } from '@atcute/identity-resolver';
-import type { Did, Nsid } from '@atcute/lexicons';
+import type { Did } from '@atcute/lexicons';
 import { isDid } from '@atcute/lexicons/syntax';
 import { AuthRequiredError, InvalidRequestError, type XRPCErrorOptions } from '@atcute/xrpc-server';
 import { ServiceJwtVerifier, type VerifiedJwt } from '@atcute/xrpc-server/auth';
@@ -10,6 +10,7 @@ import * as jose from 'jose';
 
 import { AccountStatus } from '#app/accounts/types.ts';
 import { AuthScope, isAuthScope } from '#app/auth/scopes.ts';
+import { parseRequestNsid } from '#app/proxy/utils.ts';
 
 import type { AccountManager } from '../accounts/manager';
 
@@ -125,7 +126,7 @@ export class AuthVerifier {
 		this.adminPassword = options.adminPassword;
 		this.serviceDid = options.serviceDid;
 		this.serviceJwtVerifier = new ServiceJwtVerifier({
-			serviceDid: options.serviceDid,
+			acceptAudiences: [options.serviceDid],
 			resolver: options.didDocumentResolver,
 		});
 	}
@@ -138,7 +139,7 @@ export class AuthVerifier {
 	unauthenticated(request: Request): UnauthenticatedOutput {
 		const header = request.headers.get('authorization');
 		if (header) {
-			throw new AuthRequiredError({ description: `invalid authorization header` });
+			throw new AuthRequiredError({ message: `invalid authorization header` });
 		}
 
 		return { type: AuthCredentialsType.Unauthenticated };
@@ -152,11 +153,11 @@ export class AuthVerifier {
 	async admin(request: Request): Promise<AdminTokenOutput> {
 		const parsed = parseBasicAuth(request);
 		if (!parsed || !this.adminPassword) {
-			throw new AuthRequiredError({ description: `invalid authorization header` });
+			throw new AuthRequiredError({ message: `invalid authorization header` });
 		}
 
 		if (parsed.username !== 'admin' || parsed.password !== this.adminPassword) {
-			throw new AuthRequiredError({ description: `invalid authorization header` });
+			throw new AuthRequiredError({ message: `invalid authorization header` });
 		}
 
 		return { type: AuthCredentialsType.AdminToken };
@@ -280,7 +281,7 @@ export class AuthVerifier {
 	 * @param _request http request
 	 */
 	private async oauth(_request: Request): Promise<never> {
-		throw new InvalidRequestError({ error: 'OAuthNotImplemented', description: `oauth is not implemented` });
+		throw new InvalidRequestError({ error: 'OAuthNotImplemented', message: `oauth is not implemented` });
 	}
 
 	private async access(
@@ -337,7 +338,7 @@ export class AuthVerifier {
 
 		const tokenId = payload.jti;
 		if (typeof tokenId !== 'string') {
-			throw new AuthRequiredError({ error: 'MissingTokenId', description: `refresh token id is missing` });
+			throw new AuthRequiredError({ error: 'MissingTokenId', message: `refresh token id is missing` });
 		}
 
 		return { type: AuthCredentialsType.Refresh, did: did, tokenId: tokenId };
@@ -348,11 +349,11 @@ export class AuthVerifier {
 			const status = this.accountManager.getAccountStatus(did);
 
 			if (options.checkTakedown && status === AccountStatus.Takendown) {
-				throw new AuthRequiredError({ error: 'AccountTakedown', description: `account has been taken down` });
+				throw new AuthRequiredError({ error: 'AccountTakedown', message: `account has been taken down` });
 			}
 
 			if (options.checkDeactivated && status === AccountStatus.Deactivated) {
-				throw new AuthRequiredError({ error: 'AccountDeactivated', description: `account is deactivated` });
+				throw new AuthRequiredError({ error: 'AccountDeactivated', message: `account is deactivated` });
 			}
 		}
 	}
@@ -362,7 +363,7 @@ export class AuthVerifier {
 	): Promise<{ payload: jose.JWTPayload; protectedHeader: jose.JWTHeaderParameters }> {
 		const token = bearerTokenFromRequest(request);
 		if (!token) {
-			throw new AuthRequiredError({ description: `missing bearer token` });
+			throw new AuthRequiredError({ message: `missing bearer token` });
 		}
 
 		try {
@@ -371,7 +372,7 @@ export class AuthVerifier {
 			return { payload: result.payload, protectedHeader: result.protectedHeader };
 		} catch (err) {
 			if (err instanceof jose.errors.JWTExpired) {
-				throw new InvalidRequestError({ error: 'ExpiredToken', description: `token has expired` });
+				throw new InvalidRequestError({ error: 'ExpiredToken', message: `token has expired` });
 			}
 
 			throw invalidTokenError(`token could not be verified`);
@@ -379,26 +380,15 @@ export class AuthVerifier {
 	}
 
 	private async verifyServiceJwt(request: Request): Promise<VerifiedJwt> {
-		const token = bearerTokenFromRequest(request);
-		if (!token) {
-			throw new AuthRequiredError({ description: `missing bearer token` });
-		}
-
 		const lxm = parseRequestNsid(request);
-		const result = await this.serviceJwtVerifier.verify(token, { lxm: lxm ?? null });
-
-		if (!result.ok) {
-			throw new AuthRequiredError({ error: result.error.error, description: result.error.description });
-		}
-
-		return result.value;
+		return this.serviceJwtVerifier.verifyRequest(request, { lxm });
 	}
 }
 
-const invalidTokenError = (description: string, options?: Partial<XRPCErrorOptions>): InvalidRequestError => {
+const invalidTokenError = (message: string, options?: Partial<XRPCErrorOptions>): InvalidRequestError => {
 	return new InvalidRequestError({
 		error: 'InvalidToken',
-		description: description,
+		message: message,
 		status: options?.status,
 	});
 };
@@ -470,16 +460,6 @@ const parseAuthHeader = (request: Request): { scheme: string; value: string } | 
 	}
 
 	return { scheme: scheme, value: value };
-};
-
-const parseRequestNsid = (request: Request): Nsid | null => {
-	const url = new URL(request.url);
-	if (!url.pathname.startsWith('/xrpc/')) {
-		return null;
-	}
-
-	// oxlint-disable-next-line no-unsafe-type-assertion -- branded type from URL path
-	return url.pathname.slice('/xrpc/'.length) as Nsid;
 };
 
 const isServiceToken = (request: Request): boolean => {

@@ -83,7 +83,7 @@ export class BlobTransactor extends BlobReader implements RepoBlobHandler {
 			if (!row) {
 				throw new InvalidRequestError({
 					error: 'BlobNotFound',
-					description: `blob not found: ${cid}`,
+					message: `blob not found: ${cid}`,
 				});
 			}
 

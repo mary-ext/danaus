@@ -33,7 +33,7 @@ export const validateRecordWrites = async (
 		if (validate === true) {
 			throw new InvalidRequestError({
 				error: 'UnresolvableLexicon',
-				description: `lexicon resolution is disabled`,
+				message: `lexicon resolution is disabled`,
 			});
 		}
 
@@ -59,7 +59,7 @@ export const validateRecordWrites = async (
 				if (validate === true) {
 					throw new InvalidRequestError({
 						error: 'UnresolvableLexicon',
-						description: `could not resolve lexicon for ${write.collection}`,
+						message: `could not resolve lexicon for ${write.collection}`,
 					});
 				}
 
@@ -73,7 +73,7 @@ export const validateRecordWrites = async (
 				if (err instanceof ValidationError) {
 					throw new InvalidRequestError({
 						error: 'InvalidRecord',
-						description: `record failed validation: ${err.message}`,
+						message: `record failed validation: ${err.message}`,
 					});
 				}
 

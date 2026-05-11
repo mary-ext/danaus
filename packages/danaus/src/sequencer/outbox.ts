@@ -107,7 +107,7 @@ export class Outbox {
 			if (err instanceof AsyncBufferFullError) {
 				throw new XRPCSubscriptionError({
 					error: 'ConsumerTooSlow',
-					description: `stream consumer too slow`,
+					message: `stream consumer too slow`,
 				});
 			}
 

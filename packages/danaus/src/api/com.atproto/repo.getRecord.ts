@@ -19,16 +19,16 @@ export const getRecord = (router: XRPCRouter, context: AppContext) => {
 
 			const did = accountManager.getAccountDid(repo);
 			if (!did) {
-				throw new InvalidRequestError({ error: 'RepoNotFound', description: `repository not found` });
+				throw new InvalidRequestError({ error: 'RepoNotFound', message: `repository not found` });
 			}
 
 			const record = await actorManager.read(did, (store) => store.repo.getRecord(collection, rkey));
 			if (!record) {
-				throw new InvalidRequestError({ error: 'RecordNotFound', description: `record not found` });
+				throw new InvalidRequestError({ error: 'RecordNotFound', message: `record not found` });
 			}
 
 			if (cid && record.cid !== cid) {
-				throw new InvalidRequestError({ error: 'RecordNotFound', description: `record not found` });
+				throw new InvalidRequestError({ error: 'RecordNotFound', message: `record not found` });
 			}
 
 			return json({

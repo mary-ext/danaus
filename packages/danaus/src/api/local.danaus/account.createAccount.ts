@@ -36,7 +36,7 @@ export const createAccount = (router: XRPCRouter, context: AppContext) => {
 				if (registration === 'none') {
 					throw new InvalidRequestError({
 						error: 'RegistrationDisabled',
-						description: 'public registration is disabled',
+						message: 'public registration is disabled',
 					});
 				}
 
@@ -44,7 +44,7 @@ export const createAccount = (router: XRPCRouter, context: AppContext) => {
 					if (!input.inviteCode) {
 						throw new InvalidRequestError({
 							error: 'InvalidInviteCode',
-							description: 'invite code required',
+							message: 'invite code required',
 						});
 					}
 
@@ -96,11 +96,11 @@ export const provisionAccount = async (
 	const { accountManager, actorManager, didDocumentResolver, plcClient, sequencer } = ctx;
 
 	if (!v.is(emailSchema, params.email)) {
-		throw new InvalidRequestError({ error: 'InvalidEmail', description: `invalid email address` });
+		throw new InvalidRequestError({ error: 'InvalidEmail', message: `invalid email address` });
 	}
 
 	if (params.recoveryKey !== undefined && !isKeyDid(params.recoveryKey)) {
-		throw new InvalidRequestError({ error: 'InvalidRecoveryKey', description: `invalid recovery key` });
+		throw new InvalidRequestError({ error: 'InvalidRecoveryKey', message: `invalid recovery key` });
 	}
 
 	verifyPasswordConstraints(params.password);
@@ -111,7 +111,7 @@ export const provisionAccount = async (
 	if (accountByHandle !== null) {
 		throw new InvalidRequestError({
 			error: 'HandleTaken',
-			description: `handle already taken by another account`,
+			message: `handle already taken by another account`,
 		});
 	}
 
@@ -119,7 +119,7 @@ export const provisionAccount = async (
 	if (accountByEmail !== null) {
 		throw new InvalidRequestError({
 			error: 'EmailTaken',
-			description: `email already taken by another account`,
+			message: `email already taken by another account`,
 		});
 	}
 

@@ -104,7 +104,7 @@ export const updateHandleForm = form(
 			if (err instanceof XRPCError && err.status === 400) {
 				switch (err.error) {
 					case 'InvalidHandle': {
-						invalid(err.description ?? `Invalid handle`);
+						invalid(err.message ?? `Invalid handle`);
 					}
 					case 'UnsupportedDomain': {
 						invalid(`Handle must resolve to your DID via DNS or .well-known`);
@@ -167,7 +167,7 @@ export const refreshHandleForm = form(v.object({}), async () => {
 		if (err instanceof XRPCError && err.status === 400) {
 			switch (err.error) {
 				case 'InvalidHandle': {
-					invalid(err.description ?? `Handle is no longer valid`);
+					invalid(err.message ?? `Handle is no longer valid`);
 				}
 				case 'UnsupportedDomain': {
 					invalid(`Handle no longer resolves to your DID`);

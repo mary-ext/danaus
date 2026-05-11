@@ -9,14 +9,14 @@ export const verifyPasswordConstraints = (password: string): void => {
 	if (password.length < MIN_PASSWORD_LENGTH) {
 		throw new InvalidRequestError({
 			error: 'InvalidPassword',
-			description: `password too short`,
+			message: `password too short`,
 		});
 	}
 
 	if (password.length > MAX_PASSWORD_LENGTH) {
 		throw new InvalidRequestError({
 			error: 'InvalidPassword',
-			description: 'password too long',
+			message: 'password too long',
 		});
 	}
 };

@@ -1,4 +1,8 @@
-import { parseCanonicalResourceUri, type CanonicalResourceUri } from '@atcute/lexicons';
+import {
+	parseCanonicalResourceUri,
+	type CanonicalResourceUri,
+	type ParsedCanonicalResourceUri,
+} from '@atcute/lexicons';
 import { InvalidRequestError, json, type XRPCRouter } from '@atcute/xrpc-server';
 import { LocalDanausAdminUpdateSubjectStatus } from '@kelinci/danaus-lexicons';
 
@@ -23,18 +27,23 @@ export const updateSubjectStatus = (router: XRPCRouter, context: AppContext) => 
 
 			if (takedown) {
 				if (isRecord) {
-					const parsed = parseCanonicalResourceUri(subject.uri);
-					if (!parsed.ok) {
-						throw new InvalidRequestError({ error: 'InvalidRequest', description: parsed.error });
+					let parsed: ParsedCanonicalResourceUri;
+					try {
+						parsed = parseCanonicalResourceUri(subject.uri);
+					} catch (err) {
+						throw new InvalidRequestError({
+							error: 'InvalidRequest',
+							message: err instanceof Error ? err.message : `invalid at-uri`,
+						});
 					}
 
-					const recordUri: CanonicalResourceUri = `at://${parsed.value.repo}/${parsed.value.collection}/${parsed.value.rkey}`;
-					await actorManager.transact(parsed.value.repo, async (store) => {
+					const recordUri: CanonicalResourceUri = `at://${parsed.repo}/${parsed.collection}/${parsed.rkey}`;
+					await actorManager.transact(parsed.repo, async (store) => {
 						const existing = store.record.getRecord(recordUri);
 						if (!existing) {
 							throw new InvalidRequestError({
 								error: 'RecordNotFound',
-								description: `record not found`,
+								message: `record not found`,
 							});
 						}
 
@@ -46,7 +55,7 @@ export const updateSubjectStatus = (router: XRPCRouter, context: AppContext) => 
 						if (!metadata) {
 							throw new InvalidRequestError({
 								error: 'BlobNotFound',
-								description: `blob not found`,
+								message: `blob not found`,
 							});
 						}
 
@@ -60,7 +69,7 @@ export const updateSubjectStatus = (router: XRPCRouter, context: AppContext) => 
 					if (!account) {
 						throw new InvalidRequestError({
 							error: 'NotFound',
-							description: `account not found`,
+							message: `account not found`,
 						});
 					}
 
@@ -72,7 +81,7 @@ export const updateSubjectStatus = (router: XRPCRouter, context: AppContext) => 
 				if (isRecord || isBlob) {
 					throw new InvalidRequestError({
 						error: 'InvalidRequest',
-						description: `deactivated is only valid for accounts`,
+						message: `deactivated is only valid for accounts`,
 					});
 				}
 
@@ -83,7 +92,7 @@ export const updateSubjectStatus = (router: XRPCRouter, context: AppContext) => 
 				if (!account) {
 					throw new InvalidRequestError({
 						error: 'NotFound',
-						description: `account not found`,
+						message: `account not found`,
 					});
 				}
 

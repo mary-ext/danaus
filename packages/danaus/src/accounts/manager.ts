@@ -299,7 +299,7 @@ export class AccountManager {
 		if (!isValidTld(handle)) {
 			throw new InvalidRequestError({
 				error: 'InvalidHandle',
-				description: `invalid or disallowed TLD in handle`,
+				message: `invalid or disallowed TLD in handle`,
 			});
 		}
 
@@ -310,7 +310,7 @@ export class AccountManager {
 			if (front.includes('.')) {
 				throw new InvalidRequestError({
 					error: 'InvalidHandle',
-					description: `invalid characters in handle`,
+					message: `invalid characters in handle`,
 				});
 			}
 
@@ -319,21 +319,21 @@ export class AccountManager {
 			if (front.length < 1) {
 				throw new InvalidRequestError({
 					error: 'InvalidHandle',
-					description: `handle too short`,
+					message: `handle too short`,
 				});
 			}
 
 			if (front.length > 63) {
 				throw new InvalidRequestError({
 					error: 'InvalidHandle',
-					description: `handle too long`,
+					message: `handle too long`,
 				});
 			}
 		} else {
 			if (did == null) {
 				throw new InvalidRequestError({
 					error: 'UnsupportedDomain',
-					description: `unsupported handle domain`,
+					message: `unsupported handle domain`,
 				});
 			}
 
@@ -347,19 +347,19 @@ export class AccountManager {
 
 				if (err instanceof InvalidResolvedHandleError) {
 					throw new UpstreamFailureError({
-						description: `handle resolved to an invalid DID format`,
+						message: `handle resolved to an invalid DID format`,
 					});
 				}
 
 				throw new UpstreamFailureError({
-					description: `handle could not be resolved`,
+					message: `handle could not be resolved`,
 				});
 			}
 
 			if (resolvedDid !== undefined && resolvedDid !== did) {
 				throw new InvalidRequestError({
 					error: 'InvalidHandle',
-					description: `handle does not resolve to account DID`,
+					message: `handle does not resolve to account DID`,
 				});
 			}
 		}
@@ -431,7 +431,7 @@ export class AccountManager {
 		if (existing && existing.did !== options.did) {
 			throw new InvalidRequestError({
 				error: 'EmailTaken',
-				description: `email already taken by another account`,
+				message: `email already taken by another account`,
 			});
 		}
 

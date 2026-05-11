@@ -23,7 +23,7 @@ export const subscribeRepos = (router: XRPCRouter, context: AppContext) => {
 			if (cursor !== undefined) {
 				const lastSeq = sequencer.lastSeq();
 				if (cursor > lastSeq) {
-					throw new InvalidRequestError({ error: 'FutureCursor', description: `cursor in the future` });
+					throw new InvalidRequestError({ error: 'FutureCursor', message: `cursor in the future` });
 				}
 
 				const next = sequencer.next(cursor);
